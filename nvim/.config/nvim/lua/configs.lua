@@ -41,6 +41,7 @@ set.sidescrolloff = 2 -- keep 30 columns visible left and right of the cursor at
 set.backspace = 'indent,start,eol' -- make backspace behave like normal again
 -- set.mouse = "a"  		-- turn on mouse interaction
 set.updatetime = 500 -- CursorHold interval
+set.expandtab = true
 set.softtabstop = 2
 set.shiftwidth = 2 -- spaces per tab (when shifting), when using the >> or << commands, shift lines by 4 spaces
 set.tabstop = 2 -- spaces per tab

@@ -1,3 +1,7 @@
+DOTFILES=$HOME/.dotfiles
+ANSIBLEFILES=$HOME/Sources/ansible
+
+
 addToPath() {
     if [[ "$PATH" != *"$1"* ]]; then
         export PATH=$PATH:$1

@@ -1,8 +1,8 @@
 alias vim="nvim"
 alias python="python3"
 alias dotc="commitDotFiles"
-alias dotr="$DOTFILES/install-personal"
+alias dotr=$DOTFILES/install-personal
 alias dote="cd $HOME/.dotfiles && nvim"
 alias ansc="commitAnsible"
-alias ansr="cd $ANSIBLEFILES && ansible-playbook main.yml --ask-become-yes"
+alias ansr="cd $ANSIBLEFILES && ansible-playbook main.yml --ask-become"
 alias anse="cd $ANSIBLEFILES && nvim"
