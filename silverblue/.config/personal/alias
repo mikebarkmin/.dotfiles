@@ -1,0 +1,4 @@
+alias vim="nvim"
+alias python="python3"
+alias doti="$DOTFILES/install"
+alias dot="nvim $HOME/.dotfiles"

@@ -1,0 +1,10 @@
+partial alphanumeric_keys modifier_keys keypad_keys
+xkb_symbols "vim" {
+    include "de(basic)"
+    name[Group1]="German (vim)";
+
+    key <AC06>	{ [         h,          H,       Left,      Hstroke ]	};
+    key <AC07>	{ [         j,          J,       Down,    dead_horn ] };
+    key <AC08>	{ [         k,          K,         Up,    ampersand ]	};
+    key <AC09>	{ [         l,          L,      Right,      Lstroke ]	};
+};
