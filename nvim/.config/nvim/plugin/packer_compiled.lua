@@ -110,6 +110,12 @@ _G.packer_plugins = {
     path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/friendly-snippets",
     url = "https://github.com/rafamadriz/friendly-snippets"
   },
+  ["grammar-guard.nvim"] = {
+    config = { " require('plugins/grammar-guard') " },
+    loaded = true,
+    path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/grammar-guard.nvim",
+    url = "https://github.com/brymer-meneses/grammar-guard.nvim"
+  },
   ["lsp-status.nvim"] = {
     config = { " require('plugins/lspstatus') " },
     loaded = true,
@@ -180,14 +186,18 @@ time([[Defining packer_plugins]], false)
 time([[Config for telescope.nvim]], true)
  require('plugins/telescope') 
 time([[Config for telescope.nvim]], false)
+-- Config for: grammar-guard.nvim
+time([[Config for grammar-guard.nvim]], true)
+ require('plugins/grammar-guard') 
+time([[Config for grammar-guard.nvim]], false)
 -- Config for: nvim-lsp-installer
 time([[Config for nvim-lsp-installer]], true)
  require('plugins/lsp_installer_nvim') 
 time([[Config for nvim-lsp-installer]], false)
--- Config for: lsp-status.nvim
-time([[Config for lsp-status.nvim]], true)
- require('plugins/lspstatus') 
-time([[Config for lsp-status.nvim]], false)
+-- Config for: lspkind-nvim
+time([[Config for lspkind-nvim]], true)
+ require('plugins/lspkind') 
+time([[Config for lspkind-nvim]], false)
 -- Config for: nvim-cmp
 time([[Config for nvim-cmp]], true)
  require('plugins/cmp') 
@@ -196,10 +206,10 @@ time([[Config for nvim-cmp]], false)
 time([[Config for nvim-autopairs]], true)
  require('plugins/autopairs') 
 time([[Config for nvim-autopairs]], false)
--- Config for: nvim-lspconfig
-time([[Config for nvim-lspconfig]], true)
- require('plugins/lspconfig') 
-time([[Config for nvim-lspconfig]], false)
+-- Config for: lsp-status.nvim
+time([[Config for lsp-status.nvim]], true)
+ require('plugins/lspstatus') 
+time([[Config for lsp-status.nvim]], false)
 -- Config for: LuaSnip
 time([[Config for LuaSnip]], true)
  require('plugins/luasnip') 
@@ -208,10 +218,10 @@ time([[Config for LuaSnip]], false)
 time([[Config for nvim-treesitter]], true)
  require('plugins/treesitter') 
 time([[Config for nvim-treesitter]], false)
--- Config for: lspkind-nvim
-time([[Config for lspkind-nvim]], true)
- require('plugins/lspkind') 
-time([[Config for lspkind-nvim]], false)
+-- Config for: nvim-lspconfig
+time([[Config for nvim-lspconfig]], true)
+ require('plugins/lspconfig') 
+time([[Config for nvim-lspconfig]], false)
 if should_profile then save_profiles() end
 
 end)

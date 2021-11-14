@@ -16,7 +16,7 @@ require('telescope').setup {
             find_command = {'rg', '--files', '--iglob', '!.git', '--hidden'}
         },
         file_browser = {
-            find_command = {'rg', '--files', '--iglob', '!.git', '--hidden'}
+						hidden = true
         }
         -- picker_name = {
         --   picker_config_key = value,

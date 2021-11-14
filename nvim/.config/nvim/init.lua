@@ -81,6 +81,12 @@ return require('packer').startup {
             config = [[ require('plugins/autopairs') ]]
         }
 
+				use {
+						"brymer-meneses/grammar-guard.nvim",
+						requires = "neovim/nvim-lspconfig",
+						config = [[ require('plugins/grammar') ]]
+				}
+
     end,
     config = {
         -- Move to lua dir so impatient.nvim can cache it

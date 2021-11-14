@@ -48,7 +48,8 @@ local servers = {
     "jdtls", -- for java
     "lexlab", -- for latex
     "sqlls", -- for sql
-    "pylsp" -- for python
+    "pylsp", -- for python
+		"sumneko_lua" -- for lua
 }
 
 -- setup the LS
