@@ -17,6 +17,19 @@ commitDotFiles() {
     git commit -m "automagic message"
     git push origin main
     popd
+    pushd work
+    git add .
+    git commit -m "automagic message"
+    git push origin main
+    popd
+    git add .
+    git commit -m "automagic message"
+    git push origin main
+    popd
+}
+
+commitAnsible() {
+    pushd $ANSIBLEFILES
     git add .
     git commit -m "automagic message"
     git push origin main

@@ -8,5 +8,6 @@ for i in `find -L $PERSONAL`; do
 done
 
 export DOTFILES=$HOME/.dotfiles
+export ANSIBLEFILES=$HOME/Sources/ansible
 export GIT_EDITOR=$VIM
 export PATH="$HOME/.local/bin:$PATH"
