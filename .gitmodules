@@ -1,3 +1,6 @@
 [submodule "personal"]
 	path = personal
 	url = git@github.com:mikebarkmin/.dotfiles-personal.git
+[submodule "work"]
+	path = work
+	url = git@github.com:mikebarkmin/.dotfiles-work.git
