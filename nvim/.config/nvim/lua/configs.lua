@@ -6,6 +6,7 @@ local cmd = vim.cmd -- execute Vim commands
 -- local b     = vim.bo            -- buffer-scoped options
 -- local w     = vim.wo            -- windows-scoped options
 
+vim.g.transparent_background = true
 cmd('autocmd ColorScheme * highlight ExtraWhitespace ctermbg=red guibg=grey') -- to Show whitespace, MUST be inserted BEFORE the colorscheme command
 cmd('colorscheme rvcs')
 set.guifont = 'DroidSansMono Nerd Font 11'

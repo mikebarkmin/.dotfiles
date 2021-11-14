@@ -12,7 +12,12 @@ require('telescope').setup {
         }
     },
     pickers = {
-        -- Default configuration for builtin pickers goes here:
+        find_files = {
+            find_command = {'rg', '--files', '--iglob', '!.git', '--hidden'}
+        },
+        file_browser = {
+            find_command = {'rg', '--files', '--iglob', '!.git', '--hidden'}
+        }
         -- picker_name = {
         --   picker_config_key = value,
         --   ...
