@@ -77,6 +77,7 @@ TOOLBOX_DEFAULT_CONTAINER=$(hostname)
 plugins=(
 	git
 	toolbox
+	last-working-dir
 )
 
 source $ZSH/oh-my-zsh.sh
