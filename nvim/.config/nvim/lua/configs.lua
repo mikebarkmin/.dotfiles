@@ -6,9 +6,10 @@ local cmd = vim.cmd -- execute Vim commands
 -- local b     = vim.bo            -- buffer-scoped options
 -- local w     = vim.wo            -- windows-scoped options
 
-vim.g.transparent_background = true
 cmd('autocmd ColorScheme * highlight ExtraWhitespace ctermbg=red guibg=grey') -- to Show whitespace, MUST be inserted BEFORE the colorscheme command
-cmd('colorscheme rvcs')
+vim.g.nord_disable_background = true
+vim.g.nord_contrast = true
+require('nord').set()
 set.guifont = 'DroidSansMono Nerd Font 11'
 set.termguicolors = true -- Enable GUI colors for the terminal to get truecolor
 set.list = false -- show whitespace
@@ -26,6 +27,8 @@ set.fillchars = {
     fold = '·', -- MIDDLE DOT (U+00B7, UTF-8: C2 B7)
     vert = ' ' -- remove ugly vertical lines on window division
 }
+set.undofile = true
+set.undodir = "~/.local/share/nvim/undodir"
 set.clipboard = set.clipboard + "unnamedplus" -- copy & paste
 set.wrap = false -- don't automatically wrap on load
 set.showmatch = true -- show the matching part of the pair for [] {} and ()
@@ -70,6 +73,14 @@ cmd([[
 if has("autocmd")
   au BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
 endif
+]])
+
+-- auto source vim
+cmd([[
+  augroup neovim
+		autocmd!
+		autocmd BufWritePost $MYVIMRC nested source $MYVIMRC
+	augroup end
 ]])
 
 -- patterns to ignore during file-navigation

@@ -128,6 +128,23 @@ _G.packer_plugins = {
     path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/lspkind-nvim",
     url = "https://github.com/onsails/lspkind-nvim"
   },
+  ["lualine.nvim"] = {
+    config = { " require('plugins/lualine') " },
+    loaded = true,
+    path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/lualine.nvim",
+    url = "https://github.com/nvim-lualine/lualine.nvim"
+  },
+  neogit = {
+    config = { " require('plugins/neogit') " },
+    loaded = true,
+    path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/neogit",
+    url = "https://github.com/TimUntersberger/neogit"
+  },
+  ["nord.nvim"] = {
+    loaded = true,
+    path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/nord.nvim",
+    url = "https://github.com/shaunsingh/nord.nvim"
+  },
   ["nvim-autopairs"] = {
     config = { " require('plugins/autopairs') " },
     loaded = true,
@@ -158,6 +175,11 @@ _G.packer_plugins = {
     path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/nvim-treesitter",
     url = "https://github.com/nvim-treesitter/nvim-treesitter"
   },
+  ["nvim-web-devicons"] = {
+    loaded = true,
+    path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/nvim-web-devicons",
+    url = "https://github.com/kyazdani42/nvim-web-devicons"
+  },
   ["packer.nvim"] = {
     loaded = true,
     path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/packer.nvim",
@@ -173,11 +195,21 @@ _G.packer_plugins = {
     path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/roshnivim-cs",
     url = "https://github.com/shaeinst/roshnivim-cs"
   },
+  ["telescope-project.nvim"] = {
+    loaded = true,
+    path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/telescope-project.nvim",
+    url = "https://github.com/nvim-telescope/telescope-project.nvim"
+  },
   ["telescope.nvim"] = {
     config = { " require('plugins/telescope') " },
     loaded = true,
     path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/telescope.nvim",
     url = "https://github.com/nvim-telescope/telescope.nvim"
+  },
+  ["vim-eunuch"] = {
+    loaded = true,
+    path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/vim-eunuch",
+    url = "https://github.com/tpope/vim-eunuch"
   }
 }
 
@@ -194,22 +226,30 @@ time([[Config for grammar-guard.nvim]], false)
 time([[Config for nvim-lsp-installer]], true)
  require('plugins/lsp_installer_nvim') 
 time([[Config for nvim-lsp-installer]], false)
--- Config for: lspkind-nvim
-time([[Config for lspkind-nvim]], true)
- require('plugins/lspkind') 
-time([[Config for lspkind-nvim]], false)
--- Config for: nvim-cmp
-time([[Config for nvim-cmp]], true)
- require('plugins/cmp') 
-time([[Config for nvim-cmp]], false)
--- Config for: nvim-autopairs
-time([[Config for nvim-autopairs]], true)
- require('plugins/autopairs') 
-time([[Config for nvim-autopairs]], false)
 -- Config for: lsp-status.nvim
 time([[Config for lsp-status.nvim]], true)
  require('plugins/lspstatus') 
 time([[Config for lsp-status.nvim]], false)
+-- Config for: nvim-cmp
+time([[Config for nvim-cmp]], true)
+ require('plugins/cmp') 
+time([[Config for nvim-cmp]], false)
+-- Config for: lspkind-nvim
+time([[Config for lspkind-nvim]], true)
+ require('plugins/lspkind') 
+time([[Config for lspkind-nvim]], false)
+-- Config for: lualine.nvim
+time([[Config for lualine.nvim]], true)
+ require('plugins/lualine') 
+time([[Config for lualine.nvim]], false)
+-- Config for: nvim-autopairs
+time([[Config for nvim-autopairs]], true)
+ require('plugins/autopairs') 
+time([[Config for nvim-autopairs]], false)
+-- Config for: neogit
+time([[Config for neogit]], true)
+ require('plugins/neogit') 
+time([[Config for neogit]], false)
 -- Config for: LuaSnip
 time([[Config for LuaSnip]], true)
  require('plugins/luasnip') 

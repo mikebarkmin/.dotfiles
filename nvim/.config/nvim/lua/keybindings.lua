@@ -20,3 +20,7 @@ map("n", "<Leader>vsd", "<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>
 map("n", "<Leader>vn", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>")
 map("n", "<Leader>vp", "<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>")
 map("n", "<Leader>vf", "<cmd>lua vim.lsp.buf.formatting()<CR>")
+
+-- neogit
+map("n", "<Leader>go", "<cmd>Neogit<CR>")
+map("n", "<Leader>gc", "<cmd>Neogit commit<CR>")

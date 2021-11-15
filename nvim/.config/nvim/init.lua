@@ -52,9 +52,15 @@ return require('packer').startup {
             config = [[ require('plugins/cmp') ]]
         }
 
+				use {
+					'nvim-telescope/telescope-project.nvim'
+				}
+
         use {
             'nvim-telescope/telescope.nvim',
-            requires = {{'nvim-lua/plenary.nvim'}},
+            requires = {
+							'nvim-lua/plenary.nvim'
+						},
             config = [[ require('plugins/telescope') ]]
         }
 
@@ -69,6 +75,10 @@ return require('packer').startup {
         use { --  colorscheme for (neo)vim written in lua specially made for roshnivim
             'shaeinst/roshnivim-cs'
         }
+
+				use {
+						'shaunsingh/nord.nvim'
+				}
 
         use { -- Nvim Treesitter configurations and abstraction layer
             'nvim-treesitter/nvim-treesitter',
@@ -85,6 +95,22 @@ return require('packer').startup {
 						"brymer-meneses/grammar-guard.nvim",
 						requires = "neovim/nvim-lspconfig",
 						config = [[ require('plugins/grammar_guard') ]]
+				}
+
+				use {
+					 "tpope/vim-eunuch"
+				}
+
+				use {
+				  'nvim-lualine/lualine.nvim',
+					requires = {'kyazdani42/nvim-web-devicons', opt = true},
+					config = [[ require('plugins/lualine') ]]
+				}
+
+				use {
+					'TimUntersberger/neogit',
+					requires = {'nvim-lua/plenary.nvim'},
+					config = [[ require('plugins/neogit') ]]
 				}
 
     end,
