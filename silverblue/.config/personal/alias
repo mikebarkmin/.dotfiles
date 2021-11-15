@@ -1,3 +1,4 @@
+alias rm="rm -i"
 alias vim="nvim"
 alias python="python3"
 alias dotc="commitDotFiles"
