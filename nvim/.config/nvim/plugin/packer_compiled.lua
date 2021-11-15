@@ -111,7 +111,7 @@ _G.packer_plugins = {
     url = "https://github.com/rafamadriz/friendly-snippets"
   },
   ["grammar-guard.nvim"] = {
-    config = { " require('plugins/grammar-guard') " },
+    config = { " require('plugins/grammar_guard') " },
     loaded = true,
     path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/grammar-guard.nvim",
     url = "https://github.com/brymer-meneses/grammar-guard.nvim"
@@ -188,7 +188,7 @@ time([[Config for telescope.nvim]], true)
 time([[Config for telescope.nvim]], false)
 -- Config for: grammar-guard.nvim
 time([[Config for grammar-guard.nvim]], true)
- require('plugins/grammar-guard') 
+ require('plugins/grammar_guard') 
 time([[Config for grammar-guard.nvim]], false)
 -- Config for: nvim-lsp-installer
 time([[Config for nvim-lsp-installer]], true)
