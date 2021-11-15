@@ -28,7 +28,7 @@ set.fillchars = {
     vert = ' ' -- remove ugly vertical lines on window division
 }
 set.undofile = true
-set.undodir = "~/.local/share/nvim/undodir"
+set.undodir = vim.fn.stdpath("config") .. "/undo"
 set.clipboard = set.clipboard + "unnamedplus" -- copy & paste
 set.wrap = false -- don't automatically wrap on load
 set.showmatch = true -- show the matching part of the pair for [] {} and ()
