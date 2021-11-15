@@ -50,7 +50,6 @@ set.shiftwidth = 2 -- spaces per tab (when shifting), when using the >> or << co
 set.tabstop = 2 -- spaces per tab
 set.smarttab = true -- <tab>/<BS> indent/dedent in leading whitespace
 set.autoindent = true -- maintain indent of current line
-set.expandtab = false -- don't expand tabs into spaces
 set.shiftround = true
 set.splitbelow = true -- open horizontal splits below current window
 set.splitright = true -- open vertical splits to the right of the current window
