@@ -9,6 +9,7 @@ local cmd = vim.cmd -- execute Vim commands
 cmd('autocmd ColorScheme * highlight ExtraWhitespace ctermbg=red guibg=grey') -- to Show whitespace, MUST be inserted BEFORE the colorscheme command
 vim.g.nord_disable_background = true
 vim.g.nord_contrast = true
+vim.g.nord_borders = true
 require('nord').set()
 set.guifont = 'DroidSansMono Nerd Font 11'
 set.termguicolors = true -- Enable GUI colors for the terminal to get truecolor

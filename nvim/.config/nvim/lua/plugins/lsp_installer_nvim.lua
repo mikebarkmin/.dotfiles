@@ -46,7 +46,7 @@ local servers = {
     "jsonls", -- for json
     "eslint", -- for eslint
     "jdtls", -- for java
-    "lexlab", -- for latex
+    "texlab", -- for latex
     "sqlls", -- for sql
     "pylsp", -- for python
 		"sumneko_lua" -- for lua
