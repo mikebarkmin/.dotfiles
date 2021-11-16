@@ -1,6 +1,6 @@
 export DOTFILES=$HOME/.dotfiles
 export SOURCES=$HOME/Sources
-export ANSIBLEFILES=$SOURCES/ansible
+export ANSIBLEFILES=$SOURCES/silberblau
 
 gitClone () {
   REPO=$1
