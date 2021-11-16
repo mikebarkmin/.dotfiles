@@ -42,6 +42,11 @@ commitDotFiles() {
     git commit -m "automagic message"
     git push origin main
     popd
+    pushd demo
+    git add .
+    git commit -m "automagic message"
+    git push origin main
+    popd
     git add .
     git commit -m "automagic message"
     git push origin main
