@@ -1,13 +1,11 @@
 export XDG_CONFIG_HOME=$HOME/.config
-VIM="nvim"
+export DOTFILES=$HOME/.dotfiles
+export ANSIBLEFILES=$HOME/Sources/silberblau
+export GIT_EDITOR="nvim"
+export PATH="$HOME/.local/bin:$PATH"
 
 PERSONAL=$XDG_CONFIG_HOME/personal
 source $PERSONAL/env
 for i in `find -L $PERSONAL`; do
     source $i
 done
-
-export DOTFILES=$HOME/.dotfiles
-export ANSIBLEFILES=$HOME/Sources/ansible
-export GIT_EDITOR=$VIM
-export PATH="$HOME/.local/bin:$PATH"

@@ -2,6 +2,18 @@ require('telescope').load_extension('project')
 
 require('telescope').setup {
     defaults = {
+        file_ignore_patterns = { 'node_modules', '.git' },
+        vimgrep_arguments = {
+          'rg',
+          '--color=never',
+          '--no-heading',
+          '--with-filename',
+          '--line-number',
+          '--column',
+          '--hidden',
+          '--smart-case',
+          '-u'
+        },
         -- Default configuration for telescope goes here:
         -- config_key = value,
         mappings = {

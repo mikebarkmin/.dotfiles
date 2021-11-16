@@ -1,7 +1,3 @@
-export DOTFILES=$HOME/.dotfiles
-export SOURCES=$HOME/Sources
-export ANSIBLEFILES=$SOURCES/silberblau
-
 gitClone () {
   REPO=$1
   NAME=$(basename "$REPO" .git)
