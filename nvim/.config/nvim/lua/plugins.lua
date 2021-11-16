@@ -101,6 +101,12 @@ return require('packer').startup {
 					config = [[ require('plugins/neogit') ]]
 				}
 
+        use {
+            'kyazdani42/nvim-tree.lua',
+            requires = 'kyazdani42/nvim-web-devicons',
+            config = function() require'nvim-tree'.setup {} end
+        }
+
     end,
     config = {
         -- Move to lua dir so impatient.nvim can cache it

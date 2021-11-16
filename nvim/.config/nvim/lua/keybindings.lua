@@ -24,7 +24,10 @@ map("n", "<leader>j", ":m .+1<CR>==")
 map("n", "<Leader>ff", "<cmd>Telescope find_files<cr>")
 map("n", "<Leader>fg", "<cmd>Telescope live_grep<cr>")
 map("n", "<Leader>fb", "<cmd>Telescope buffers<cr>")
-map("n", "<Leader>ft", "<cmd>Telescope file_browser<cr>")
+
+-- lua tree
+map("n", "<Leader>ft", "<cmd>NvimTreeToggle<cr>")
+map("n", "<Leader>fr", "<cmd>NvimTreeRefresh<cr>")
 
 -- language server
 map("n", "<Leader>vd", "<cmd>lua vim.lsp.buf.definition()<CR>")
