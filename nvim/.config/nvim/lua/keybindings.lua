@@ -2,6 +2,11 @@ local map = require("utils").map
 
 vim.g.mapleader = " "
 
+-- wrap
+map("n", "<Leader>w", ":set wrap! linebreak!<cr>")
+map("n", "j", "gj")
+map("n", "k", "gk")
+
 -- navigation
 --- behave like other capitals
 map("n", "Y", "y$")
