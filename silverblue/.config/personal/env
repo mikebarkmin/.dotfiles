@@ -1,6 +1,22 @@
-DOTFILES=$HOME/.dotfiles
-ANSIBLEFILES=$HOME/Sources/ansible
+export DOTFILES=$HOME/.dotfiles
+export SOURCES=$HOME/Sources
+export ANSIBLEFILES=$SOURCES/ansible
 
+gitClone () {
+  REPO=$1
+  NAME=$(basename "$REPO" .git)
+
+  shift
+  MAIN_BRANCH=$1
+  git clone --bare $REPO $NAME
+  pushd "$PWD/$NAME"
+
+  for BRANCH in "$@"
+  do
+    git worktree add $BRANCH
+  done
+  pushd "$PWD/$MAIN_BRANCH"
+}
 
 addToPath() {
     if [[ "$PATH" != *"$1"* ]]; then
