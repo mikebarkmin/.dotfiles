@@ -108,6 +108,11 @@ return require('packer').startup {
             config = function() require'nvim-tree'.setup {} end
         }
 
+        use {
+          'folke/zen-mode.nvim',
+					config = [[ require('plugins/zen-mode') ]]
+        }
+
     end,
     config = {
         -- Move to lua dir so impatient.nvim can cache it

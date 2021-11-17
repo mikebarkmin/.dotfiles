@@ -1,1 +1,2 @@
 addToPath $HOME/.yarn/bin
+addToPath $HOME/.local/bin2

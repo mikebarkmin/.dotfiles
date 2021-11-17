@@ -45,3 +45,6 @@ map("n", "<Leader>vf", "<cmd>lua vim.lsp.buf.formatting()<CR>")
 -- neogit
 map("n", "<Leader>go", "<cmd>Neogit<CR>")
 map("n", "<Leader>gc", "<cmd>Neogit commit<CR>")
+
+--- zen-mode
+map("n", "<leader>z", "<cmd>ZenMode<cr>")

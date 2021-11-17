@@ -1,6 +1,7 @@
 alias rm="rm -i"
 alias vim="nvim"
 alias python="python3"
+alias o="xdg-open"
 alias dotc="commitDotFiles"
 alias dotr=$DOTFILES/install-personal
 alias dote="pushd $HOME/.dotfiles && nvim && popd"

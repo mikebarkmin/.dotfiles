@@ -47,6 +47,7 @@ set.backspace = 'indent,start,eol' -- make backspace behave like normal again
 set.updatetime = 500 -- CursorHold interval
 set.expandtab = true
 set.softtabstop = 2
+set.textwidth = 120
 set.shiftwidth = 2 -- spaces per tab (when shifting), when using the >> or << commands, shift lines by 4 spaces
 set.tabstop = 2 -- spaces per tab
 set.smarttab = true -- <tab>/<BS> indent/dedent in leading whitespace
@@ -100,3 +101,8 @@ cmd(
 -- json
 cmd(
     [[ au BufEnter *.json set ai expandtab shiftwidth=2 tabstop=2 sta fo=croql ]])
+
+--- latex
+vim.g.tex_flavor = "latex";
+cmd(
+    [[ autocmd FileType latex,tex,plaintex set wrap linebreak ]])
