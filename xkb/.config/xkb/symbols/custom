@@ -1,5 +1,5 @@
 partial alphanumeric_keys modifier_keys keypad_keys
-xkb_symbols "vim" {
+xkb_symbols "devim" {
     include "de(basic)"
     name[Group1]="German (vim)";
 
