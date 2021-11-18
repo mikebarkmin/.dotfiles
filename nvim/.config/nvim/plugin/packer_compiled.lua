@@ -105,10 +105,22 @@ _G.packer_plugins = {
     path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/cmp_luasnip",
     url = "https://github.com/saadparwaiz1/cmp_luasnip"
   },
+  ["formatter.nvim"] = {
+    config = { " require('plugins/formatter') " },
+    loaded = true,
+    path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/formatter.nvim",
+    url = "https://github.com/mhartington/formatter.nvim"
+  },
   ["friendly-snippets"] = {
     loaded = true,
     path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/friendly-snippets",
     url = "https://github.com/rafamadriz/friendly-snippets"
+  },
+  ["git-worktree.nvim"] = {
+    config = { " require('plugins/git-worktree') " },
+    loaded = true,
+    path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/git-worktree.nvim",
+    url = "https://github.com/ThePrimeagen/git-worktree.nvim"
   },
   ["grammar-guard.nvim"] = {
     config = { " require('plugins/grammar_guard') " },
@@ -170,7 +182,7 @@ _G.packer_plugins = {
     url = "https://github.com/neovim/nvim-lspconfig"
   },
   ["nvim-tree.lua"] = {
-    config = { "\27LJ\2\2;\0\0\2\0\3\0\a6\0\0\0'\1\1\0B\0\2\0029\0\2\0004\1\0\0B\0\2\1K\0\1\0\nsetup\14nvim-tree\frequire\0" },
+    config = { " require('plugins/nvim-tree') " },
     loaded = true,
     path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/nvim-tree.lua",
     url = "https://github.com/kyazdani42/nvim-tree.lua"
@@ -206,6 +218,11 @@ _G.packer_plugins = {
     path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/roshnivim-cs",
     url = "https://github.com/shaeinst/roshnivim-cs"
   },
+  ["telescope-fzf-native.nvim"] = {
+    loaded = true,
+    path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/telescope-fzf-native.nvim",
+    url = "https://github.com/nvim-telescope/telescope-fzf-native.nvim"
+  },
   ["telescope-project.nvim"] = {
     loaded = true,
     path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/telescope-project.nvim",
@@ -231,18 +248,26 @@ _G.packer_plugins = {
 }
 
 time([[Defining packer_plugins]], false)
+-- Config for: lualine.nvim
+time([[Config for lualine.nvim]], true)
+ require('plugins/lualine') 
+time([[Config for lualine.nvim]], false)
 -- Config for: telescope.nvim
 time([[Config for telescope.nvim]], true)
  require('plugins/telescope') 
 time([[Config for telescope.nvim]], false)
--- Config for: grammar-guard.nvim
-time([[Config for grammar-guard.nvim]], true)
- require('plugins/grammar_guard') 
-time([[Config for grammar-guard.nvim]], false)
+-- Config for: neogit
+time([[Config for neogit]], true)
+ require('plugins/neogit') 
+time([[Config for neogit]], false)
 -- Config for: nvim-lspconfig
 time([[Config for nvim-lspconfig]], true)
  require('plugins/lspconfig') 
 time([[Config for nvim-lspconfig]], false)
+-- Config for: grammar-guard.nvim
+time([[Config for grammar-guard.nvim]], true)
+ require('plugins/grammar_guard') 
+time([[Config for grammar-guard.nvim]], false)
 -- Config for: zen-mode.nvim
 time([[Config for zen-mode.nvim]], true)
  require('plugins/zen-mode') 
@@ -251,30 +276,30 @@ time([[Config for zen-mode.nvim]], false)
 time([[Config for lsp-status.nvim]], true)
  require('plugins/lspstatus') 
 time([[Config for lsp-status.nvim]], false)
--- Config for: neogit
-time([[Config for neogit]], true)
- require('plugins/neogit') 
-time([[Config for neogit]], false)
+-- Config for: nvim-lsp-installer
+time([[Config for nvim-lsp-installer]], true)
+ require('plugins/lsp_installer_nvim') 
+time([[Config for nvim-lsp-installer]], false)
 -- Config for: nvim-cmp
 time([[Config for nvim-cmp]], true)
  require('plugins/cmp') 
 time([[Config for nvim-cmp]], false)
+-- Config for: nvim-tree.lua
+time([[Config for nvim-tree.lua]], true)
+ require('plugins/nvim-tree') 
+time([[Config for nvim-tree.lua]], false)
 -- Config for: lspkind-nvim
 time([[Config for lspkind-nvim]], true)
  require('plugins/lspkind') 
 time([[Config for lspkind-nvim]], false)
--- Config for: nvim-tree.lua
-time([[Config for nvim-tree.lua]], true)
-try_loadstring("\27LJ\2\2;\0\0\2\0\3\0\a6\0\0\0'\1\1\0B\0\2\0029\0\2\0004\1\0\0B\0\2\1K\0\1\0\nsetup\14nvim-tree\frequire\0", "config", "nvim-tree.lua")
-time([[Config for nvim-tree.lua]], false)
 -- Config for: nvim-autopairs
 time([[Config for nvim-autopairs]], true)
  require('plugins/autopairs') 
 time([[Config for nvim-autopairs]], false)
--- Config for: lualine.nvim
-time([[Config for lualine.nvim]], true)
- require('plugins/lualine') 
-time([[Config for lualine.nvim]], false)
+-- Config for: formatter.nvim
+time([[Config for formatter.nvim]], true)
+ require('plugins/formatter') 
+time([[Config for formatter.nvim]], false)
 -- Config for: LuaSnip
 time([[Config for LuaSnip]], true)
  require('plugins/luasnip') 
@@ -283,10 +308,10 @@ time([[Config for LuaSnip]], false)
 time([[Config for nvim-treesitter]], true)
  require('plugins/treesitter') 
 time([[Config for nvim-treesitter]], false)
--- Config for: nvim-lsp-installer
-time([[Config for nvim-lsp-installer]], true)
- require('plugins/lsp_installer_nvim') 
-time([[Config for nvim-lsp-installer]], false)
+-- Config for: git-worktree.nvim
+time([[Config for git-worktree.nvim]], true)
+ require('plugins/git-worktree') 
+time([[Config for git-worktree.nvim]], false)
 if should_profile then save_profiles() end
 
 end)

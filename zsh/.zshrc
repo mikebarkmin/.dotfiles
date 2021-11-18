@@ -72,7 +72,7 @@ ZSH_THEME="m3b6"
 # Add wisely, as too many plugins slow down shell startup.
 DISABLE_TOOLBOX_ENTER=1
 DISABLE_TOOLBOX_EXIT=1
-TOOLBOX_DEFAULT_IMAGE="ghcr.io/mikebarkmin/fedora-toolbox:35"
+TOOLBOX_DEFAULT_IMAGE="ghcr.io/mikebarkmin/fedora-toolbox:35-dev"
 TOOLBOX_DEFAULT_CONTAINER=$(hostname)
 plugins=(
 	git

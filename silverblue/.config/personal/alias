@@ -8,4 +8,5 @@ alias dote="pushd $HOME/.dotfiles && nvim && popd"
 alias ansc="commitAnsible"
 alias ansr="pushd $ANSIBLEFILES && ansible-galaxy install -r requirements.yml && ansible-playbook main.yml --ask-become && popd"
 alias anse="pushd $ANSIBLEFILES && nvim && popd"
+alias podman_ghcr="echo $GH_TOKEN | podman login ghcr.io --username=mikebarkmin --password-stdin"
 
