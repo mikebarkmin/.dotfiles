@@ -1,8 +1,13 @@
 -- Only required if you have packer configured as `opt`
 vim.cmd [[packadd packer.nvim]]
+local fn = vim.fn
+local install_path = fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
+if fn.empty(fn.glob(install_path)) > 0 then
+  packer_bootstrap = fn.system({'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path})
+end
 
 return require("packer").startup {
-  function()
+  function(use)
     -- Packer can manage itself
     use "wbthomason/packer.nvim"
 
@@ -134,9 +139,9 @@ return require("packer").startup {
       "mhartington/formatter.nvim",
       config = [[ require('plugins/formatter') ]]
     }
-  end,
-  config = {
-    -- Move to lua dir so impatient.nvim can cache it
-    compile_path = vim.fn.stdpath("config") .. "/plugin/packer_compiled.lua"
-  }
+
+    if packer_bootstrap then
+      require("packer").sync()
+    end
+  end
 }

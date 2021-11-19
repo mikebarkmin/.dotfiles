@@ -1,0 +1,245 @@
+#!/usr/bin/env bash
+
+set -o errexit # exit script if a command fails
+set -o nounset # exit when trying to use undeclared variables
+
+# define some colors
+declare red='\033[1;31m'
+declare yellow='\033[1;33m'
+declare green='\033[1;32m'
+declare blue='\033[1;34m'
+declare blank='\033[0m'
+
+# define log level prefix
+declare error="$red[error]$blank"
+declare warn="$yellow[warn]$blank"
+declare success="$green[success]$blank"
+declare info="$blue[info]$blank"
+
+# misc
+declare number_regex='^[0-9]+$'
+
+# const variables for udev files
+declare udev_rules_dir=/usr/lib/udev/rules.d
+declare udev_rule_file=$udev_rules_dir/61-mutter-primary-gpu.rules
+
+# constant function for udev template
+function mutter_rule_file() {
+  local DEVNAME=$1
+  envsubst <<EOF
+ENV{DEVNAME}=="$DEVNAME", TAG+="mutter-device-preferred-primary"
+EOF
+}
+
+# todo: this assumes that there is bash 4+ installed
+declare -A gpus=()
+declare gpu_connected=0
+
+# helper method for printing error messages
+function print_error() {
+	echo -e "$error $1"
+}
+
+# helper method for printing info messages
+function print_info() {
+	echo -e "$info $1"
+}
+
+# helper method for printing warn messages
+function print_warn() {
+	echo -e "$warn $1"
+}
+
+# helper method for printin success messages
+function print_success() {
+	echo -e "$success $1"
+}
+
+# check if the script is run as root
+if [[ $EUID -ne 0 ]]; then
+  	print_error "You need to run the script with root privileges"
+  	exit
+fi
+
+# check if an argument was passed
+if [ -z ${1+x} ]; then
+	print_error "No argument passed."
+	exit
+fi
+
+# read the connected GPUs and put them into the "gpus" associative array
+function read_gpus() {
+
+	# empty the gpus array
+	gpus=()
+
+	declare lines=$(lspci -D -d ::0300 && lspci -D -d ::0302)
+	while read -r line ; do
+		declare name=$(echo $line | grep -o -e "[^:]*$")
+		declare bus=$(echo $line | grep -o -e "^[^ ]*")
+
+		# The bus IDs in hex
+		declare bus1h=${bus:5:2}
+		declare bus2h=${bus:8:2}
+		declare bus3h=${bus:11:1}
+
+		# The bus IDs in dec
+		declare bus1d=$((16#$bus1h))
+		declare bus2d=$((16#$bus2h))
+		declare bus3d=$((16#$bus3h))
+
+		# Remove the whitespace at the beginning of the name
+		# And concatenate bus IDs
+		bus="${bus1d}:${bus2d}:${bus3d}"
+		name=${name:1}
+
+		# Put the result into the gpus array
+		gpus+=( [$bus]=$name )
+	done <<< $lines
+	return
+}
+
+# returns 1 if egpu is connected, 0 if not
+function is_egpu_connected() {
+
+	# read pci id from xorg.conf.egpu
+	declare egpu_pci_id=$(cat $xfile_egpu | grep -Ei "BusID" | grep -oEi '[0-9]+\:[0-9]+\:[0-9]+')
+
+	# create an array by splitting the BUS-ID on ':'
+	declare busArray=(${egpu_pci_id//:/ })
+	declare bus1d=${busArray[0]}
+	declare bus2d=${busArray[1]}
+	declare bus3d=${busArray[2]}
+
+	# convert dec to hex
+	declare bus1h=$(printf "%02x" $bus1d)
+	declare bus2h=$(printf "%02x" $bus2d)
+	declare bus3h=$(printf "%01x" $bus3d)
+
+	# instantiate counter
+	declare i=1
+
+	# begin infinite loop to allow retries if the egpu isn't connected immediately on bootup
+	while [ true ]; do
+
+		# if a video device is connected to the BUS-ID
+		if [ $( (lspci -d ::0300 && lspci -d ::0302) | grep -iEc "$bus1h:$bus2h.$bus3h") -eq 1 ]; then
+			print_info "EGPU is ${green}connected${blank}."
+			gpu_connected=1
+			hex_id=$bus1h:$bus2h.$bus3h
+			break
+		else
+			# escape the infinite loop after a certain amount of retries
+			if [ $i -ge 6 ]; then
+				print_info "EGPU is ${red}disconnected${blank}."
+				gpu_connected=0
+				hex_id=$bus1h:$bus2h.$bus3h
+				break
+			fi
+		fi
+
+		# increase counter by 1
+		i=$(( $i + 1 ))
+
+		# sleep for 500ms before retrying
+		sleep 0.5
+	done
+}
+
+# get the matching driver according to the gpu name
+function get_driver() {
+
+	input=${1}
+
+	if [ $(echo "${input}" | grep -Eic "nvidia") -gt 0 ]; then
+		echo "nvidia"
+		return
+	fi
+
+	if [ $(echo "${input}" | grep -Eic "intel") -gt 0 ]; then
+		echo "intel"
+		return
+	fi
+
+	if [ $(echo "${input}" | grep -Eic "amd") -gt 0 ]; then
+		echo "amdgpu"
+		return
+	fi
+}
+
+# set udev rule
+function set_udev_rule() {
+  local devname=${1}
+  local content=$(mutter_rule_file $devname)
+
+  if [[ -f $udev_rule_file ]]; then
+    rm $udev_rule_file
+  fi
+
+  if [[ ! -d $udev_rules_dir  ]]; then
+    mkdir -p $udev_rules_dir
+  fi
+
+  cat content > $udev_rule_file
+
+  udevadm control --reload-rules
+  udevadm trigger
+}
+
+# cleanup udev rule
+function cleanup_udev_rule() {
+  if [[ -f $udev_rule_file ]]; then
+    print_info "Removing udev rule"
+    rm $udev_rule_file
+  fi
+
+  print_success "Done... Finished cleanup"
+}
+
+function setup() {
+  read_gpus
+
+  declare num_of_gpus=${#gpus[@]}
+
+  # additional check
+	if [ $num_of_gpus -lt "2" ]; then
+		print_warn "Only ${num_of_gpus} GPUs found, there need to be at least 2. Make sure to connect your EGPU for the setup."
+		exit
+	fi
+
+	# print the GPUs found
+	echo ""
+	echo -e "Found $num_of_gpus possible GPUs..."
+	echo ""
+
+  declare mapping=()
+	declare i=0
+	for key in ${!gpus[@]}; do
+		i=$((i+1))
+		mapping+=([${i}]=${key})
+		echo "  $i: ${gpus[${key}]} (${key})"
+	done
+
+	echo ""
+
+  # prompt to choose the external gpu from the list
+	printf "Choose your preferred$green EXTERNAL$blank GPU [1-$num_of_gpus]: "
+	read external
+	declare full_external=${gpus[${mapping[$external]}]}
+	declare pci_external=${mapping[$external]}
+
+	if ! [[ $external =~ $number_regex ]] || [ -z "$pci_external" ]; then
+		print_error "Your input is invalid. Exiting setup..."
+		exit
+	fi
+}
+
+function cleanup() {
+  cleanup_udev_rule
+}
+
+if [ $1 = "setup" ]; then
+  setup
+elif [ $1 = "cleanup" ]; then
+  cleanup
+fi
