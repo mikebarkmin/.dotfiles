@@ -77,7 +77,7 @@ TOOLBOX_DEFAULT_CONTAINER=$(hostname)
 plugins=(
 	git
 	toolbox
-	last-working-dir
+	last-working-dir-tmux
 )
 
 source $ZSH/oh-my-zsh.sh

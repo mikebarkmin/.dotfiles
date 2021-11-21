@@ -1,2 +1,4 @@
 addToPath $HOME/.yarn/bin
 addToPath $HOME/.local/bin2
+addToPath $HOME/Applications/gradle-7.3/bin
+addToPath $HOME/Applications/google-cloud-sdk/bin
