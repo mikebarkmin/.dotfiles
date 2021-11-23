@@ -98,6 +98,11 @@ return require("packer").startup {
     }
 
     use {
+      "lukas-reineke/indent-blankline.nvim",
+      config = [[ require('plugins/blankline') ]]
+    }
+
+    use {
       "brymer-meneses/grammar-guard.nvim",
       requires = "neovim/nvim-lspconfig",
       config = [[ require('plugins/grammar_guard') ]]
