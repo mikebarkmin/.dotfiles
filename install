@@ -1,6 +1,10 @@
 #!/usr/bin/env zsh
 # I am using zsh instead of bash.  I was having some troubles using bash with
 # arrays.  Didn't want to investigate, so I just did zsh
+if [[ -n $HOME/.oh-my-zsh/custom ]]; then
+  rm -rf $HOME/.oh-my-zsh/custom
+fi
+
 pushd $DOTFILES
 for folder in $(echo $STOW_FOLDERS | sed "s/,/ /g")
 do
