@@ -1,4 +1,0 @@
-! option = symbols
-  devim = custom(devim)
-
-! include %S/evdev

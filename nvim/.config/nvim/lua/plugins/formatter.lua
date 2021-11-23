@@ -41,6 +41,26 @@ require("formatter").setup(
           }
         end
       },
+      java = {
+        -- prettier
+        function()
+          return {
+            exe = "prettier",
+            args = {"--stdin-filepath", vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))},
+            stdin = true
+          }
+        end
+      },
+      sql = {
+        -- prettier
+        function()
+          return {
+            exe = "pg-formatter",
+            args = {"--keyword-case", "uppercase", vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))},
+            stdin = true
+          }
+        end
+      },
       typescript = {
         -- prettier
         function()

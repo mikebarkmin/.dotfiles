@@ -140,6 +140,10 @@ return require("packer").startup {
       config = [[ require('plugins/formatter') ]]
     }
 
+    use {
+      "kmonad/kmonad-vim"
+    }
+
     if packer_bootstrap then
       require("packer").sync()
     end

@@ -1,10 +1,72 @@
-partial alphanumeric_keys modifier_keys keypad_keys
-xkb_symbols "devim" {
-    include "de(basic)"
-    name[Group1]="German (vim)";
+xkb_symbols "de-prog" {
+    name[Group1]="German (Programmer)";
 
+    //  code          normal ,      shift,    lalt (lower), lalt + ralt (adjust), ralt (raise)
+    key <AE01>	{ [         1,     exclam,  onesuperior,   exclamdown ]	};
+    key <AE02>	{ [         2,   quotedbl,           at,    oneeighth ]	};
+    key <AE03>	{ [         3, numbersign, threesuperior,    sterling ]	};
+    key <AE04>	{ [         4,     dollar,   onequarter,       dollar ]	};
+    key <AE05>	{ [         5,    percent,      onehalf, threeeighths ]	};
+    key <AE06>	{ [         6,  ampersand,      notsign,  fiveeighths ]	};
+    key <AE07>	{ [         7,      slash,    braceleft, seveneighths ]	};
+    key <AE08>	{ [         8,  parenleft,  bracketleft,    trademark ]	};
+    key <AE09>	{ [         9, parenright, bracketright,    plusminus ]	};
+    key <AE10>	{ [         0,      equal,   braceright,       degree ]	};
+    key <AE11>	{ [     minus, underscore,    backslash, questiondown ]	};
+    key <AE12>	{ [     equal,       plus,     cedilla,        ogonek ]	};
+
+    key <AD01>	{ [         q,          Q,           at,  Greek_OMEGA ]	};
+    key <AD02>	{ [         w,          W,      lstroke,      Lstroke ]	};
+    key <AD03>	{ [         e,          E,     EuroSign,         cent ]	};
+    key <AD04>	{ [         r,          R,    paragraph,   registered ]	};
+    key <AD05>	{ [         t,          T,       tslash,       Tslash ]	};
+    key <AD06>	{ [         y,          Y,    leftarrow,          yen ]	};
+    key <AD07>	{ [         u,          U,    downarrow,      uparrow ]	};
+    key <AD08>	{ [         i,          I,   rightarrow,     idotless ]	};
+    key <AD09>	{ [         o,          O,       oslash,     Ooblique ]	};
+    key <AD10>	{ [         p,          P,        thorn,        THORN ]	};
+    key <AD11>	{ [bracketleft,  braceleft,  diaeresis,        degree ]	};
+    key <AD12>	{ [bracketright, braceright, asciitilde,       macron ]	};
+
+    key <AC01>	{ [         a,          A,           ae,           AE ]	};
+    key <AC02>	{ [         s,          S,       ssharp,      section ]	};
+    key <AC03>	{ [         d,          D,          eth,          ETH ]	};
+    key <AC04>	{ [         f,          F,      dstroke,  ordfeminine ]	};
+    key <AC05>	{ [         g,          G,          eng,          ENG ]	};
     key <AC06>	{ [         h,          H,       Left,      Hstroke ]	};
     key <AC07>	{ [         j,          J,       Down,    dead_horn ] };
     key <AC08>	{ [         k,          K,         Up,    ampersand ]	};
     key <AC09>	{ [         l,          L,      Right,      Lstroke ]	};
+    key <AC10>	{ [ semicolon,      colon,       acute,   doubleacute ]	};
+    key <AC11>	{ [apostrophe,   quotedbl, asciicircum,         caron ]	};
+    key <TLDE>	{ [     grave, asciitilde,      notsign,      notsign ]	};
+
+    key <BKSL>	{ [ backslash,        bar,       grave,         breve ]	};
+    key <AB01>	{ [         z,          Z, guillemotleft,        less ]	};
+    key <AB02>	{ [         x,          X, guillemotright,    greater ]	};
+    key <AB03>	{ [         c,          C,         cent,    copyright ]	};
+    key <AB04>	{ [         v,          V, leftdoublequotemark, leftsinglequotemark ]	};
+    key <AB05>	{ [         b,          B, rightdoublequotemark, rightsinglequotemark ] };
+    key <AB06>	{ [         n,          N,            n,            N ]	};
+    key <AB07>	{ [         m,          M,           mu,    masculine ]	};
+    key <AB08>	{ [   comma,  semicolon, horizconnector,     multiply ]	};
+    key <AB09>	{ [  period,      colon, periodcentered,     division ]	};
+    key <AB10>	{ [   minus, underscore, belowdot, abovedot ]	};
+
+    key <BKSP>	{	[	BackSpace,		BackSpace,		BackSpace,		BackSpace		]	};
+    key <RTRN>	{	[	KP_Enter,		KP_Enter,		Tab,		KP_Enter, Tab		]	};
+    key <ESC>	{	[	Escape, Escape, Escape, Escape, Escape		]	};
+    key <LFSH> { [ Shift_L, Shift_L, greater, Shift_L, Shift_L ] };
+    key <RFSH> { [ Shift_R, Shift_R, Shift_R, Shift_R, Shift_R ] };
+    key <TAB>	{	[	Tab,			Tab,			EuroSign,			Tab, F1			]	};
+    key <SPACE> { [ Space, Space, BackSpace, Space, BackSpace ] }
+
+    // Make caps an escape key
+    key <CAPS> { [ Escape, Escape, dollar, Escape, Escape ] };
+
+    // copied from de baisc
+    include "kpdl(comma)"
+
+    include "level3(lalt_switch)"
+    include "level5(ralt_switch)"
 };
