@@ -198,6 +198,16 @@ _G.packer_plugins = {
     path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/nvim-treesitter",
     url = "https://github.com/nvim-treesitter/nvim-treesitter"
   },
+  ["nvim-ts-autotag"] = {
+    loaded = true,
+    path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/nvim-ts-autotag",
+    url = "https://github.com/windwp/nvim-ts-autotag"
+  },
+  ["nvim-ts-rainbow"] = {
+    loaded = true,
+    path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/nvim-ts-rainbow",
+    url = "https://github.com/p00f/nvim-ts-rainbow"
+  },
   ["nvim-web-devicons"] = {
     loaded = true,
     path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/nvim-web-devicons",
@@ -217,11 +227,6 @@ _G.packer_plugins = {
     loaded = true,
     path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/ripgrep",
     url = "https://github.com/BurntSushi/ripgrep"
-  },
-  ["roshnivim-cs"] = {
-    loaded = true,
-    path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/roshnivim-cs",
-    url = "https://github.com/shaeinst/roshnivim-cs"
   },
   ["telescope-fzf-native.nvim"] = {
     loaded = true,
@@ -253,10 +258,10 @@ _G.packer_plugins = {
 }
 
 time([[Defining packer_plugins]], false)
--- Config for: lualine.nvim
-time([[Config for lualine.nvim]], true)
- require('plugins/lualine') 
-time([[Config for lualine.nvim]], false)
+-- Config for: neogit
+time([[Config for neogit]], true)
+ require('plugins/neogit') 
+time([[Config for neogit]], false)
 -- Config for: telescope.nvim
 time([[Config for telescope.nvim]], true)
  require('plugins/telescope') 
@@ -269,10 +274,10 @@ time([[Config for grammar-guard.nvim]], false)
 time([[Config for nvim-lspconfig]], true)
  require('plugins/lspconfig') 
 time([[Config for nvim-lspconfig]], false)
--- Config for: nvim-lsp-installer
-time([[Config for nvim-lsp-installer]], true)
- require('plugins/lsp_installer_nvim') 
-time([[Config for nvim-lsp-installer]], false)
+-- Config for: lualine.nvim
+time([[Config for lualine.nvim]], true)
+ require('plugins/lualine') 
+time([[Config for lualine.nvim]], false)
 -- Config for: zen-mode.nvim
 time([[Config for zen-mode.nvim]], true)
  require('plugins/zen-mode') 
@@ -289,18 +294,18 @@ time([[Config for lspkind-nvim]], false)
 time([[Config for nvim-cmp]], true)
  require('plugins/cmp') 
 time([[Config for nvim-cmp]], false)
--- Config for: neogit
-time([[Config for neogit]], true)
- require('plugins/neogit') 
-time([[Config for neogit]], false)
--- Config for: nvim-autopairs
-time([[Config for nvim-autopairs]], true)
- require('plugins/autopairs') 
-time([[Config for nvim-autopairs]], false)
+-- Config for: nvim-lsp-installer
+time([[Config for nvim-lsp-installer]], true)
+ require('plugins/lsp_installer_nvim') 
+time([[Config for nvim-lsp-installer]], false)
 -- Config for: nvim-tree.lua
 time([[Config for nvim-tree.lua]], true)
  require('plugins/nvim-tree') 
 time([[Config for nvim-tree.lua]], false)
+-- Config for: nvim-autopairs
+time([[Config for nvim-autopairs]], true)
+ require('plugins/autopairs') 
+time([[Config for nvim-autopairs]], false)
 -- Config for: formatter.nvim
 time([[Config for formatter.nvim]], true)
  require('plugins/formatter') 

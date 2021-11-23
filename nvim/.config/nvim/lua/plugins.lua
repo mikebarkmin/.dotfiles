@@ -76,11 +76,7 @@ return require("packer").startup {
     }
 
     use {
-      --  colorscheme for (neo)vim written in lua specially made for roshnivim
-      "shaeinst/roshnivim-cs"
-    }
-
-    use {
+      --  colorscheme for (neo)vim
       "shaunsingh/nord.nvim"
     }
 
@@ -88,6 +84,10 @@ return require("packer").startup {
       -- Nvim Treesitter configurations and abstraction layer
       "nvim-treesitter/nvim-treesitter",
       run = ":TSUpdate",
+      requires = {
+        "windwp/nvim-ts-autotag",
+        "p00f/nvim-ts-rainbow",
+      },
       config = [[ require('plugins/treesitter') ]]
     }
 
