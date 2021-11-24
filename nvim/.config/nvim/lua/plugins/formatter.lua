@@ -1,3 +1,21 @@
+local goFmt = function()
+  return {
+    exe = "gofmt",
+    args = {"-w"},
+    tempfile_postfix = ".tmp",
+    stdin = false
+  }
+end
+
+local goImports = function()
+  return {
+    exe = "goimports",
+    args = {"-w"},
+    tempfile_postfix = ".tmp",
+    stdin = false
+  }
+end
+
 require("formatter").setup(
   {
     filetype = {
@@ -51,12 +69,42 @@ require("formatter").setup(
           }
         end
       },
+      sh = {
+        -- prettier
+        function()
+          return {
+            exe = "prettier",
+            args = {"--stdin-filepath", vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))},
+            stdin = true
+          }
+        end
+      },
+      zsh = {
+        -- prettier
+        function()
+          return {
+            exe = "prettier",
+            args = {"--stdin-filepath", vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))},
+            stdin = true
+          }
+        end
+      },
+      bash = {
+        -- prettier
+        function()
+          return {
+            exe = "prettier",
+            args = {"--stdin-filepath", vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))},
+            stdin = true
+          }
+        end
+      },
       sql = {
         -- prettier
         function()
           return {
-            exe = "pg-formatter",
-            args = {"--keyword-case", "uppercase", vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))},
+            exe = "prettier",
+            args = {"--stdin-filepath", vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))},
             stdin = true
           }
         end
@@ -80,6 +128,10 @@ require("formatter").setup(
             stdin = true
           }
         end
+      },
+      go = {
+        goImports,
+        goFmt
       },
       lua = {
         -- luafmt

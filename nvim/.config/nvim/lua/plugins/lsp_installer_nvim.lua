@@ -49,7 +49,8 @@ local servers = {
     "texlab", -- for latex
     "sqlls", -- for sql
     "pylsp", -- for python
-		"sumneko_lua" -- for lua
+		"sumneko_lua", -- for lua
+    "gopls", -- for go
 }
 
 -- setup the LS

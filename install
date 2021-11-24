@@ -6,10 +6,9 @@ if [[ -n $HOME/.oh-my-zsh/custom ]]; then
 fi
 
 pushd $DOTFILES
-for folder in $(echo $STOW_FOLDERS | sed "s/,/ /g")
-do
-    stow -D $folder
-    stow $folder
+for folder in $(echo $STOW_FOLDERS | sed "s/,/ /g"); do
+  stow -D $folder
+  stow $folder
 done
 popd
 
