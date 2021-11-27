@@ -12,6 +12,19 @@ vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
   }
 )
 
+require('lspconfig').texlab.setup {
+  settings = {
+    texlab = {
+      auxDirectory = "build/pdf",
+      build = {
+        executable = "latexmk",
+        forwardSearchAfter = false,
+        onSave = true
+      }
+    }
+  }
+}
+
 -- se LSP diagnostic symbols/signs
 vim.api.nvim_command [[ sign define LspDiagnosticsSignError         text=✗ texthl=LspDiagnosticsSignError       linehl= numhl= ]]
 vim.api.nvim_command [[ sign define LspDiagnosticsSignWarning       text=⚠ texthl=LspDiagnosticsSignWarning     linehl= numhl= ]]

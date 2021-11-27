@@ -29,7 +29,26 @@ require("formatter").setup(
           }
         end
       },
+      tex = {
+        -- prettier
+        function()
+          return {
+            exe = "latexindent",
+            stdin = true
+          }
+        end
+      },
       css = {
+        -- prettier
+        function()
+          return {
+            exe = "prettier",
+            args = {"--stdin-filepath", vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))},
+            stdin = true
+          }
+        end
+      },
+      json = {
         -- prettier
         function()
           return {

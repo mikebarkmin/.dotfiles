@@ -7,8 +7,6 @@ require('lsp-status').config({
     indicator_hint = '',
     indicator_ok = '✔',
     current_function = true,
-    diagnostics = false,
-    select_symbol = nil,
     update_interval = 100,
     status_symbol = ' 🇻',
 })

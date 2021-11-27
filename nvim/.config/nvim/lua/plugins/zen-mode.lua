@@ -7,6 +7,6 @@ require"zen-mode".setup {
     }
   },
   plugins = {
-    tmux = { enabled = false }
+    tmux = { enabled = true }
   }
 }

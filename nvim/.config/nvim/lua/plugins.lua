@@ -28,11 +28,13 @@ return require("packer").startup {
       config = [[ require('plugins/lspkind') ]]
     }
 
+    --[=[
     use {
       -- Utility functions for getting diagnostic status and progress messages from LSP servers, for use in the Neovim statusline
       "nvim-lua/lsp-status.nvim",
       config = [[ require('plugins/lspstatus') ]]
     }
+    ]=]--
 
     use {
       -- A completion plugin for neovim coded in Lua.
