@@ -10,7 +10,7 @@ alias ansc="commitAnsible"
 function ansr() {
   pushd $ANSIBLEFILES
   ansible-galaxy install -r requirements.yml
-  if [[ "$1" -eq "all" ]]; then
+  if [[ "$1" = "all" ]]; then
     ansible-playbook main.yml --ask-become
   else
     local tags=$(ls $ANSIBLEFILES/roles | fzf -m | tr '\n' ',' | sed 's/,$/\n/')
