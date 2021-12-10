@@ -1,0 +1,10 @@
+# exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+exec /usr/libexec/xdg-desktop-portal-gtk
+exec export `gnome-keyring-daemon --start --components=ssh`
+exec export _JAVA_AWT_WM_NONREPARENTING=1
+exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
+exec export DISPLAY=:0
+
+exec lxpolkit
+exec mako
+exec ulauncher --hide-window 1 > ~/logs/ulauncher.log 2>&1

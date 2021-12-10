@@ -57,7 +57,7 @@ end
 time([[Luarocks path setup]], false)
 time([[try_loadstring definition]], true)
 local function try_loadstring(s, component, name)
-  local success, result = pcall(loadstring(s))
+  local success, result = pcall(loadstring(s), name, _G.packer_plugins[name])
   if not success then
     vim.schedule(function()
       vim.api.nvim_notify('packer.nvim: Error running ' .. component .. ' for ' .. name .. ': ' .. result, vim.log.levels.ERROR, {})
@@ -121,12 +121,6 @@ _G.packer_plugins = {
     loaded = true,
     path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/git-worktree.nvim",
     url = "https://github.com/ThePrimeagen/git-worktree.nvim"
-  },
-  ["grammar-guard.nvim"] = {
-    config = { " require('plugins/grammar_guard') " },
-    loaded = true,
-    path = "/var/home/mbarkmin/.local/share/nvim/site/pack/packer/start/grammar-guard.nvim",
-    url = "https://github.com/brymer-meneses/grammar-guard.nvim"
   },
   ["indent-blankline.nvim"] = {
     config = { " require('plugins/blankline') " },
@@ -258,22 +252,18 @@ _G.packer_plugins = {
 }
 
 time([[Defining packer_plugins]], false)
--- Config for: neogit
-time([[Config for neogit]], true)
- require('plugins/neogit') 
-time([[Config for neogit]], false)
 -- Config for: telescope.nvim
 time([[Config for telescope.nvim]], true)
  require('plugins/telescope') 
 time([[Config for telescope.nvim]], false)
--- Config for: grammar-guard.nvim
-time([[Config for grammar-guard.nvim]], true)
- require('plugins/grammar_guard') 
-time([[Config for grammar-guard.nvim]], false)
--- Config for: nvim-lspconfig
-time([[Config for nvim-lspconfig]], true)
- require('plugins/lspconfig') 
-time([[Config for nvim-lspconfig]], false)
+-- Config for: neogit
+time([[Config for neogit]], true)
+ require('plugins/neogit') 
+time([[Config for neogit]], false)
+-- Config for: nvim-lsp-installer
+time([[Config for nvim-lsp-installer]], true)
+ require('plugins/lsp_installer_nvim') 
+time([[Config for nvim-lsp-installer]], false)
 -- Config for: lualine.nvim
 time([[Config for lualine.nvim]], true)
  require('plugins/lualine') 
@@ -286,18 +276,18 @@ time([[Config for zen-mode.nvim]], false)
 time([[Config for lspkind-nvim]], true)
  require('plugins/lspkind') 
 time([[Config for lspkind-nvim]], false)
--- Config for: nvim-tree.lua
-time([[Config for nvim-tree.lua]], true)
- require('plugins/nvim-tree') 
-time([[Config for nvim-tree.lua]], false)
+-- Config for: nvim-lspconfig
+time([[Config for nvim-lspconfig]], true)
+ require('plugins/lspconfig') 
+time([[Config for nvim-lspconfig]], false)
 -- Config for: nvim-cmp
 time([[Config for nvim-cmp]], true)
  require('plugins/cmp') 
 time([[Config for nvim-cmp]], false)
--- Config for: nvim-lsp-installer
-time([[Config for nvim-lsp-installer]], true)
- require('plugins/lsp_installer_nvim') 
-time([[Config for nvim-lsp-installer]], false)
+-- Config for: nvim-tree.lua
+time([[Config for nvim-tree.lua]], true)
+ require('plugins/nvim-tree') 
+time([[Config for nvim-tree.lua]], false)
 -- Config for: LuaSnip
 time([[Config for LuaSnip]], true)
  require('plugins/luasnip') 

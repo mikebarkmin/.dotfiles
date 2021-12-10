@@ -16,6 +16,7 @@ require('lspconfig').texlab.setup {
   settings = {
     texlab = {
       auxDirectory = "build/pdf",
+      rootDirectory = ".",
       build = {
         executable = "latexmk",
         forwardSearchAfter = false,
@@ -24,6 +25,24 @@ require('lspconfig').texlab.setup {
     }
   }
 }
+
+require("lspconfig").ltex.setup({
+	settings = {
+		ltex = {
+			enabled = { "latex", "tex", "bib", "markdown" },
+			diagnosticSeverity = "information",
+			setenceCacheSize = 2000,
+			additionalRules = {
+				enablePickyRules = true,
+				motherTongue = "de",
+			},
+			trace = { server = "verbose" },
+			dictionary = {},
+			disabledRules = {},
+			hiddenFalsePositives = {},
+		},
+	},
+})
 
 -- se LSP diagnostic symbols/signs
 vim.api.nvim_command [[ sign define LspDiagnosticsSignError         text=✗ texthl=LspDiagnosticsSignError       linehl= numhl= ]]

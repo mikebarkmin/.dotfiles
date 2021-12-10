@@ -74,10 +74,11 @@ DISABLE_TOOLBOX_ENTER=1
 DISABLE_TOOLBOX_EXIT=1
 TOOLBOX_DEFAULT_IMAGE="ghcr.io/mikebarkmin/fedora-toolbox:35-dev"
 TOOLBOX_DEFAULT_CONTAINER=$(hostname)
+ZSH_TMUX_AUTOSTART=false
 plugins=(
 	git
 	toolbox
-	last-working-dir-tmux
+  tmux
 )
 
 source $ZSH/oh-my-zsh.sh

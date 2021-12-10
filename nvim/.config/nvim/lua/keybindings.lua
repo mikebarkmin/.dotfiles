@@ -21,7 +21,7 @@ map("n", "<leader>k", ":m .-2<CR>==")
 map("n", "<leader>j", ":m .+1<CR>==")
 
 -- telescope
-map("n", "<Leader>ff", "<cmd>Telescope git_files<cr>")
+map("n", "<Leader>ff", "<cmd>Telescope find_files<cr>")
 map("n", "<Leader>fg", "<cmd>Telescope live_grep<cr>")
 map("n", "<Leader>fb", "<cmd>Telescope buffers<cr>")
 

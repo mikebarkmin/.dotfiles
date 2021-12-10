@@ -1,0 +1,5 @@
+exec_always {
+  gsettings set org.gnome.desktop.interface gtk-theme "Nordic-v40"
+  gsettings set org.gnome.desktop.wm.preferences theme "Nordic-v40"
+  gsettings set org.gnome.desktop.interface icon-theme 'Zafiro-Icons-Dark'
+}

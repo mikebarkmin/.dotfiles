@@ -16,18 +16,22 @@ local goImports = function()
   }
 end
 
+local prettier = function()
+  return {
+    exe = [[ ./node_modules/.bin/prettier ]],
+    args = {
+      "--stdin-filepath",
+      vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))
+    },
+    stdin = true
+  }
+end
+
 require("formatter").setup(
   {
     filetype = {
       html = {
-        -- prettier
-        function()
-          return {
-            exe = "prettier",
-            args = {"--stdin-filepath", vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))},
-            stdin = true
-          }
-        end
+        prettier
       },
       tex = {
         -- prettier
@@ -39,114 +43,40 @@ require("formatter").setup(
         end
       },
       css = {
-        -- prettier
-        function()
-          return {
-            exe = "prettier",
-            args = {"--stdin-filepath", vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))},
-            stdin = true
-          }
-        end
+        prettier
       },
       json = {
-        -- prettier
-        function()
-          return {
-            exe = "prettier",
-            args = {"--stdin-filepath", vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))},
-            stdin = true
-          }
-        end
+        prettier
       },
       markdown = {
-        -- prettier
-        function()
-          return {
-            exe = "prettier",
-            args = {"--stdin-filepath", vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))},
-            stdin = true
-          }
-        end
+        prettier
       },
       javascript = {
-        -- prettier
-        function()
-          return {
-            exe = "prettier",
-            args = {"--stdin-filepath", vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))},
-            stdin = true
-          }
-        end
+        prettier
+      },
+      javascriptreact = {
+        prettier
       },
       java = {
-        -- prettier
-        function()
-          return {
-            exe = "prettier",
-            args = {"--stdin-filepath", vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))},
-            stdin = true
-          }
-        end
+        prettier
       },
       sh = {
-        -- prettier
-        function()
-          return {
-            exe = "prettier",
-            args = {"--stdin-filepath", vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))},
-            stdin = true
-          }
-        end
+        prettier
       },
       zsh = {
-        -- prettier
-        function()
-          return {
-            exe = "prettier",
-            args = {"--stdin-filepath", vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))},
-            stdin = true
-          }
-        end
+        prettier
       },
       bash = {
-        -- prettier
-        function()
-          return {
-            exe = "prettier",
-            args = {"--stdin-filepath", vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))},
-            stdin = true
-          }
-        end
+        prettier
       },
       sql = {
-        -- prettier
-        function()
-          return {
-            exe = "prettier",
-            args = {"--stdin-filepath", vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))},
-            stdin = true
-          }
-        end
+        prettier
       },
       typescript = {
-        -- prettier
-        function()
-          return {
-            exe = "prettier",
-            args = {"--stdin-filepath", vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))},
-            stdin = true
-          }
-        end
+        prettier
       },
       typescriptreact = {
-        -- prettier
-        function()
-          return {
-            exe = "prettier",
-            args = {"--stdin-filepath", vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))},
-            stdin = true
-          }
-        end
+        prettier
       },
       go = {
         goImports,

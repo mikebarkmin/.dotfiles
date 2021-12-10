@@ -1,0 +1,27 @@
+### Variables
+#
+# Logo key. Use Mod1 for Alt.
+set $mod Mod4
+# Home row direction keys, like vim
+set $left h
+set $down j
+set $up k
+set $right l
+# Your preferred terminal emulator
+set $term alacritty
+set $lock "swaylock -c 000000"
+set $bar waybar
+
+# set $menu ulauncher-toggle
+set $menu wofi --show drun
+
+output * bg /usr/share/backgrounds/default.png fill
+
+include bar
+include gtk_config
+include inputs
+include keybindings
+include lock
+include theme
+include windows
+include autostart

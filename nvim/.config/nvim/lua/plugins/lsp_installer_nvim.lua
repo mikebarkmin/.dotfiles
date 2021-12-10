@@ -47,6 +47,7 @@ local servers = {
     "eslint", -- for eslint
     "jdtls", -- for java
     "texlab", -- for latex
+    "ltex",
     "sqlls", -- for sql
     "pylsp", -- for python
 		"sumneko_lua", -- for lua

@@ -1,0 +1,10 @@
+input * {
+  xkb_layout de
+  xkb_variant nodeadkeys
+  xkb_options caps:escape
+}
+
+input type:touchpad {
+    tap enabled
+    natural_scroll enabled
+}

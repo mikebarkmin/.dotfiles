@@ -1,0 +1,4 @@
+bar {
+  swaybar_command $bar
+  workspace_buttons yes
+}

@@ -105,12 +105,6 @@ return require("packer").startup {
     }
 
     use {
-      "brymer-meneses/grammar-guard.nvim",
-      requires = "neovim/nvim-lspconfig",
-      config = [[ require('plugins/grammar_guard') ]]
-    }
-
-    use {
       "tpope/vim-eunuch"
     }
 

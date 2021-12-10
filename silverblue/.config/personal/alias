@@ -7,6 +7,10 @@ alias dotc="commitDotFiles"
 alias dotr=$DOTFILES/install-personal
 alias dote="pushd $HOME/.dotfiles && nvim && popd"
 alias ansc="commitAnsible"
+function bluejc() {
+  javac $1 -cp ".:./+libs"
+}
+
 function ansr() {
   pushd $ANSIBLEFILES
   ansible-galaxy install -r requirements.yml
