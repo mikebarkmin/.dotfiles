@@ -46,7 +46,7 @@
 @define-color cpu #596A8D;
 @define-color temp #4D5C78;
 @define-color layout #5e81ac;
-@define-color battery #88c0d0;
+@define-color battery #4D5C78;
 @define-color date #434C5E;
 @define-color time #434C5E;
 @define-color backlight #434C5E;
@@ -182,6 +182,11 @@
 #bluetooth {
     background: @nord_bg_blue;
     font-size: 1.2em;
+    font-weight: bold;
+    padding: 0 0.6em;
+}
+#custom-grimshot {
+    background: @nord_bg;
     font-weight: bold;
     padding: 0 0.6em;
 }

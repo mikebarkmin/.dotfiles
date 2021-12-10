@@ -1,3 +1,8 @@
 profile default {
-    output eDP-1 mode 1920x1080 position 0,0
+  output eDP-1 mode 1920x1080 position 0,0
+}
+
+profile bedroom {
+  output "BenQ Corporation BenQ RL2460H KCF01940SL0" mode 1920x1080 position 0,0
+  output eDP-1 mode 1920x1080 position 1921,500
 }

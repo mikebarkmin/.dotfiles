@@ -1,21 +1,28 @@
 {
     "layer": "top", // Waybar at top layer
     "position": "top", // Waybar position (top|bottom|left|right)
-    "modules-left": [ "clock", "sway/language", "custom/scratchpad-indicator", "sway/mode", "idle_inhibitor", "custom/media"],
+    "modules-left": [ "clock", "custom/scratchpad-indicator", "custom/grimshot", "sway/mode", "idle_inhibitor", "custom/media"],
     "modules-center": ["sway/workspaces"],
-    "modules-right": [ "cpu", "temperature", "pulseaudio", "bluetooth", "network", "tray"],
+    "modules-right": [ "cpu", "temperature", "battery", "backlight", "pulseaudio", "bluetooth", "network", "tray"],
     // Modules configuration
     "sway/workspaces": {
         "disable-scroll": true,
-        "all-outputs": true,
+        "all-outputs": false,
     },
     "sway/mode": {
-        "format": "<span style=\"italic\">{}</span>"
+        "format": "{}"
     },
     "sway/window": {
         "format": "{}",
         "max-length": 50,
         "tooltip": false
+    },
+    "backlight": {
+        "device": "intel_backlight",
+        "format": "{percent}% {icon}",
+        "format-icons": ["", ""],
+        "on-scroll-up": "light -A 10",
+        "on-scroll-down": "light -U 10"
     },
     "bluetooth": {
         "interval": 30,
@@ -25,12 +32,7 @@
             "enabled": "",
             "disabled": ""
         },
-        "on-click": "gnome-control-center bluetooth"
-    },
-    "sway/language": {
-        "format": "<big></big> {}",
-        "max-length": 5,
-        "min-length": 5,
+        "on-click": "blueberry"
     },
     "idle_inhibitor": {
         "format": "{icon}",
@@ -42,7 +44,7 @@
     },
     "tray": {
         //"icon-size": 11,
-        "spacing": 5
+        "spacing": 5,
     },
     "clock": {
         "format": "  {:%H:%M   %e %b}",
@@ -81,6 +83,13 @@
         "tooltip-format-wifi": "  {ifname} @ {essid}\nIP: {ipaddr}\nStrength: {signalStrength}%\nFreq: {frequency}MHz\n {bandwidthUpBits}  {bandwidthDownBits}",
         "tooltip-format-ethernet": " {ifname}\nIP: {ipaddr}\n {bandwidthUpBits}  {bandwidthDownBits}"
     },
+    "custom/grimshot": {
+        "format": "",
+        "tooltip": false,
+        "on-click": "$HOME/.local/dbin/grimshot --notify save output - | swappy -f -",
+        "on-click-middle": "$HOME/.local/dbin/grimshot --notify save window - | swappy -f -",
+        "on-click-right": "$HOME/.local/dbin/grimshot --notify save area - | swappy -f -"
+    },
     "pulseaudio": {
         "scroll-step": 3, // %, can be a float
         "format": "{icon} {volume}% {format_source}",
@@ -100,7 +109,19 @@
             "car": "",
             "default": ["", "", ""]
         },
-        "on-click": "gnome-control-center sound",
+        "on-click": "pavucontrol",
+    },
+    "battery": {
+        "states": {
+            "good": 80,
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{time} {icon}",
+        "format-charging": "{timeTo} ",
+        "format-plugged": "{capacity}% ",
+        "format-full": "",
+        "format-icons": ["", "", "", "", ""]
     },
     "custom/media": {
         "format": "{icon} {}",
@@ -111,6 +132,7 @@
             "default": "🎜"
         },
         "escape": true,
+        "on-click": "playerctl play-pause",
         "exec": "$HOME/.config/waybar/mediaplayer.py 2> /dev/null" // Script in resources folder
         // "exec": "$HOME/.config/waybar/mediaplayer.py --player spotify 2> /dev/null" // Filter player based on name
     },
@@ -118,8 +140,7 @@
         "interval": 3,
         "return-type": "json",
         "exec": "swaymsg -t get_tree | jq --unbuffered --compact-output '( select(.name == \"root\") | .nodes[] | select(.name == \"__i3\") | .nodes[] | select(.name == \"__i3_scratch\") | .focus) as $scratch_ids | [..  | (.nodes? + .floating_nodes?) // empty | .[] | select(.id |IN($scratch_ids[]))] as $scratch_nodes | { text: \"\\($scratch_nodes | length)\", tooltip: $scratch_nodes | map(\"\\(.app_id // .window_properties.class) (\\(.id)): \\(.name)\") | join(\"\\n\") }'",
-        "format": "{} 􏠜",
+        "format": "{}",
         "on-click": "exec swaymsg 'scratchpad show'",
-        "on-click-right": "exec swaymsg 'move scratchpad'"
     }
 }

@@ -12,8 +12,8 @@ set $term alacritty
 set $lock "swaylock -c 000000"
 set $bar waybar
 
-# set $menu ulauncher-toggle
-set $menu wofi --show drun
+set $menu ulauncher-toggle
+set $menu_bak wofi --show drun
 
 output * bg /usr/share/backgrounds/default.png fill
 

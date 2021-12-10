@@ -1,8 +1,10 @@
 exec export `gnome-keyring-daemon --start --components=ssh`
-exec export _JAVA_AWT_WM_NONREPARENTING=1
-exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
-exec export DISPLAY=:0
+exec /usr/libexec/xdg-desktop-portal -r
+exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK
+exec hash dbus-update-activation-environment 2>/dev/null && \
+     dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK
 
 exec lxpolkit
 exec mako
-exec ulauncher --hide-window 1 > ~/logs/ulauncher.log 2>&1
+exec kanshi
+exec /usr/bin/python3 /usr/bin/ulauncher --hide-window 1>> ~/ulauncher.log 2>&1
