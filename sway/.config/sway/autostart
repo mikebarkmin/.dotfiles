@@ -1,5 +1,3 @@
-# exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
-exec /usr/libexec/xdg-desktop-portal-gtk
 exec export `gnome-keyring-daemon --start --components=ssh`
 exec export _JAVA_AWT_WM_NONREPARENTING=1
 exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
