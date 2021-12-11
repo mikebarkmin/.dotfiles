@@ -1,4 +1,5 @@
-exec export `gnome-keyring-daemon --start --components=ssh`
+exec eval $(gnome-keyring-daemon --start)
+exec export SSH_AUTH_SOCK
 exec /usr/libexec/xdg-desktop-portal -r
 exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK
 exec hash dbus-update-activation-environment 2>/dev/null && \

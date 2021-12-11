@@ -1,7 +1,7 @@
 {
     "layer": "top", // Waybar at top layer
     "position": "top", // Waybar position (top|bottom|left|right)
-    "modules-left": [ "clock", "custom/scratchpad-indicator", "custom/grimshot", "sway/mode", "idle_inhibitor", "custom/media"],
+    "modules-left": [ "clock", "custom/scratchpad-indicator", "sway/mode", "idle_inhibitor", "custom/media"],
     "modules-center": ["sway/workspaces"],
     "modules-right": [ "cpu", "temperature", "battery", "backlight", "pulseaudio", "bluetooth", "network", "tray"],
     // Modules configuration
@@ -45,6 +45,7 @@
     "tray": {
         //"icon-size": 11,
         "spacing": 5,
+        "show-passive-items": true
     },
     "clock": {
         "format": "  {:%H:%M   %e %b}",
@@ -82,13 +83,6 @@
         "on-click": "gnome-control-center wifi",
         "tooltip-format-wifi": "  {ifname} @ {essid}\nIP: {ipaddr}\nStrength: {signalStrength}%\nFreq: {frequency}MHz\n {bandwidthUpBits}  {bandwidthDownBits}",
         "tooltip-format-ethernet": " {ifname}\nIP: {ipaddr}\n {bandwidthUpBits}  {bandwidthDownBits}"
-    },
-    "custom/grimshot": {
-        "format": "",
-        "tooltip": false,
-        "on-click": "$HOME/.local/dbin/grimshot --notify save output - | swappy -f -",
-        "on-click-middle": "$HOME/.local/dbin/grimshot --notify save window - | swappy -f -",
-        "on-click-right": "$HOME/.local/dbin/grimshot --notify save area - | swappy -f -"
     },
     "pulseaudio": {
         "scroll-step": 3, // %, can be a float
