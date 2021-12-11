@@ -76,6 +76,7 @@ TOOLBOX_DEFAULT_IMAGE="ghcr.io/mikebarkmin/fedora-toolbox:35-dev"
 TOOLBOX_DEFAULT_CONTAINER=$(hostname)
 ZSH_TMUX_AUTOSTART=false
 plugins=(
+  ssh-agent
 	git
 	toolbox
   tmux
