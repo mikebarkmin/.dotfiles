@@ -32,8 +32,9 @@
 /*@define-color bg #353C4A;*/
 @define-color light #D8DEE9;
 /*@define-color dark @nord_dark_font;*/
-@define-color warning #ebcb8b;
-@define-color critical #BF616A;
+@define-color warning #ebcb8b; /* yellow */
+@define-color critical #BF616A; /* red */
+@define-color success #a3be8c; /* green */
 @define-color mode #434C5E;
 /*@define-color workspaces @bg;*/
 /*@define-color workspaces @nord_dark_font;*/
@@ -97,6 +98,7 @@
 
 /* Each module that should blink */
 #mode,
+#custom-recorder,
 #memory,
 #temperature,
 #battery {
@@ -117,6 +119,7 @@
 #mode,
 #memory.critical,
 #temperature.critical,
+#custom-recorder.on,
 #battery.critical.discharging {
     animation-name: blink-critical;
     animation-duration: 2s;
@@ -185,7 +188,28 @@
     font-weight: bold;
     padding: 0 0.6em;
 }
+#custom-recorder {
+    background: @nord_bg;
+    font-weight: bold;
+    padding: 0 0.6em;
+}
+#custom-recorder.on {
+    background: @nord_bg;
+    font-weight: bold;
+    padding: 0 0.6em;
+}
 #custom-grimshot {
+    background: @nord_bg;
+    font-weight: bold;
+    padding: 0 0.6em;
+}
+#custom-mako.off {
+    background: @success;
+    color: @nord_dark_font;
+    font-weight: bold;
+    padding: 0 0.6em;
+}
+#custom-mako.on {
     background: @nord_bg;
     font-weight: bold;
     padding: 0 0.6em;

@@ -1,9 +1,9 @@
 exec eval $(gnome-keyring-daemon --start)
 exec export SSH_AUTH_SOCK
-exec /usr/libexec/xdg-desktop-portal -r
 exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK
 exec hash dbus-update-activation-environment 2>/dev/null && \
-     dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK
+     dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP=sway
+exec /usr/libexec/xdg-desktop-portal -r
 
 exec lxpolkit
 exec mako
