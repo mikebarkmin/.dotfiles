@@ -18,7 +18,7 @@ end
 
 local prettier = function()
   return {
-    exe = [[ ./node_modules/.bin/prettier ]],
+    exe = [[ prettier ]],
     args = {
       "--stdin-filepath",
       vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))

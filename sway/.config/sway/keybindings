@@ -11,6 +11,9 @@
     bindsym $mod+d exec $menu
     bindsym $mod+Shift+d exec $menu_bak
 
+    # Map Wacom Tablet
+    bindsym $mod+Shift+w exec swaymsg input type:tablet_tool map_to_output `swaymsg -t get_outputs | jq -r '.[] | select(.focused == true) | .name'`
+
     # Lock screen
     bindsym $mod+Escape exec $lock
 
@@ -158,8 +161,3 @@ bindsym $mod+r mode "resize"
 #
 # Screenshot
 #
-
-bindsym Print exec $grimshot --notify save screen
-bindsym Ctrl+Print exec $grimshot --notify copy screen
-bindsym Shift+Print exec $grimshot --notify save area
-bindsym Ctrl+Shift+Print exec $grimshot --notify copy area

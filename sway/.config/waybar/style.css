@@ -69,8 +69,8 @@
 #waybar {
     background: @bg;
     color: @light;
-    font-family: "Cantarell", "FontAwesome";
-    font-size: 12px;
+    font-family: "Ubuntu", "Font Awesome 6 Free";
+    font-size: 10px;
     font-weight: bold;
 }
 

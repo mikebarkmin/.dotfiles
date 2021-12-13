@@ -123,7 +123,7 @@
         "max-length": 40,
         "format-icons": {
             "spotify": "",
-            "default": "🎜"
+            "default": "ﱘ"
         },
         "escape": true,
         "on-click": "playerctl play-pause",
@@ -150,7 +150,9 @@
           "off": ""
         },
         "exec": "$HOME/.config/waybar/wf-recorder-status.sh",
-        "on-click": "$HOME/.config/waybar/toggle-wf-recorder.sh"
+        "on-click": "$HOME/.config/waybar/toggle-wf-recorder.sh",
+        "on-click-right": "$HOME/.config/waybar/toggle-wf-recorder.sh -w",
+        "on-click-middle": "$HOME/.config/waybar/toggle-wf-recorder.sh -s"
     },
     "custom/scratchpad-indicator": {
         "interval": 3,
