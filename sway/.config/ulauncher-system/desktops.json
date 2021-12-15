@@ -1,0 +1,5 @@
+{
+  "sway": {
+      "env": "SWAYSOCK"
+  }
+}

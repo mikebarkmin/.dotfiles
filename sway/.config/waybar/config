@@ -1,9 +1,9 @@
 {
-    "layer": "top", // Waybar at top layer
+    "layer": "bottom", // Waybar at top layer
     "position": "top", // Waybar position (top|bottom|left|right)
-    "modules-left": [ "clock", "custom/scratchpad-indicator", "sway/mode", "idle_inhibitor", "custom/recorder", "custom/mako", "custom/media"],
+    "modules-left": [ "clock", "custom/scratchpad-indicator", "sway/mode", "idle_inhibitor", "custom/recorder", "custom/screenshot", "custom/mako", "custom/media"],
     "modules-center": ["sway/workspaces"],
-    "modules-right": [ "cpu", "temperature", "battery", "backlight", "pulseaudio", "bluetooth", "network", "tray"],
+    "modules-right": [ "cpu", "temperature", "battery", "backlight", "pulseaudio", "bluetooth", "tray"],
     // Modules configuration
     "sway/workspaces": {
         "disable-scroll": true,
@@ -112,7 +112,7 @@
             "critical": 15
         },
         "format": "{time} {icon}",
-        "format-charging": "{timeTo} ",
+        "format-charging": "{time} ",
         "format-plugged": "{capacity}% ",
         "format-full": "",
         "format-icons": ["", "", "", "", ""]
@@ -140,6 +140,12 @@
         "interval": 1,
         "exec": "$HOME/.config/waybar/mako-status.sh",
         "on-click": "$HOME/.config/waybar/toggle-mako.sh"
+    },
+    "custom/screenshot": {
+        "format": "",
+        "on-click": "grimshot save output",
+        "on-click-right": "grimshot save window",
+        "on-click-middle": "grimshot save area"
     },
     "custom/recorder": {
         "format": "{icon}",

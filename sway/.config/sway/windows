@@ -1,2 +1,6 @@
 for_window [app_id="ulauncher"] floating enable, border none
 for_window [title="\ -\ Sharing\ Indicator$"] floating enable, sticky enable
+for_window [class="bluej.Boot\$App"] floating enable
+for_window [class="bluej.Boot\$App" title="BlueJ"] floating disable
+for_window [class="bluej.Boot\$App" title="Greenfoot"] floating disable
+for_window [instance="sun-awt-X11-XWindowPeer"] focus

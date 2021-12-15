@@ -1,0 +1,35 @@
+{
+    "lock": {
+        "name": "Lock",
+        "command": "swaylock",
+        "icon": "system-lock-screen"
+    },
+    "log-out": {
+        "name": "Log out",
+        "icon": "system-log-out",
+        "command": "swaymsg exit"
+    },
+    "suspend": {
+        "name": "Suspend",
+        "description": "Suspend to memory.",
+        "icon": "system-suspend",
+        "aliases": ["suspend", "sleep"],
+        "command": "systemctl suspend -i"
+    },
+    "restart": {
+        "name": "Restart",
+        "description": "Restart the machine.",
+        "icon": "system-reboot",
+        "aliases": ["restart", "reboot"],
+        "command": "systemctl reboot -i"
+    },
+    "hibernate": null,
+    "bios": null,
+    "shutdown": {
+        "name": "Shut down",
+        "description": "Shut down the machine.",
+        "icon": "system-shutdown",
+        "aliases": ["shut down", "shutdown", "poweroff", "halt"],
+        "command": "systemctl poweroff -i"
+    }
+}
