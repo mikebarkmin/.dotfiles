@@ -1,6 +1,15 @@
 for_window [app_id="ulauncher"] floating enable, border none
-for_window [title="\ -\ Sharing\ Indicator$"] floating enable, sticky enable
+
 for_window [class="bluej.Boot\$App"] floating enable
 for_window [class="bluej.Boot\$App" title="BlueJ"] floating disable
 for_window [class="bluej.Boot\$App" title="Greenfoot"] floating disable
+
 for_window [instance="sun-awt-X11-XWindowPeer"] focus
+
+for_window [app_id="firefox"]                                   floating enable
+for_window [app_id="firefox" title="\ -\ Sharing\ Indicator$"] floating enable, sticky enable
+for_window [app_id="firefox" title="— Firefox"]                floating disable
+for_window [app_id="firefox" title="^Firefox"]                  floating disable
+
+for_window [app_id="thunderbird"]                                   floating enable
+for_window [app_id="thunderbird" title="- Mozilla Thunderbird$"]    floating disable

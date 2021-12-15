@@ -10,5 +10,6 @@ exec lxpolkit
 exec mako
 exec kanshi
 exec /usr/bin/python3 /usr/bin/ulauncher --hide-window 1>> ~/ulauncher.log 2>&1
-exec ~/Applications/ownCloud-2.9.2.6206.AppImage
 exec nm-applet --indicator
+
+exec flatpak run md.osidian.Obsidian

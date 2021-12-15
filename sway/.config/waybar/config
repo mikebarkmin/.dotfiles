@@ -6,8 +6,24 @@
     "modules-right": [ "cpu", "temperature", "battery", "backlight", "pulseaudio", "bluetooth", "tray"],
     // Modules configuration
     "sway/workspaces": {
+        "format": "{icon}",
         "disable-scroll": true,
         "all-outputs": false,
+        "format-icons": {
+          "1": "",
+          "2": "",
+          "3": "",
+          "4": "",
+          "5": "",
+          "6": "",
+          "7": "",
+          "8": "",
+          "9": "",
+          "10": "",
+          "urgent": "",
+          "active": "",
+          "default": ""
+        }
     },
     "sway/mode": {
         "format": "{}"
@@ -55,7 +71,7 @@
     },
     "cpu": {
         "interval": "1",
-        "format": "  {max_frequency}GHz <span color=\"darkgray\">| {usage}%</span>",
+        "format": "  {max_frequency}GHz <span color=\"darkgray\">| {usage}%</span>",
         "max-length": 13,
         "min-length": 13,
         "on-click": "gnome-system-monitor",
@@ -118,13 +134,9 @@
         "format-icons": ["", "", "", "", ""]
     },
     "custom/media": {
-        "format": "{icon} {}",
+        "format": "{}",
         "return-type": "json",
         "max-length": 40,
-        "format-icons": {
-            "spotify": "",
-            "default": "ﱘ"
-        },
         "escape": true,
         "on-click": "playerctl play-pause",
         "exec": "$HOME/.config/waybar/mediaplayer.py 2> /dev/null" // Script in resources folder

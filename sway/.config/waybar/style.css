@@ -156,19 +156,17 @@
 }
 
 #workspaces button {
-    font-weight: bold; /* Somewhy the bar-wide setting is ignored*/
-    padding: 0;
     /*color: #999;*/
     opacity: 0.3;
+    padding: 0.2em;
     background: none;
-    font-size: 1em;
+    font-size: 1.2em;
 }
 
 #workspaces button.focused {
     background: @workspacesfocused;
     color: #D8DEE9;
     opacity: 1;
-    padding: 0 0.4em;
 }
 
 #workspaces button.urgent {
