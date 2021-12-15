@@ -68,14 +68,15 @@
     set $ws9 9
     set $ws10 10
 
-    workspace_layout tabbed
     assign [class="bluej.Boot\$App"] $ws2
     for_window [class="bluej.Boot\$App"] move window to workspace $ws2
+    assign [class="Zotero"] $ws3
+    for_window [class="Zotero"] move window to workspace $ws3
+    assign [class="obsidian"] $ws4
     assign [class="discord"] $ws5
     for_window [class="discord"] move window to workspace $ws5
     assign [class="Microsoft Teams"] $ws5
     assign [app_id="evolution.bin"] $ws5
-    assign [class="obsidian"] $ws4
     assign [class="Spotify"] $ws6
     for_window [class="Spotify"] move window to workspace $ws6
     assign [class="Gimp"] $ws7
