@@ -8,6 +8,6 @@ profile bedroom {
 }
 
 profile livingroom {
-  output "BenQ Corporation BenQ BL2405 H4H02869SL0" mode 1920x1080 positon 0,0
+  output "BenQ Corporation BenQ BL2405 H4H02869SL0" mode 1920x1080 position 0,0
   output eDP-1 mode 1920x1080 position 1920,0
 }
