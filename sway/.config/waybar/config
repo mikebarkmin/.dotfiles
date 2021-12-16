@@ -155,9 +155,9 @@
     },
     "custom/screenshot": {
         "format": "",
-        "on-click": "grimshot save output",
-        "on-click-right": "grimshot save window",
-        "on-click-middle": "grimshot save area"
+        "on-click": "grimshot --notify save output",
+        "on-click-right": "grimshot --notify save window",
+        "on-click-middle": "grimshot --notify save area"
     },
     "custom/recorder": {
         "format": "{icon}",
@@ -167,6 +167,7 @@
           "on": "",
           "off": ""
         },
+        "tooltip": true,
         "exec": "$HOME/.config/waybar/wf-recorder-status.sh",
         "on-click": "$HOME/.config/waybar/toggle-wf-recorder.sh",
         "on-click-right": "$HOME/.config/waybar/toggle-wf-recorder.sh -w",
