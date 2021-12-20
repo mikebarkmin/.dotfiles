@@ -1,6 +1,6 @@
 for_window [app_id="ulauncher"] floating enable, border none
 
-for_window [class="bluej.Boot\$App"] floating enable
+# for_window [class="bluej.Boot\$App"] floating enable
 for_window [class="bluej.Boot\$App" title="BlueJ"] floating disable
 for_window [class="bluej.Boot\$App" title="Greenfoot"] floating disable
 
@@ -13,3 +13,12 @@ for_window [app_id="firefox" title="^Firefox"]                  floating disable
 
 for_window [app_id="thunderbird"]                                   floating enable
 for_window [app_id="thunderbird" title="- Mozilla Thunderbird$"]    floating disable
+
+## Zoom
+# For pop up notification windows that don't use notifications api
+for_window [app_id="zoom" title="^zoom$"] border none, floating enable
+# For specific Zoom windows
+for_window [app_id="zoom" title="^(Zoom|About)$"] border pixel, floating enable
+for_window [app_id="zoom" title="Settings"] floating enable, floating_minimum_size 960 x 700
+# Open Zoom Meeting windows on a new workspace (a bit hacky)
+for_window [app_id="zoom" title="Zoom Meeting(.*)?"] floating disable, inhibit_idle open

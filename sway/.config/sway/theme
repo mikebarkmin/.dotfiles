@@ -1,5 +1,5 @@
-default_border pixel 1
-titlebar_border_thickness 1
+# default_border pixel 1
+# titlebar_border_thickness 1
 gaps outer 5
 gaps inner 5
 

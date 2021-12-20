@@ -1,9 +1,6 @@
 exec /usr/bin/gnome-keyring-daemon --components=ssh,secrets,pkcs11 --start; /usr/bin/systemctl --user import-environment SSH_AUTH_SOCK;
-exec systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK
 exec hash dbus-update-activation-environment 2>/dev/null && \
      dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP=sway
-exec /usr/libexec/xdg-desktop-portal-gtk -r
-exec /usr/libexec/xdg-desktop-portal-wlr -r
 exec "sh -c 'sleep 5;exec /usr/libexec/xdg-desktop-portal -r'"
 
 exec lxpolkit

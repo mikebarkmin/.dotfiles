@@ -56,3 +56,5 @@ commitAnsible() {
     git push origin main
     popd
 }
+
+export WORKSPACE=$HOME/Sources
