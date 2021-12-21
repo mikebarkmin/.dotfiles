@@ -58,3 +58,4 @@ commitAnsible() {
 }
 
 export WORKSPACE=$HOME/Sources
+export BIBINPUTS=$HOME/Sciebo/Zotero.bib

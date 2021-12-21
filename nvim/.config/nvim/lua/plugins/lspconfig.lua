@@ -17,6 +17,9 @@ require('lspconfig').texlab.setup {
     texlab = {
       auxDirectory = "build/pdf",
       rootDirectory = ".",
+      chktex = {
+        onEdit = true
+      },
       build = {
         executable = "latexmk",
         forwardSearchAfter = false,
