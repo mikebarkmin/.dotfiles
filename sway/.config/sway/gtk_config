@@ -1,5 +1,5 @@
 exec_always {
   gsettings set org.gnome.desktop.interface gtk-theme "Nordic-darker"
-  gsettings set org.gnome.desktop.wm.preferences theme "Nodic-daker"
+  gsettings set org.gnome.desktop.wm.preferences theme "Nodic-darker"
   gsettings set org.gnome.desktop.interface icon-theme "Zafiro-Icons-Dark"
 }
