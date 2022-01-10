@@ -95,6 +95,10 @@ cmd([[au BufEnter * set fo-=c fo-=r fo-=o]])
 -- completion options
 set.completeopt = 'menuone,noselect,noinsert'
 
+cmd(
+ [[ autocmd BufNewFile,BufRead *.mdx set filetype=markdown ]]
+)
+
 -- 2 spaces for selected filetypes
 cmd(
     [[ autocmd FileType xml,html,xhtml,css,scssjavascript,lua,dart setlocal shiftwidth=2 tabstop=2 ]])

@@ -29,22 +29,9 @@ end
 ---------------------------------------------------
 
 ---------------------------------------------------
-local function install_server(server)
-    local lsp_installer_servers = require 'nvim-lsp-installer.servers'
-    local ok, server_analyzer = lsp_installer_servers.get_server(server)
-    if ok then
-        if not server_analyzer:is_installed() then
-            server_analyzer:install(server)
-        end
-    end
-end
----------------------------------------------------
-
----------------------------------------------------
 local servers = {
     "tsserver", -- for javascript
     "jsonls", -- for json
-    "eslint", -- for eslint
     "jdtls", -- for java
     "texlab", -- for latex
     "ltex",
@@ -52,6 +39,9 @@ local servers = {
     "pylsp", -- for python
 		"sumneko_lua", -- for lua
     "gopls", -- for go
+    "yamlls",
+    "bashls",
+    "dockerls"
 }
 
 -- setup the LS
@@ -59,4 +49,12 @@ require "plugins.lspconfig"
 make_server_ready(On_attach) -- LSP mappings
 
 -- install the LS
-for _, server in ipairs(servers) do install_server(server) end
+for _, name in pairs(servers) do
+  local server_is_found, server = lsp_installer.get_server(name)
+  if server_is_found then
+    if not server:is_installed() then
+      print("Installing " .. name)
+      server:install()
+    end
+  end
+end

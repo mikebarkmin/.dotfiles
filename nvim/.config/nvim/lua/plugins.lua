@@ -19,7 +19,10 @@ return require("packer").startup {
 
     use {
       "williamboman/nvim-lsp-installer",
-      config = [[ require('plugins/lsp_installer_nvim') ]]
+      config = [[ require('plugins/lsp_installer_nvim') ]],
+      requires = {
+        "neovim/nvim-lspconfig"
+      }
     }
 
     use {
@@ -61,7 +64,6 @@ return require("packer").startup {
 
     use {
       "nvim-telescope/telescope.nvim",
-      commit = "80cdb00b221f69348afc4fb4b701f51eb8dd3120",
       requires = {
         "nvim-lua/plenary.nvim",
         "BurntSushi/ripgrep"
@@ -92,12 +94,6 @@ return require("packer").startup {
         "p00f/nvim-ts-rainbow",
       },
       config = [[ require('plugins/treesitter') ]]
-    }
-
-    use {
-      -- A super powerful autopairs for Neovim. It support multiple character.
-      "windwp/nvim-autopairs",
-      config = [[ require('plugins/autopairs') ]]
     }
 
     use {

@@ -1,1 +1,7 @@
-require'nvim-tree'.setup {}
+require "nvim-tree".setup {
+  git = {
+    enable = true,
+    ignore = false,
+    timeout = 500
+  }
+}
