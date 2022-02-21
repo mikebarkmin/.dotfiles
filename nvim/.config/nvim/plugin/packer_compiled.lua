@@ -246,34 +246,14 @@ _G.packer_plugins = {
 }
 
 time([[Defining packer_plugins]], false)
--- Config for: nvim-lsp-installer
-time([[Config for nvim-lsp-installer]], true)
- require('plugins/lsp_installer_nvim') 
-time([[Config for nvim-lsp-installer]], false)
--- Config for: lspkind-nvim
-time([[Config for lspkind-nvim]], true)
- require('plugins/lspkind') 
-time([[Config for lspkind-nvim]], false)
--- Config for: formatter.nvim
-time([[Config for formatter.nvim]], true)
- require('plugins/formatter') 
-time([[Config for formatter.nvim]], false)
--- Config for: nvim-lspconfig
-time([[Config for nvim-lspconfig]], true)
- require('plugins/lspconfig') 
-time([[Config for nvim-lspconfig]], false)
--- Config for: lualine.nvim
-time([[Config for lualine.nvim]], true)
- require('plugins/lualine') 
-time([[Config for lualine.nvim]], false)
--- Config for: nvim-cmp
-time([[Config for nvim-cmp]], true)
- require('plugins/cmp') 
-time([[Config for nvim-cmp]], false)
 -- Config for: nvim-tree.lua
 time([[Config for nvim-tree.lua]], true)
  require('plugins/nvim-tree') 
 time([[Config for nvim-tree.lua]], false)
+-- Config for: zen-mode.nvim
+time([[Config for zen-mode.nvim]], true)
+ require('plugins/zen-mode') 
+time([[Config for zen-mode.nvim]], false)
 -- Config for: neogit
 time([[Config for neogit]], true)
  require('plugins/neogit') 
@@ -282,26 +262,46 @@ time([[Config for neogit]], false)
 time([[Config for git-worktree.nvim]], true)
  require('plugins/git-worktree') 
 time([[Config for git-worktree.nvim]], false)
--- Config for: zen-mode.nvim
-time([[Config for zen-mode.nvim]], true)
- require('plugins/zen-mode') 
-time([[Config for zen-mode.nvim]], false)
--- Config for: nvim-treesitter
-time([[Config for nvim-treesitter]], true)
- require('plugins/treesitter') 
-time([[Config for nvim-treesitter]], false)
 -- Config for: indent-blankline.nvim
 time([[Config for indent-blankline.nvim]], true)
  require('plugins/blankline') 
 time([[Config for indent-blankline.nvim]], false)
+-- Config for: formatter.nvim
+time([[Config for formatter.nvim]], true)
+ require('plugins/formatter') 
+time([[Config for formatter.nvim]], false)
+-- Config for: nvim-cmp
+time([[Config for nvim-cmp]], true)
+ require('plugins/cmp') 
+time([[Config for nvim-cmp]], false)
+-- Config for: nvim-treesitter
+time([[Config for nvim-treesitter]], true)
+ require('plugins/treesitter') 
+time([[Config for nvim-treesitter]], false)
+-- Config for: nvim-lsp-installer
+time([[Config for nvim-lsp-installer]], true)
+ require('plugins/lsp_installer_nvim') 
+time([[Config for nvim-lsp-installer]], false)
 -- Config for: telescope.nvim
 time([[Config for telescope.nvim]], true)
  require('plugins/telescope') 
 time([[Config for telescope.nvim]], false)
+-- Config for: lspkind-nvim
+time([[Config for lspkind-nvim]], true)
+ require('plugins/lspkind') 
+time([[Config for lspkind-nvim]], false)
+-- Config for: nvim-lspconfig
+time([[Config for nvim-lspconfig]], true)
+ require('plugins/lspconfig') 
+time([[Config for nvim-lspconfig]], false)
 -- Config for: LuaSnip
 time([[Config for LuaSnip]], true)
  require('plugins/luasnip') 
 time([[Config for LuaSnip]], false)
+-- Config for: lualine.nvim
+time([[Config for lualine.nvim]], true)
+ require('plugins/lualine') 
+time([[Config for lualine.nvim]], false)
 if should_profile then save_profiles() end
 
 end)

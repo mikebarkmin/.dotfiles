@@ -7,6 +7,7 @@ alias dotc="commitDotFiles"
 alias dotr=$DOTFILES/install-personal
 alias dote="pushd $HOME/.dotfiles && nvim && popd"
 alias ansc="commitAnsible"
+alias gcn="git commit -m \"Updated: `date +'%Y-%m-%d %H:%M:%S'`\""
 function bluejc() {
   javac $1 -cp ".:./+libs"
 }

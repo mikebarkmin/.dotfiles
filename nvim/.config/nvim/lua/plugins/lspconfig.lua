@@ -32,7 +32,7 @@ require('lspconfig').texlab.setup {
 require("lspconfig").ltex.setup({
 	settings = {
 		ltex = {
-			enabled = { "latex", "tex", "bib", "markdown" },
+			enabled = { "latex", "tex", "bib", "markdown", "text", "txt" },
 			diagnosticSeverity = "information",
 			setenceCacheSize = 2000,
 			additionalRules = {
