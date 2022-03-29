@@ -1,9 +1,10 @@
 -- Only required if you have packer configured as `opt`
 vim.cmd [[packadd packer.nvim]]
 local fn = vim.fn
-local install_path = fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
+local install_path = fn.stdpath("data") .. "/site/pack/packer/start/packer.nvim"
 if fn.empty(fn.glob(install_path)) > 0 then
-  packer_bootstrap = fn.system({'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path})
+  packer_bootstrap =
+    fn.system({"git", "clone", "--depth", "1", "https://github.com/wbthomason/packer.nvim", install_path})
 end
 
 return require("packer").startup {
@@ -30,6 +31,7 @@ return require("packer").startup {
       "onsails/lspkind-nvim",
       config = [[ require('plugins/lspkind') ]]
     }
+     --
 
     --[=[
     use {
@@ -37,7 +39,7 @@ return require("packer").startup {
       "nvim-lua/lsp-status.nvim",
       config = [[ require('plugins/lspstatus') ]]
     }
-    ]=]--
+    ]=]
 
     use {
       -- A completion plugin for neovim coded in Lua.
@@ -72,6 +74,16 @@ return require("packer").startup {
     }
 
     use {
+      "nvim-telescope/telescope-bibtex.nvim",
+      requires = {
+        {"nvim-telescope/telescope.nvim"}
+      },
+      config = function()
+        require "telescope".load_extension("bibtex")
+      end
+    }
+
+    use {
       -- Snippet Engine for Neovim written in Lua.
       "L3MON4D3/LuaSnip",
       requires = {
@@ -91,7 +103,7 @@ return require("packer").startup {
       run = ":TSUpdate",
       requires = {
         "windwp/nvim-ts-autotag",
-        "p00f/nvim-ts-rainbow",
+        "p00f/nvim-ts-rainbow"
       },
       config = [[ require('plugins/treesitter') ]]
     }
@@ -140,6 +152,10 @@ return require("packer").startup {
 
     use {
       "kmonad/kmonad-vim"
+    }
+
+    use {
+      "tpope/vim-obsession"
     }
 
     if packer_bootstrap then

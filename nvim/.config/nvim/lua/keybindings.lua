@@ -24,6 +24,7 @@ map("n", "<leader>j", ":m .+1<CR>==")
 map("n", "<Leader>ff", "<cmd>Telescope find_files<cr>")
 map("n", "<Leader>fg", "<cmd>Telescope live_grep<cr>")
 map("n", "<Leader>fb", "<cmd>Telescope buffers<cr>")
+map("n", "<Leader>fr", "<cmd>Telescope bibtex<cr>")
 
 --- quicklist
 map("n", "<leader>qn", "<cmd>:cnext<cr>")

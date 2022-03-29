@@ -18,8 +18,10 @@ end
 
 local prettier = function()
   return {
-    exe = [[ prettier ]],
+    exe = "prettier",
     args = {
+      "--config-precendece",
+      "prefer-file",
       "--stdin-filepath",
       vim.fn.fnameescape(vim.api.nvim_buf_get_name(0))
     },
