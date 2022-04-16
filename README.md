@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-My `dotiles` are managed by `stow`. So you need that before continuing. You also need `git-crypt` for the private
+My `dotfiles` are managed by `stow`. So you need that before continuing. You also need `git-crypt` for the private
 `personal` and `work` submodule. These contain information not for the public eyes. You can take a look at the `demo`
 submodule to get an idea how these work.
 
