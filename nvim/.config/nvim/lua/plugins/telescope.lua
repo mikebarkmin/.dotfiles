@@ -54,6 +54,9 @@ require("telescope").setup {
         {path = "~/Sources", max_depth = 2}
       },
       hidden_files = true
+    },
+    bibtex = {
+      format = 'plain'
     }
   }
 }
