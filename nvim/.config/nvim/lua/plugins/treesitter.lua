@@ -2,6 +2,8 @@ require "nvim-treesitter.configs".setup {
   indent = {
     enable = true
   },
+  ensure_installed = "all",
+  auto_install = true,
   highlight = {
     enable = true, -- enable = true (false will disable the whole extension)
     -- disable = { "c", "rust" },  -- list of language that will be disabled

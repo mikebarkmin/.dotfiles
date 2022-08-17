@@ -84,6 +84,14 @@ require("formatter").setup(
         goImports,
         goFmt
       },
+      terraform = {
+        function()
+          return {
+            exe = "terraform fmt",
+            stdin = true
+          }
+        end
+      },
       lua = {
         -- luafmt
         function()

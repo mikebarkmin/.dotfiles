@@ -158,6 +158,10 @@ return require("packer").startup {
       "tpope/vim-obsession"
     }
 
+    use {
+      "lambdalisue/suda.vim"
+    }
+
     if packer_bootstrap then
       require("packer").sync()
     end
