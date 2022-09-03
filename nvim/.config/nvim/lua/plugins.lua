@@ -94,7 +94,11 @@ return require("packer").startup {
 
     use {
       --  colorscheme for (neo)vim
-      "shaunsingh/nord.nvim"
+      "folke/tokyonight.nvim"
+    }
+
+    use {
+      "vimpostor/vim-lumen"
     }
 
     use {
