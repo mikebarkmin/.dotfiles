@@ -2,3 +2,5 @@
 dconf write /org/gnome/terminal/legacy/profiles:/:043582b8-e1a5-4824-996f-b6f13792f297/background-color "'#1a1b26'"
 dconf write /org/gnome/terminal/legacy/profiles:/:043582b8-e1a5-4824-996f-b6f13792f297/foreground-color "'#c0caf5'"
 dconf write /org/gnome/terminal/legacy/theme-variant "'dark'"
+
+tmux source-file ~/.tmux_tokyonight_night.tmux
