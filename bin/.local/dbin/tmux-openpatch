@@ -10,17 +10,16 @@ do
   window=1
   tmux rename-window -t $project:$window "nvim"
   tmux send-keys -t $project:$window "cd ${path}" C-m
-  tmux send-keys -t $project:$window "vim" C-m
+  tmux send-keys -t $project:$window "tbe" C-m
 
   window=2
   tmux new-window -t $project:$window -n "server"
   tmux send-keys -t $project:$window "cd ${path}" C-m
-  tmux send-keys -t $project:$window "pnpm dev" C-m
+  tmux send-keys -t $project:$window "tbe" C-m
 
   window=3
   tmux new-window -t $project:$window -n "git"
   tmux send-keys -t $project:$window "cd ${path}" C-m
   tmux send-keys -t $project:$window "git pull" C-m
+  tmux send-keys -t $project:$window "tbe" C-m
 done
-
-tmux attach-session -t ${projects[0]}:1
