@@ -23,5 +23,5 @@ then
 fi
 
 if [ -z "$TMUX" ] && [ ! -f /run/.containerenv ] && [ ! -f /run/.toolboxenv ]; then
-  tmux new -A -s default
+  tmux
 fi
