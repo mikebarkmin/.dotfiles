@@ -1,18 +1,30 @@
 -- options for lsp diagnostic
-vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
-  vim.lsp.diagnostic.on_publish_diagnostics, {
+vim.lsp.handlers["textDocument/publishDiagnostics"] =
+  vim.lsp.with(
+  vim.lsp.diagnostic.on_publish_diagnostics,
+  {
     underline = true,
     signs = true,
     update_in_insert = true,
     virtual_text = {
-        true,
-        spacing = 6,
-        --severity_limit='Error'  -- Only show virtual text on error
-    },
+      true,
+      spacing = 6
+      --severity_limit='Error'  -- Only show virtual text on error
+    }
   }
 )
 
-require('lspconfig').texlab.setup {
+require("lspconfig").sumneko_lua.setup {
+  settings = {
+    Lua = {
+      diagnostics = {
+        globals = {"vim"}
+      }
+    }
+  }
+}
+
+require("lspconfig").texlab.setup {
   settings = {
     texlab = {
       auxDirectory = "build/pdf",
@@ -29,23 +41,25 @@ require('lspconfig').texlab.setup {
   }
 }
 
-require("lspconfig").ltex.setup({
-	settings = {
-		ltex = {
-			enabled = { "latex", "tex", "bib", "markdown", "text", "txt" },
-			diagnosticSeverity = "information",
-			setenceCacheSize = 2000,
-			additionalRules = {
-				enablePickyRules = true,
-				motherTongue = "de",
-			},
-			trace = { server = "verbose" },
-			dictionary = {},
-			disabledRules = {},
-			hiddenFalsePositives = {},
-		},
-	},
-})
+require("lspconfig").ltex.setup(
+  {
+    settings = {
+      ltex = {
+        enabled = {"latex", "tex", "bib", "markdown", "text", "txt"},
+        diagnosticSeverity = "information",
+        setenceCacheSize = 2000,
+        additionalRules = {
+          enablePickyRules = true,
+          motherTongue = "de"
+        },
+        trace = {server = "verbose"},
+        dictionary = {},
+        disabledRules = {},
+        hiddenFalsePositives = {}
+      }
+    }
+  }
+)
 
 -- se LSP diagnostic symbols/signs
 vim.api.nvim_command [[ sign define LspDiagnosticsSignError         text=✗ texthl=LspDiagnosticsSignError       linehl= numhl= ]]
