@@ -1,10 +1,10 @@
 #!/bin/bash
 
-projects=("bitflow" "hyperbook" "patches" "org")
+projects=("bitflow" "hyperbook" "patches" "org" "struktog")
 
 for project in ${projects[@]}
 do
-  path="Sources/openpatch/${project}/main"
+  path="$HOME/Sources/openpatch/${project}/main"
   tmux new-session -d -s $project
 
   window=1

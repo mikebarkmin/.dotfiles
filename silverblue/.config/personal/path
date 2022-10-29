@@ -2,4 +2,5 @@ addToPath $HOME/.yarn/bin
 addToPath $HOME/Applications/gradle/bin
 addToPath $HOME/Applications/google-cloud-sdk/bin
 addToPath $HOME/.local/dbin
+addToPath $HOME/.cargo/bin
 addToPath $HOME/Sources/spicetify-cli

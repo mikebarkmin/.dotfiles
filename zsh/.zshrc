@@ -76,7 +76,7 @@ TOOLBOX_DEFAULT_IMAGE="ghcr.io/mikebarkmin/fedora-toolbox:36-dev"
 TOOLBOX_DEFAULT_CONTAINER=$(hostname)
 ZSH_TMUX_DEFAULT_SESSION_NAME="default"
 ZSH_TMUX_AUTOSTART=false
-ZSH_TMUX_AUTOQUIT=true
+ZSH_TMUX_AUTOQUIT=false
 ZSH_TMUX_AUTOCONNECT=true
 plugins=(
   ssh-agent

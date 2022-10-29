@@ -1,4 +1,5 @@
 #!/bin/bash
+gsettings set org.gnome.desktop.interface gtk-theme 'adw-gtk3' && gsettings set org.gnome.desktop.interface color-scheme 'default'
 dconf write /org/gnome/terminal/legacy/profiles:/:043582b8-e1a5-4824-996f-b6f13792f297/background-color "'#e1e2e7'"
 dconf write /org/gnome/terminal/legacy/profiles:/:043582b8-e1a5-4824-996f-b6f13792f297/foreground-color "'#3760bf'"
 dconf write /org/gnome/terminal/legacy/theme-variant "'light'"
