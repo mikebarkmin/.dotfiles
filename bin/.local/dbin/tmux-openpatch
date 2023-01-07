@@ -1,6 +1,6 @@
 #!/bin/bash
 
-projects=("bitflow" "hyperbook" "patches" "org" "struktog")
+projects=("bitflow" "hyperbook" "patches" "org" "struktog" "scratch-for-java")
 
 for project in ${projects[@]}
 do

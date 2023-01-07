@@ -44,9 +44,9 @@ map("n", "<Leader>vrr", "<cmd>lua vim.lsp.buf.references()<CR>")
 map("n", "<Leader>vrn", "<cmd>lua vim.lsp.buf.rename()<CR>")
 map("n", "<Leader>vh", "<cmd>lua vim.lsp.buf.hover()<CR>")
 map("n", "<Leader>vca", "<cmd>lua vim.lsp.buf.code_action()<CR>")
-map("n", "<Leader>vsd", "<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>")
-map("n", "<Leader>vn", "<cmd>lua vim.lsp.diagnostic.goto_next()<CR>")
-map("n", "<Leader>vp", "<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>")
+map("n", "<Leader>vsd", "<cmd>lua vim.diagnostic.open_float({scope='line'})<CR>")
+map("n", "<Leader>vn", "<cmd>lua vim.diagnostic.goto_next()<CR>")
+map("n", "<Leader>vp", "<cmd>lua vim.diagnostic.goto_prev()<CR>")
 map("n", "<Leader>vf", "<cmd>Format<CR>")
 
 -- neogit

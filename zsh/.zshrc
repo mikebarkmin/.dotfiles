@@ -72,7 +72,7 @@ ZSH_THEME="m3b6"
 # Add wisely, as too many plugins slow down shell startup.
 DISABLE_TOOLBOX_ENTER=1
 DISABLE_TOOLBOX_EXIT=1
-TOOLBOX_DEFAULT_IMAGE="ghcr.io/mikebarkmin/fedora-toolbox:36-dev"
+TOOLBOX_DEFAULT_IMAGE="ghcr.io/mikebarkmin/fedora-toolbox:37-dev"
 TOOLBOX_DEFAULT_CONTAINER=$(hostname)
 ZSH_TMUX_DEFAULT_SESSION_NAME="default"
 ZSH_TMUX_AUTOSTART=false
@@ -83,6 +83,7 @@ plugins=(
 	git
 	toolbox
   tmux
+  auto-source
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -114,3 +115,12 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
 source $HOME/.zsh_profile
+
+#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+export SDKMAN_DIR="$HOME/.sdkman"
+[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+# pnpm
+export PNPM_HOME="/var/home/mbarkmin/.local/share/pnpm"
+export PATH="$PNPM_HOME:$PATH"
+# pnpm end

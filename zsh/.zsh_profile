@@ -11,13 +11,13 @@ for i in `find -L $PERSONAL`; do
 done
 
 # check for dark and light theme in gnome
-if [[ -r "$HOME/.local/dbin/gnome-dark" && -r "$HOME/.local/dbin/gnome-light" ]]
-then
-  theme=$(gsettings get org.gnome.desktop.interface color-scheme)
-  if [[ $theme = "'default'" ]]
-  then
-    zsh $HOME/.local/dbin/gnome-light
-  else
-    zsh $HOME/.local/dbin/gnome-dark
-  fi
-fi
+# if [[ -r "$HOME/.local/dbin/gnome-dark" && -r "$HOME/.local/dbin/gnome-light" ]]
+# then
+#   theme=$(gsettings get org.gnome.desktop.interface color-scheme)
+#   if [[ $theme = "'default'" ]]
+#   then
+#     zsh $HOME/.local/dbin/gnome-light
+#   else
+#     zsh $HOME/.local/dbin/gnome-dark
+#   fi
+# fi

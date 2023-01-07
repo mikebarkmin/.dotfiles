@@ -13,17 +13,16 @@ return require("packer").startup {
     use "wbthomason/packer.nvim"
 
     use {
-      -- A collection of common configurations for Neovim's built-in language server client
       "neovim/nvim-lspconfig",
-      config = [[ require('plugins/lspconfig') ]]
-    }
-
-    use {
-      "williamboman/nvim-lsp-installer",
-      config = [[ require('plugins/lsp_installer_nvim') ]],
+      wants = {
+        "williamboman/mason.nvim",
+        "williamboman/mason-lspconfig.nvim"
+      },
       requires = {
-        "neovim/nvim-lspconfig"
-      }
+        "williamboman/mason.nvim",
+        "williamboman/mason-lspconfig.nvim"
+      },
+      config = [[ require('plugins/lsp') ]]
     }
 
     use {
@@ -31,7 +30,7 @@ return require("packer").startup {
       "onsails/lspkind-nvim",
       config = [[ require('plugins/lspkind') ]]
     }
-     --
+    --
 
     --[=[
     use {
