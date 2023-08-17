@@ -1,10 +1,10 @@
 #!/bin/bash
 
-projects=("bitflow" "hyperbook" "patches" "org" "struktog" "scratch-for-java" "online-ide-nrw" "hyperbook-informatik" "hyperbook-mathematik")
+projects=("schule-material" "hyperbook-spieleentwicklung" "hyperbook-konzeptspeicher" "hyperbook-ki")
 
 for project in ${projects[@]}
 do
-  path="$HOME/Sources/openpatch/${project}/main"
+  path="$HOME/Sources/${project}/main"
   tmux new-session -d -s $project
 
   window=1

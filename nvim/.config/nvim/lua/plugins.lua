@@ -127,7 +127,7 @@ return require("packer").startup {
     }
 
     use {
-      "TimUntersberger/neogit",
+      "NeogitOrg/neogit",
       requires = {"nvim-lua/plenary.nvim"},
       config = [[ require('plugins/neogit') ]]
     }

@@ -20,7 +20,7 @@ require("mason-lspconfig").setup(
       "ltex",
       "sqlls", -- for sql
       "pylsp", -- for python
-      "sumneko_lua", -- for lua
+      "lua_ls", -- for lua
       "gopls", -- for go
       "yamlls",
       "bashls",
@@ -38,10 +38,8 @@ require("mason-lspconfig").setup_handlers {
     require("lspconfig")[server_name].setup {}
   end,
   -- you can override the default handler by providing custom handlers per server
-  ["jdtls"] = function()
-  end,
-  ["sumneko_lua"] = function()
-    require("lspconfig").sumneko_lua.setup {
+  ["lua_ls"] = function()
+    require("lspconfig").lua_ls.setup {
       settings = {
         Lua = {
           diagnostics = {
