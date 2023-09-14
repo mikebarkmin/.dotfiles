@@ -38,6 +38,47 @@ require("mason-lspconfig").setup_handlers {
     require("lspconfig")[server_name].setup {}
   end,
   -- you can override the default handler by providing custom handlers per server
+  ["jdtls"] = function()
+    require("lspconfig").jdtls.setup {
+      root_dir = require("lspconfig").util.root_pattern(
+        ".git",
+        "package.bluej",
+        "gradlew",
+        "settings.gradle",
+        "settings.gradel.kts",
+        "pom.xml",
+        ".gitattributes"
+      ) or vim.fn.getcwd(),
+      single_file_support = true,
+      settings = {
+        java = {
+          sources = {
+            organizeImports = {
+              starThreshold = 9999,
+              staticStarThreshold = 9999
+            }
+          },
+          configuration = {
+            runtimes = {
+              {
+                name = "JavaSE-11",
+                path = "~/Applications/java/jdk-11/bin",
+                default = true
+              },
+              {
+                name = "JavaSE-17",
+                path = "~/Applications/java/jdk-17.0.8+7/bin"
+              },
+              {
+                name = "JavaSE-20",
+                path = "~/Applications/java/jdk-20.0.1/bin"
+              }
+            }
+          }
+        }
+      }
+    }
+  end,
   ["lua_ls"] = function()
     require("lspconfig").lua_ls.setup {
       settings = {

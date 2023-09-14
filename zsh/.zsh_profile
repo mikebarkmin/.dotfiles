@@ -1,6 +1,7 @@
 export XDG_CONFIG_HOME=$HOME/.config
 export DOTFILES=$HOME/.dotfiles
 export ANSIBLEFILES=$HOME/Sources/silberblau
+export SILBERBLAUFILES=$HOME/Sources/silberblau
 export GIT_EDITOR="nvim"
 export PATH="$HOME/.local/bin:$PATH"
 

@@ -57,5 +57,13 @@ commitAnsible() {
     popd
 }
 
+commitSilberblau() {
+    pushd $SILBERBLAUFILES
+    git add .
+    git commit -m "automagic message"
+    git push origin live
+    popd
+}
+
 export WORKSPACE=$HOME/Sources
 export BIBINPUTS=$HOME/Sciebo/Zotero.bib

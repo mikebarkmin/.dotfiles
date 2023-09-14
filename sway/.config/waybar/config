@@ -6,7 +6,7 @@
     "modules-right": [ "cpu", "temperature", "battery", "backlight", "pulseaudio", "bluetooth", "tray"],
     // Modules configuration
     "sway/workspaces": {
-        "format": "{icon}",
+        "format": "{index}",
         "disable-scroll": true,
         "all-outputs": false,
         "format-icons": {

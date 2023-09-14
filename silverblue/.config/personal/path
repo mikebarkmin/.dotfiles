@@ -5,3 +5,5 @@ addToPath $HOME/.local/dbin
 addToPath $HOME/.cargo/bin
 addToPath $HOME/Sources/spicetify-cli
 addToPath $HOME/bin
+addToPath "$HOME/Applications/java/jdk-17.0.8+7/bin"
+addToPath $HOME/Applications/apache-ant-1.10.14/bin
