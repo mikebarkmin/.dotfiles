@@ -1,3 +1,10 @@
+local java = function()
+  return {
+    exe = "google-java-format",
+    args = {"--replace"},
+  }
+end
+
 local goFmt = function()
   return {
     exe = "gofmt",
@@ -60,7 +67,7 @@ require("formatter").setup(
         prettier
       },
       java = {
-        prettier
+        java
       },
       sh = {
         prettier

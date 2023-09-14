@@ -149,11 +149,6 @@ return require("packer").startup {
     }
 
     use {
-      "mhartington/formatter.nvim",
-      config = [[ require('plugins/formatter') ]]
-    }
-
-    use {
       "kmonad/kmonad-vim"
     }
 

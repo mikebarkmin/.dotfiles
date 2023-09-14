@@ -10,6 +10,13 @@ require("mason").setup(
   }
 )
 
+-- If you started neovim within `~/dev/xy/project-1` this would resolve to `project-1`
+local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
+if project_name == "main" then
+  project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:h:t')
+end
+local workspace_dir = '/var/home/mbarkmin/Sources/java-workspace/' .. project_name
+
 require("mason-lspconfig").setup(
   {
     ensure_installed = {
@@ -40,6 +47,28 @@ require("mason-lspconfig").setup_handlers {
   -- you can override the default handler by providing custom handlers per server
   ["jdtls"] = function()
     require("lspconfig").jdtls.setup {
+      cmd = {
+        -- 💀
+        "java",
+        "-Declipse.application=org.eclipse.jdt.ls.core.id1",
+        "-Dosgi.bundles.defaultStartLevel=4",
+        "-Declipse.product=org.eclipse.jdt.ls.core.product",
+        "-Dlog.protocol=true",
+        "-Dlog.level=ALL",
+        "-Xms1g",
+        "--add-modules=ALL-SYSTEM",
+        "--add-opens",
+        "java.base/java.util=ALL-UNNAMED",
+        "--add-opens",
+        "java.base/java.lang=ALL-UNNAMED",
+        -- 💀
+        "-jar",
+        "/var/home/mbarkmin/.local/share/nvim/mason/packages/jdtls/plugins/org.eclipse.equinox.launcher_1.6.500.v20230717-2134.jar",
+        "-configuration",
+        "/var/home/mbarkmin/.local/share/nvim/mason/packages/jdtls/config_linux",
+        "-data",
+        workspace_dir
+      },
       root_dir = require("lspconfig").util.root_pattern(
         ".git",
         "package.bluej",
@@ -58,20 +87,25 @@ require("mason-lspconfig").setup_handlers {
               staticStarThreshold = 9999
             }
           },
+          project = {
+            referencedLibraries = {
+              "+libs/*.jar"
+            }
+          },
           configuration = {
             runtimes = {
               {
                 name = "JavaSE-11",
-                path = "~/Applications/java/jdk-11/bin",
+                path = "/var/home/mbarkmin/Applications/java/jdk-11/",
                 default = true
               },
               {
                 name = "JavaSE-17",
-                path = "~/Applications/java/jdk-17.0.8+7/bin"
+                path = "/var/home/mbarkmin/Applications/java/jdk-17.0.8+7/"
               },
               {
                 name = "JavaSE-20",
-                path = "~/Applications/java/jdk-20.0.1/bin"
+                path = "/var/home/mbarkmin/Applications/java/jdk-20.0.1/"
               }
             }
           }
