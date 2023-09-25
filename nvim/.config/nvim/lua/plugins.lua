@@ -16,11 +16,13 @@ return require("packer").startup {
       "neovim/nvim-lspconfig",
       wants = {
         "williamboman/mason.nvim",
-        "williamboman/mason-lspconfig.nvim"
+        "williamboman/mason-lspconfig.nvim",
+        "WhoIsSethDaniel/mason-tool-installer.nvim"
       },
       requires = {
         "williamboman/mason.nvim",
-        "williamboman/mason-lspconfig.nvim"
+        "williamboman/mason-lspconfig.nvim",
+        "WhoIsSethDaniel/mason-tool-installer.nvim"
       },
       config = [[ require('plugins/lsp') ]]
     }
@@ -55,7 +57,18 @@ return require("packer").startup {
     }
 
     use {
+      "cohama/lexima.vim"
+    }
+
+    use {
       "nvim-telescope/telescope-project.nvim"
+    }
+
+    use {
+      "nvim-telescope/telescope-dap.nvim",
+      requires = {
+        "mfussenegger/nvim-dap"
+      }
     }
 
     use {
@@ -146,6 +159,11 @@ return require("packer").startup {
     use {
       "ThePrimeagen/git-worktree.nvim",
       config = [[ require('plugins/git-worktree') ]]
+    }
+
+    use {
+      "mhartington/formatter.nvim",
+      config = [[ require('plugins/formatter') ]]
     }
 
     use {

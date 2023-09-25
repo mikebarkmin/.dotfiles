@@ -11,11 +11,11 @@ require("mason").setup(
 )
 
 -- If you started neovim within `~/dev/xy/project-1` this would resolve to `project-1`
-local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
+local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
 if project_name == "main" then
-  project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:h:t')
+  project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:h:t")
 end
-local workspace_dir = '/var/home/mbarkmin/Sources/java-workspace/' .. project_name
+local workspace_dir = "/var/home/mbarkmin/Sources/java-workspace/" .. project_name
 
 require("mason-lspconfig").setup(
   {
@@ -38,6 +38,20 @@ require("mason-lspconfig").setup(
     }
   }
 )
+
+require("mason-tool-installer").setup {
+  ensure_installed = {
+    "checkstyle",
+    "codespell",
+    "java-debug-adapter",
+    "js-debug-adapter"
+  },
+  auto_update = true,
+  run_on_start = true,
+  start_delay = 3000,
+  debouce_hours = 5
+
+}
 
 require("mason-lspconfig").setup_handlers {
   -- default handler - setup with default settings

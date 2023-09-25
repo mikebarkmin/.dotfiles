@@ -13,11 +13,12 @@ local current_dir='%{$terminfo[bold]$fg[blue]%}%~ %{$reset_color%}'
 local git_branch='$(git_prompt_info)'
 local rvm_ruby='$(ruby_prompt_info)'
 local venv_prompt='$(virtualenv_prompt_info)'
-local toolbox_prompt='$(toolbox_prompt_info)'
+local distrobox_prompt_info='$(distrobox_prompt_info)'
+local distrobox_prompt_name='$(distrobox_prompt_name)'
 
 ZSH_THEME_RVM_PROMPT_OPTIONS="i v g"
 
-PROMPT="╭─${toolbox_prompt}${user_host}${current_dir}${rvm_ruby}${git_branch}${venv_prompt}
+PROMPT="╭─${distrobox_prompt_info}${user_host}${distrobox_prompt_name}${current_dir}${rvm_ruby}${git_branch}${venv_prompt}
 ╰─%B${user_symbol}%b "
 
 RPROMPT="%B${return_code}%b"

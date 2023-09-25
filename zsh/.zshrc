@@ -8,7 +8,7 @@ export ZSH="/var/home/mbarkmin/.oh-my-zsh"
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="bira"
+ZSH_THEME="m3b6"
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -72,8 +72,6 @@ ZSH_THEME="bira"
 # Add wisely, as too many plugins slow down shell startup.
 DISABLE_TOOLBOX_ENTER=1
 DISABLE_TOOLBOX_EXIT=1
-TOOLBOX_DEFAULT_IMAGE="ghcr.io/mikebarkmin/fedora-toolbox:38-dev"
-TOOLBOX_DEFAULT_CONTAINER=$(hostname)
 ZSH_TMUX_DEFAULT_SESSION_NAME="default"
 ZSH_TMUX_AUTOSTART=false
 ZSH_TMUX_AUTOQUIT=false
@@ -81,6 +79,7 @@ ZSH_TMUX_AUTOCONNECT=true
 plugins=(
   ssh-agent
 	git
+  distrobox
 	#toolbox
   tmux
   auto-source

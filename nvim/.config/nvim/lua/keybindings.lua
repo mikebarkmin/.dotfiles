@@ -49,6 +49,13 @@ map("n", "<Leader>vn", "<cmd>lua vim.diagnostic.goto_next()<CR>")
 map("n", "<Leader>vp", "<cmd>lua vim.diagnostic.goto_prev()<CR>")
 map("n", "<Leader>vf", "<cmd>Format<CR>")
 
+--- dap
+map("n", "<Leader>dc", "<cmd>:lua require'telescope'.extensions.dap.commands{}<cr>")
+map("n", "<Leader>ds", "<cmd>:lua require'telescope'.extensions.dap.configurations{}<cr>")
+map("n", "<Leader>dl", "<cmd>:lua require'telescope'.extensions.dap.list_breakpoints{}<cr>")
+map("n", "<Leader>dv", "<cmd>:lua require'telescope'.extensions.dap.variables{}<cr>")
+map("n", "<Leader>df", "<cmd>:lua require'telescope'.extensions.dap.frames{}<cr>")
+
 -- neogit
 map("n", "<Leader>go", "<cmd>Neogit<CR>")
 map("n", "<Leader>gc", "<cmd>Neogit commit<CR>")
