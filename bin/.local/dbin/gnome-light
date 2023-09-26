@@ -1,7 +1,9 @@
 #!/bin/bash
-gsettings set org.gnome.desktop.interface gtk-theme 'adw-gtk3' && gsettings set org.gnome.desktop.interface color-scheme 'default'
-dconf write /org/gnome/terminal/legacy/profiles:/:043582b8-e1a5-4824-996f-b6f13792f297/background-color "'#e1e2e7'"
-dconf write /org/gnome/terminal/legacy/profiles:/:043582b8-e1a5-4824-996f-b6f13792f297/foreground-color "'#3760bf'"
+gsettings set org.gnome.desktop.interface gtk-theme 'adw-gtk3'
+gsettings set org.gnome.desktop.interface color-scheme 'default'
+gsettings set org.gnome.Terminal.ProfilesList default de8a9081-8352-4ce4-9519-5de655ad9361
 dconf write /org/gnome/terminal/legacy/theme-variant "'light'"
 
-tmux source-file ~/.tmux_tokyonight_day.tmux
+sed -i 's/tmux_dark/tmux_light/' ~/.tmux.conf
+tmux source-file ~/.tmux.conf
+tmux set-environment THEME 'light'

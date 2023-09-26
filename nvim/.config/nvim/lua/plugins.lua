@@ -13,6 +13,16 @@ return require("packer").startup {
     use "wbthomason/packer.nvim"
 
     use {
+      --  colorscheme for (neo)vim
+      "catppuccin/nvim", as = "catppuccin",
+      config = [[ require('plugins/catppuccin') ]]
+    }
+
+    use {
+      "vimpostor/vim-lumen"
+    }
+
+    use {
       "neovim/nvim-lspconfig",
       wants = {
         "williamboman/mason.nvim",
@@ -32,15 +42,6 @@ return require("packer").startup {
       "onsails/lspkind-nvim",
       config = [[ require('plugins/lspkind') ]]
     }
-    --
-
-    --[=[
-    use {
-      -- Utility functions for getting diagnostic status and progress messages from LSP servers, for use in the Neovim statusline
-      "nvim-lua/lsp-status.nvim",
-      config = [[ require('plugins/lspstatus') ]]
-    }
-    ]=]
 
     use {
       -- A completion plugin for neovim coded in Lua.
@@ -54,10 +55,6 @@ return require("packer").startup {
         "saadparwaiz1/cmp_luasnip" -- luasnip completion source for nvim-cmp
       },
       config = [[ require('plugins/cmp') ]]
-    }
-
-    use {
-      "cohama/lexima.vim"
     }
 
     use {
@@ -88,7 +85,7 @@ return require("packer").startup {
     use {
       "nvim-telescope/telescope-bibtex.nvim",
       requires = {
-        {"nvim-telescope/telescope.nvim"}
+          "nvim-telescope/telescope.nvim"
       },
       config = function()
         require "telescope".load_extension("bibtex")
@@ -102,15 +99,6 @@ return require("packer").startup {
         "rafamadriz/friendly-snippets" -- Snippets collection for a set of different programming languages for faster development.
       },
       config = [[ require('plugins/luasnip') ]]
-    }
-
-    use {
-      --  colorscheme for (neo)vim
-      "folke/tokyonight.nvim"
-    }
-
-    use {
-      "vimpostor/vim-lumen"
     }
 
     use {
@@ -135,7 +123,6 @@ return require("packer").startup {
 
     use {
       "nvim-lualine/lualine.nvim",
-      requires = {"kyazdani42/nvim-web-devicons", opt = true},
       config = [[ require('plugins/lualine') ]]
     }
 
@@ -157,21 +144,8 @@ return require("packer").startup {
     }
 
     use {
-      "ThePrimeagen/git-worktree.nvim",
-      config = [[ require('plugins/git-worktree') ]]
-    }
-
-    use {
       "mhartington/formatter.nvim",
       config = [[ require('plugins/formatter') ]]
-    }
-
-    use {
-      "kmonad/kmonad-vim"
-    }
-
-    use {
-      "tpope/vim-obsession"
     }
 
     use {

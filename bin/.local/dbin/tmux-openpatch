@@ -1,10 +1,30 @@
 #!/bin/bash
 
-projects=("bitflow" "hyperbook" "patches" "org" "struktog" "scratch-for-java" "online-ide-nrw" "hyperbook-informatik" "hyperbook-mathematik")
+url="git@github.com:openpatch/"
+projects=(
+  "branding"
+  "hyperbook"
+  "hyperbook-informatik"
+  "hyperbook-mathematik"
+  "manual-neural-network"
+  "online-ide-nrw"
+  "org"
+  "scratch-for-java"
+  "sqlide"
+  "struktog"
+  "videos"
+)
 
 for project in ${projects[@]}
 do
-  path="$HOME/Sources/openpatch/${project}/main"
+  path="$HOME/Sources/openpatch/${project}"
+
+  if [ ! -d "$path" ]; then
+    pushd $HOME/Sources/openpatch
+      git clone ${url}${project}.git
+    popd
+  fi
+
   tmux new-session -d -s $project
 
   window=1

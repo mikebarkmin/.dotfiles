@@ -15,7 +15,6 @@ projects=(
 
 for project in ${projects[@]}
 do
-  project=$(echo $project | tr "." "-")
   path="$HOME/Sources/${project}"
 
   if [ ! -d "$path" ]; then

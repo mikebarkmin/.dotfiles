@@ -15,7 +15,7 @@ local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
 if project_name == "main" then
   project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:h:t")
 end
-local workspace_dir = "/var/home/mbarkmin/Sources/java-workspace/" .. project_name
+local workspace_dir = "/var/home/mbarkmin/.local/share/java-workspace/" .. project_name
 
 require("mason-lspconfig").setup(
   {
@@ -26,7 +26,7 @@ require("mason-lspconfig").setup(
       "texlab", -- for latex
       "ltex",
       "sqlls", -- for sql
-      "pylsp", -- for python
+      "pyright", -- for python
       "lua_ls", -- for lua
       "gopls", -- for go
       "yamlls",
@@ -50,7 +50,6 @@ require("mason-tool-installer").setup {
   run_on_start = true,
   start_delay = 3000,
   debouce_hours = 5
-
 }
 
 require("mason-lspconfig").setup_handlers {

@@ -2,7 +2,6 @@ alias rm="rm -i"
 alias vim="nvim"
 alias python="python3"
 alias o="xdg-open"
-alias manim="podman-host run --rm -it -v "$PWD:/manim" manimcommunity/manim manim"
 alias docker="echo \"It is podman!!\" && podman"
 alias dotc="commitDotFiles"
 alias dotr=$DOTFILES/install-personal
