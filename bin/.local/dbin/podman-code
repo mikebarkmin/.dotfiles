@@ -1,0 +1,3 @@
+BUILDAH_FORMAT=docker \
+PODMAN_USERNS=keep-id \
+podman "$@"

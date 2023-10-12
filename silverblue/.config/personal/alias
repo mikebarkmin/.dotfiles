@@ -1,13 +1,12 @@
 alias rm="rm -i"
 alias vim="nvim"
-alias python="python3"
 alias o="xdg-open"
-alias docker="echo \"It is podman!!\" && podman"
 alias dotc="commitDotFiles"
 alias dotr=$DOTFILES/install-personal
 alias dote="pushd $HOME/.dotfiles && nvim && popd"
 alias sbe="pushd $HOME/Sources/silberblau/ && nvim && popd"
 alias sbc="commitSilberblau"
+alias dac="distrobox assemble create ~/Sources/silberblau/config/files/usr/etc/distrobox/distrobox.ini"
 alias ansc="commitAnsible"
 alias gcn="git commit -m \"Updated: `date +'%Y-%m-%d %H:%M:%S'`\""
 function bluejc() {
@@ -33,15 +32,6 @@ function bjava() {
   javac -cp "$HOME/Sources/openpatch/scratch-for-java/main/distribution/scratch4j-linux-amd64.jar:$HOME/.bluej/libs/*:+libs/*:." $1
   java -cp "$HOME/Sources/openpatch/scratch-for-java/main/distribution/scratch4j-linux-amd64.jar:$HOME/.bluej/libs/*:+libs/*:." $filename
 }
-function toolbox_xdg() {
-    if command -v flatpak-xdg-open
-    then
-      flatpak-xdg-open $@
-    else
-      xdg-open $@
-    fi
-}
-alias xdg-open="toolbox_xdg"
 
 function normalize() {
   ffmpeg-normalize $1 -c:a aac -b:a 192k

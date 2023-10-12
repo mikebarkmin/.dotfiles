@@ -1,43 +1,15 @@
 #!/bin/bash
 
-url="git@github.com:mikebarkmin/"
-projects=(
-  "hyperbook-ki"
-  "hyperbook-konzeptspeicher"
-  "hyperbook-spieleentwicklung"
-  "mikebarkmin.github.io"
-  "schule-material"
-  "silberblau"
-  "ulauncher-obsidian"
-  "ulauncher-snippets"
-  "ulauncher-snippets-files"
+repos=(
+  "git@github.com:mikebarkmin/hyperbook-ki"
+  "git@github.com:mikebarkmin/hyperbook-konzeptspeicher"
+  "git@github.com:mikebarkmin/hyperbook-spieleentwicklung"
+  "git@github.com:mikebarkmin/mikebarkmin.github.io"
+  "git@github.com:mikebarkmin/schule-material:latex"
+  "git@github.com:mikebarkmin/silberblau"
+  "git@github.com:mikebarkmin/ulauncher-obsidian"
+  "git@github.com:mikebarkmin/ulauncher-snippets"
+  "git@github.com:mikebarkmin/ulauncher-snippets-files"
 )
 
-for project in ${projects[@]}
-do
-  path="$HOME/Sources/${project}"
-
-  if [ ! -d "$path" ]; then
-    pushd $HOME/Sources
-      git clone ${url}${project}.git
-    popd
-  fi
-
-  tmux new-session -d -s $project
-
-  window=1
-  tmux rename-window -t $project:$window "nvim"
-  tmux send-keys -t $project:$window "cd ${path}" C-m
-  tmux send-keys -t $project:$window "distrobox enter fedora" C-m
-
-  window=2
-  tmux new-window -t $project:$window -n "server"
-  tmux send-keys -t $project:$window "cd ${path}" C-m
-  tmux send-keys -t $project:$window "distrobox enter fedora" C-m
-
-  window=3
-  tmux new-window -t $project:$window -n "git"
-  tmux send-keys -t $project:$window "cd ${path}" C-m
-  tmux send-keys -t $project:$window "git pull" C-m
-  tmux send-keys -t $project:$window "distrobox enter fedora" C-m
-done
+tmux-session "$HOME/Sources" "${repos[@]}"

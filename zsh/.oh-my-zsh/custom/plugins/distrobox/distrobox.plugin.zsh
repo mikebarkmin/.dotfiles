@@ -44,38 +44,6 @@ function distrobox_name {
   fi
 }
 
-# Automatically enter Git projects in the default distrobox container. Toolbox
-# container can be overridden by placing a .distrobox file in the project root
-# with a container name in it.
-#
-function distrobox_cwd {
-  if [[ -z "$DISTROBOX_CWD" ]]; then
-    local DISTROBOX_CWD=1
-    local DISTROBOX_NAME=$(distrobox_name)
-
-    if [[ -n $DISTROBOX_NAME ]]; then
-      if ! is_in_distrobox; then
-        if ! $(podman container exists $distrobox_NAME); then
-          dbc $DISTROBOX_NAME
-        fi
-        distrobox enter $DISTROBOX_NAME
-      fi
-    elif [[ "$(hostname)" != "distrobox" && ! $DISABLE_TOOLBOX_EXIT -eq 1 ]]; then
-      if is_in_distrobox; then
-        exit
-      fi
-    fi
-  fi
-}
-
-if [[ ! $DISABLE_DISTROBOX_ENTER -eq 1 ]]; then
-
-  # Append workon_cwd to the chpwd_functions array, so it will be called on cd
-  # http://zsh.sourceforge.net/Doc/Release/Functions.html
-  autoload -Uz add-zsh-hook
-  add-zsh-hook chpwd distrobox_cwd
-fi
-
 alias dbc="distrobox create"
 alias db="distrobox"
 alias dbrm="distrobox rm"

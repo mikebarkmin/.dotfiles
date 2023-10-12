@@ -14,12 +14,20 @@ return require("packer").startup {
 
     use {
       --  colorscheme for (neo)vim
-      "catppuccin/nvim", as = "catppuccin",
+      "catppuccin/nvim",
+      as = "catppuccin",
       config = [[ require('plugins/catppuccin') ]]
     }
 
     use {
       "vimpostor/vim-lumen"
+    }
+
+    use {
+      "windwp/nvim-autopairs",
+      config = function()
+        require("nvim-autopairs").setup {}
+      end
     }
 
     use {
@@ -85,7 +93,7 @@ return require("packer").startup {
     use {
       "nvim-telescope/telescope-bibtex.nvim",
       requires = {
-          "nvim-telescope/telescope.nvim"
+        "nvim-telescope/telescope.nvim"
       },
       config = function()
         require "telescope".load_extension("bibtex")

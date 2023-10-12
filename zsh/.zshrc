@@ -70,8 +70,7 @@ ZSH_THEME="m3b6"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-DISABLE_TOOLBOX_ENTER=1
-DISABLE_TOOLBOX_EXIT=1
+DISABLE_DISTROBOX_ENTER=true
 ZSH_TMUX_DEFAULT_SESSION_NAME="default"
 ZSH_TMUX_AUTOSTART=false
 ZSH_TMUX_AUTOQUIT=false
@@ -80,7 +79,8 @@ plugins=(
   ssh-agent
 	git
   distrobox
-	#toolbox
+  virtualenv
+  poetry-env
   tmux
   auto-source
 )
@@ -114,10 +114,6 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
 source $HOME/.zsh_profile
-
-#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
-export SDKMAN_DIR="$HOME/.sdkman"
-[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 # pnpm
 export PNPM_HOME="/var/home/mbarkmin/.local/share/pnpm"
