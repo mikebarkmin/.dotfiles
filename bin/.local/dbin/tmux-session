@@ -17,7 +17,7 @@ do
 
   if [ ! -d "$path" ]; then
     pushd $basedir
-      git clone ${url}${repo}.git
+      git clone ${url}/${repo}.git
     popd
   fi
 

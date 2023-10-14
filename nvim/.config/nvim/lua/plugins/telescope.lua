@@ -29,7 +29,17 @@ require("telescope").setup {
   },
   pickers = {
     find_files = {
-      find_command = {"rg", "--files", "--hidden", "--ignore-file", ".next", "--ignore-file", "out", "--ignore-file", "pnpm-lock.yaml"}
+      find_command = {
+        "rg",
+        "--files",
+        "--hidden",
+        "--ignore-file",
+        ".next",
+        "--ignore-file",
+        "out",
+        "--ignore-file",
+        "pnpm-lock.yaml"
+      }
     },
     file_browser = {
       hidden = true
@@ -42,6 +52,7 @@ require("telescope").setup {
     -- builtin picker
   },
   extensions = {
+    ["ui-select"] = {},
     project = {
       fzf = {
         fuzzy = true, -- false will only do exact matching
@@ -56,9 +67,10 @@ require("telescope").setup {
       hidden_files = true
     },
     bibtex = {
-      format = 'plain'
+      format = "plain"
     }
   }
 }
 
-require('telescope').load_extension('fzf')
+require("telescope").load_extension("fzf")
+require("telescope").load_extension("ui-select")

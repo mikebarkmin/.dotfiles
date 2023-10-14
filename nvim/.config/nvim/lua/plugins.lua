@@ -70,12 +70,22 @@ return require("packer").startup {
     }
 
     use {
+      "nvim-telescope/telescope-ui-select.nvim"
+    }
+
+    use {
       "nvim-telescope/telescope-dap.nvim",
       requires = {
         "mfussenegger/nvim-dap"
       }
     }
 
+    use {
+      "mfussenegger/nvim-jdtls",
+      requires = {
+        "mfussenegger/nvim-dap"
+      }
+    }
     use {
       "nvim-telescope/telescope-fzf-native.nvim",
       run = "make"
