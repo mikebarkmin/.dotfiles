@@ -36,6 +36,7 @@ local config = {
       "gradlew",
       "settings.gradle",
       "settings.gradel.kts",
+      ".classpath",
       "pom.xml",
       ".gitattributes"
     }

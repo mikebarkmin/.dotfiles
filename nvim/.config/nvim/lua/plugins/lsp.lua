@@ -37,7 +37,9 @@ require("mason-tool-installer").setup {
     "checkstyle",
     "codespell",
     "java-debug-adapter",
-    "js-debug-adapter"
+    "js-debug-adapter",
+    "luaformatter",
+    "latexindent"
   },
   auto_update = true,
   run_on_start = true,

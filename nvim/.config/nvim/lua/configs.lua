@@ -7,6 +7,7 @@ local g = vim.g -- global variables
 -- local w     = vim.wo            -- windows-scoped options
 
 
+vim.cmd [[ set formatoptions=croq]]
 vim.cmd [[ colorscheme catppuccin-frappe ]]
 set.guifont = "FiraCode Nerd Font 11"
 set.termguicolors = true -- Enable GUI colors for the terminal to get truecolor
@@ -77,8 +78,6 @@ set.wildignore = set.wildignore + "*.o,*.rej,*.so"
 cmd([[au BufWritePre * :%s/\s\+$//e]])
 -- faster scrolling
 set.lazyredraw = true
--- don't auto commenting new lines
-cmd([[au BufEnter * set fo-=c fo-=r fo-=o]])
 -- completion options
 set.completeopt = "menuone,noselect,noinsert"
 

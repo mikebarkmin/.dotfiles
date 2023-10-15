@@ -131,6 +131,13 @@ return require("packer").startup {
     }
 
     use {
+      "numToStr/Comment.nvim",
+      config = function()
+        require("Comment").setup()
+      end
+    }
+
+    use {
       "lukas-reineke/indent-blankline.nvim",
       config = [[ require('plugins/blankline') ]]
     }
