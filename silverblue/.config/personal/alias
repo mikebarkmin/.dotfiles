@@ -29,8 +29,15 @@ alias podman_ghcr="echo $GH_TOKEN | podman login ghcr.io --username=mikebarkmin 
 function bjava() {
   filename="${1%.*}"
   rm -rf **/*.class
-  javac -cp "$HOME/Sources/openpatch/scratch-for-java/main/distribution/scratch4j-linux-amd64.jar:$HOME/.bluej/libs/*:+libs/*:." $1
-  java -cp "$HOME/Sources/openpatch/scratch-for-java/main/distribution/scratch4j-linux-amd64.jar:$HOME/.bluej/libs/*:+libs/*:." $filename
+  javac -cp "$HOME/Sources/openpatch/scratch-for-java/distribution/scratch4j-linux-amd64.jar:$HOME/.bluej/libs/*:+libs/*:." $1
+  shift
+  java -cp "$HOME/Sources/openpatch/scratch-for-java/distribution/scratch4j-linux-amd64.jar:$HOME/.bluej/libs/*:+libs/*:." $filename $@
+}
+function s4j_init() {
+  mkdir $1
+  cd $1
+  cp -a "$HOME/Sources/openpatch/scratch-for-java/templates/bluej-starter/." .
+  cp "$HOME/Sources/openpatch/scratch-for-java/distribution/scratch4j-linux-amd64.jar" "+libs"
 }
 
 function normalize() {

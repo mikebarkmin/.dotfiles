@@ -4,6 +4,6 @@ gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
 gsettings set org.gnome.Terminal.ProfilesList default 71a9971e-e829-43a9-9b2f-4565c855d664
 dconf write /org/gnome/terminal/legacy/theme-variant "'dark'"
 
-sed -i 's/tmux_light/tmux_dark/' ~/.tmux.conf
+sed -i --follow-symlinks 's/tmux_light/tmux_dark/' ~/.tmux.conf
 tmux source-file ~/.tmux.conf
 tmux set-environment THEME 'dark'

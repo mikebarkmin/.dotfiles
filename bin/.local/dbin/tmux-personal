@@ -10,6 +10,7 @@ repos=(
   "git@github.com:mikebarkmin/ulauncher-obsidian"
   "git@github.com:mikebarkmin/ulauncher-snippets"
   "git@github.com:mikebarkmin/ulauncher-snippets-files"
+  "git@gitlab.com:abitur-2025/begleitmaterial"
 )
 
 tmux-session "$HOME/Sources" "${repos[@]}"
