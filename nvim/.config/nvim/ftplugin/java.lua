@@ -60,12 +60,12 @@ local config = {
         runtimes = {
           {
             name = "JavaSE-17",
-            path = "/var/home/mbarkmin/.sdkman/candidates/java/17.0.8.1-tem",
+            path = "/var/home/mbarkmin/.sdkman/candidates/java/17.0.9.fx-zulu",
             default = true
           },
           {
             name = "JavaSE-11",
-            path = "/var/home/mbarkmin/.sdkman/candidates/java/11.0.20.1-tem"
+            path = "/var/home/mbarkmin/.sdkman/candidates/java/11.0.21.fx-zulu"
           }
         }
       }

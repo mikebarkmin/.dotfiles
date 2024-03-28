@@ -6,6 +6,7 @@ repos=(
   "git@github.com:openpatch/hyperbook-informatik"
   "git@github.com:openpatch/hyperbook-mathematik"
   "git@github.com:openpatch/manual-neural-network"
+  "git@github.com:openpatch/java-memory-playground"
   "git@github.com:openpatch/online-ide-nrw"
   "git@github.com:openpatch/org"
   "git@github.com:openpatch/scratch-for-java"
