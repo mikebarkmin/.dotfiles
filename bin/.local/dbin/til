@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+set -e
+
+ROOT_DIR="/home/mike/Sources/mikebarkmin.github.io"
+TIL_DIR="$ROOT_DIR/book/til"
+
+read -rp "Title: " TITLE
+
+if [[ -z "$TITLE" ]]; then
+  echo "Title must not be empty"
+  exit 1
+fi
+
+# Create slug (German-friendly)
+SLUG=$(echo "$TITLE" \
+  | tr '[:upper:]' '[:lower:]' \
+  | sed \
+    -e 's/ä/ae/g' \
+    -e 's/ö/oe/g' \
+    -e 's/ü/ue/g' \
+    -e 's/ß/ss/g' \
+    -e 's/[^a-z0-9]/-/g' \
+    -e 's/--*/-/g' \
+    -e 's/^-//' \
+    -e 's/-$//')
+
+# Determine next TIL number
+LAST_NUM=$(ls "$TIL_DIR"/til-*.md 2>/dev/null \
+  | sed -n 's/.*til-\([0-9][0-9]\)-.*/\1/p' \
+  | sort -n \
+  | tail -n 1)
+
+NEXT_NUM=$(printf "%02d" $((10#${LAST_NUM:-0} + 1)))
+
+DATE=$(date +%Y-%m-%d)
+FILE="$TIL_DIR/til-$NEXT_NUM-$SLUG.md"
+
+cat > "$FILE" <<EOF
+---
+title: $TITLE
+date: $DATE
+tags:
+    - til
+lang: de
+---
+
+# $TITLE
+EOF
+
+# Open Vim with repo root as working directory
+vim -c "cd $ROOT_DIR" "$FILE"
+

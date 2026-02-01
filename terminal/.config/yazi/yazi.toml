@@ -1,0 +1,9 @@
+[mgr]
+show_hidden = false
+show_symlink = true
+syntect_theme = "~/.config/yazi/Catppuccin Mocha.tmTheme"
+
+[opener]
+open = [
+  { run = 'xdg-open "$@"', orphan = true, desc = "Open", for = "unix" }, # add orphan = true
+]

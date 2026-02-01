@@ -1,0 +1,9 @@
+[Unit]
+Description=Waybar Reload Service
+
+[Service]
+Type=oneshot
+ExecStart=/home/mike/.config/waybar/reload.sh
+
+[Install]
+WantedBy=graphical-session.target

@@ -1,0 +1,15 @@
+[mgr]
+prepend_keymap = [
+    { on = [ "p", "p" ], run = "paste"},
+    { on = [ "p", "c" ], run = "plugin save-clipboard-to-file", desc = "Paste clipboard content to file and hover after created" },
+    { on = [ "y", "y"], run = "yank"},
+    { on = [ "y", "m" ], run = '''shell --
+    paths=$(for p in "$@"; do echo "$p"; done | paste -s -d,)
+    thunderbird -compose "attachment='$paths'"
+    ''', desc = "Compose email with selected files as attachments" },
+    { on = [ "g", "r" ], run = 'shell -- ya emit cd "$(git rev-parse --show-toplevel)"', desc = "Go to Git repository root" },
+    { on = [ "g", "s" ], run = 'cd ~/Sources', desc = "Go to Sources" },
+    { on = [ "g", "m" ], run = 'cd ~/Sources/mikebarkmin.github.io/', desc = "Go to Mike Barkmin" },
+    { on = [ "g", "o", "h" ], run = 'cd ~/Sources/openpatch/hyperbook/', desc = "Go to Hyperbook" },
+    { on = [ "g", "o", "l" ], run = 'cd ~/Sources/openpatch/learningmap/', desc = "Go to Learningmaps" },
+]

@@ -1,0 +1,10 @@
+{
+  "layer": "top",
+  "position": "top",
+  "mode": "dock",
+  "reload_style_on_change": true,
+  "gtk-layer-shell": true,
+  "include": [
+    "~/.config/waybar/shared.jsonc"
+  ]
+}

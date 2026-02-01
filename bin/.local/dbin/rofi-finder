@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Configuration
+BASE="${1:-$HOME}"
+ROFI_LINES="${ROFI_LINES:-20}"
+ROFI_WIDTH="${ROFI_WIDTH:-90%}"
+
+# Search for files, handle errors gracefully
+files=$(fd . "$BASE" \
+    --type f \
+    --exclude '.git' \
+    --exclude 'node_modules' \
+    --exclude 'venv' \
+    --exclude '.cache' \
+    --exclude '.local/share/Trash' \
+    --exclude '__pycache__' \
+    2>/dev/null) || {
+    rofi -e "Error: fd command failed"
+    exit 1
+}
+
+# Exit early if no files found
+if [[ -z "$files" ]]; then
+    rofi -e "No files found in $BASE"
+    exit 0
+fi
+
+# Show in rofi
+selection=$(
+    printf '%s\n' "$files" |
+        rofi -i -sort -sorting-method fzf -disable-history -dmenu -no-custom \
+            -p "Open file" -no-lazy-grab -markup-rows \
+            -theme-str "window { width: $ROFI_WIDTH; } listview { lines: $ROFI_LINES; }"
+)
+
+# Exit if nothing selected
+[[ -z "$selection" ]] && exit 0
+
+# Handle tilde expansion if present
+selection="${selection/#\~/$HOME}"
+
+# Verify file exists before opening
+if [[ ! -f "$selection" ]]; then
+    rofi -e "Error: File not found: $selection"
+    exit 1
+fi
+
+# Open file and disown from script
+xdg-open "$selection" &>/dev/null &
+disown

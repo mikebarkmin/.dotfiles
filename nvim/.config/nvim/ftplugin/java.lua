@@ -1,88 +1,73 @@
+local root_markers = {
+  'package.bluej',
+  'settings.gradle',
+  'settings.gradle.kts',
+  'pom.xml',
+  'build.gradle',
+  'mvnw',
+  'gradlew',
+  'build.gradle',
+  'build.gradle.kts',
+  '.git',
+}
 
--- If you started neovim within `~/dev/xy/project-1` this would resolve to `project-1`
-local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
-if project_name == "main" then
-  project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:h:t")
+local function find_root()
+  return vim.fs.dirname(vim.fs.find(root_markers, { upward = true })[1])
 end
-local workspace_dir = "/var/home/mbarkmin/.local/share/java-workspace/" .. project_name
+
+-- Determine if 'package.bluej' exists in the root directory
+local root_dir = find_root()
+local has_bluej_package = vim.fs.find('package.bluej', { path = root_dir, upward = false })[1] ~= nil
+
+-- if create different project configurations for different root_dirs
+local project = {
+  sourcePaths = has_bluej_package and { '.' } or nil,
+  referencedLibraries = {
+    '+libs/**/*.jar',
+  },
+}
+
+-- root_dir: scratch-for-java
+if root_dir == vim.fn.expand '~/Sources/openpatch/scratch-for-java' then
+  project.sourcePaths = { 'src', 'examples/java', 'examples/reference' }
+  project.referencedLibraries = {
+    'libs/**/*.jar',
+  }
+end
 
 local config = {
-  cmd = {
-    -- 💀
-    "java",
-    "-Declipse.application=org.eclipse.jdt.ls.core.id1",
-    "-Dosgi.bundles.defaultStartLevel=4",
-    "-Declipse.product=org.eclipse.jdt.ls.core.product",
-    "-Dlog.protocol=true",
-    "-Dlog.level=ALL",
-    "-Xms1g",
-    "--add-modules=ALL-SYSTEM",
-    "--add-opens",
-    "java.base/java.util=ALL-UNNAMED",
-    "--add-opens",
-    "java.base/java.lang=ALL-UNNAMED",
-    -- 💀
-    "-jar",
-    "/var/home/mbarkmin/.local/share/nvim/mason/packages/jdtls/plugins/org.eclipse.equinox.launcher_1.6.500.v20230717-2134.jar",
-    "-configuration",
-    "/var/home/mbarkmin/.local/share/nvim/mason/packages/jdtls/config_linux",
-    "-data",
-    workspace_dir
-  },
-  root_dir = require("jdtls.setup").find_root(
-    {
-      ".git",
-      "package.bluej",
-      "gradlew",
-      "settings.gradle",
-      "settings.gradel.kts",
-      ".classpath",
-      "pom.xml",
-      ".gitattributes"
-    }
-  ),
-  single_file_support = true,
+  cmd = { '/usr/bin/jdtls' },
+  root_dir = root_dir,
   settings = {
     java = {
-      sources = {
-        organizeImports = {
-          starThreshold = 9999,
-          staticStarThreshold = 9999
-        }
-      },
-      project = {
-        referencedLibraries = {
-          "+libs/*.jar",
-          "libs/*.jar"
-        }
-      },
       configuration = {
         runtimes = {
           {
-            name = "JavaSE-17",
-            path = "/var/home/mbarkmin/.sdkman/candidates/java/17.0.9.fx-zulu",
-            default = true
+            name = 'JavaSE-25',
+            path = '/home/mike/.sdkman/candidates/java/25-tem',
+            default = true,
           },
           {
-            name = "JavaSE-11",
-            path = "/var/home/mbarkmin/.sdkman/candidates/java/11.0.21.fx-zulu"
-          }
-        }
-      }
-    }
+            name = 'JavaSE-21',
+            path = '/home/mike/.sdkman/candidates/java/21-tem',
+          },
+          {
+            name = 'JavaSE-17',
+            path = '/home/mike/.sdkman/candidates/java/17.0.13-tem',
+          },
+        },
+      },
+      project = project,
+      implementationsCodeLens = {
+        enabled = true,
+      },
+      referencesCodeLens = {
+        enabled = true,
+      },
+      references = {
+        includeDecompiledSources = true,
+      },
+    },
   },
-  init_options = {
-    bundles = {
-      vim.fn.glob(
-        "/var/home/mbarkmin/Sources/java-debug/com.microsoft.java.debug.plugin/target/com.microsoft.java.debug.plugin-*.jar",
-        1
-      )
-    }
-  }
 }
-require("jdtls").jol_path = "/var/home/mbarkmin/Applications/jol-cli-0.17-full.jar"
-require("jdtls").start_or_attach(config)
-
-local map = require("utils").map
-map("n", "<Leader>vtc", "<cmd>lua require'jdtls'.test_class()<CR>")
-map("n", "<Leader>vtm", "<cmd>lua require'jdtls'.test_nearest_method()<CR>")
+require('jdtls').start_or_attach(config)

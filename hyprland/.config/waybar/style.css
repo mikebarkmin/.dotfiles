@@ -1,0 +1,367 @@
+@import "mocha.css";
+
+* {
+  min-height: 0;
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ----------------------------------------------------- MAIN BACKGROUND --- */
+
+window#waybar>box {
+  margin: 2px;
+}
+
+/* --------------------------------------------------------- DROP SHADOW --- */
+
+window#waybar {
+  background: @base;
+}
+
+/* ------------------------------------------------------------ TOOLTIPS --- */
+
+tooltip {
+  background: @base;
+  border: 1.5px solid @mauve;
+  border-radius: 8px;
+}
+
+tooltip label {
+  color: @text;
+  margin: -1.5px 3px;
+}
+
+/* ---------------------------------------- WORKSPACE BUTTONS and LABELS --- */
+
+#workspaces button {
+  color: @text;
+  border-radius: 8px;
+  box-shadow: none;
+  margin: 2px 0;
+  padding: 0 6px;
+  transition: none;
+}
+
+#workspaces button:hover {
+  color: @mauve;
+  background: @crust;
+  text-shadow: none;
+}
+
+#workspaces button.active {
+  color: @base;
+  background: @mauve;
+}
+
+#workspaces button.urgent {
+  color: @base;
+  background: @yellow;
+}
+
+/* ------------------------------------------------------------- GENERAL --- */
+
+#custom-ws,
+#workspaces,
+#window,
+#memory,
+#cpu,
+#power-profiles-daemon,
+#idle_inhibitor,
+#clock,
+#custom-wifi,
+#bluetooth,
+#mpris,
+#pulseaudio,
+#backlight,
+#battery,
+#custom-winapps,
+#custom-power {
+  opacity: 1;
+  color: @text;
+  padding: 0 4px;
+}
+
+/* ------------------------------------------------------------- MODULES --- */
+
+/* --------------------------------------------------------- window icon --- */
+
+/* --------------------------------------------------------- temperature --- */
+
+#custom-temperature {
+  padding: 0 0 0 1px;
+}
+
+#custom-notification {}
+
+/* -------------------------------------------------------------- memory --- */
+
+#memory {
+  padding: 0 0 0 1px;
+}
+
+#memory.warning {
+  color: @yellow;
+}
+
+#memory.critical {
+  color: @red;
+}
+
+/* ----------------------------------------------------------------- cpu --- */
+
+#cpu {}
+
+/* --------------------------------------------------------- distro icon --- */
+
+#power-profiles-daemon {
+  color: @base;
+  background: @surface1;
+  border-radius: 10px;
+  margin: 2px 4px 2px 0;
+  padding: 0 9px 0 9px;
+}
+
+#power-profiles-daemon.performance {
+  background-color: @red;
+}
+
+#power-profiles-daemon.balanced {
+  background-color: @mauve;
+}
+
+#power-profiles-daemon.power-saver {
+  background-color: @teal;
+}
+
+/* ---------------------------------------------------------------- time --- */
+
+#idle_inhibitor {
+  background: @surface1;
+  border-radius: 10px;
+  margin: 2px 4px 2px 0;
+  padding: 0 6px 0 9px;
+}
+
+#idle_inhibitor.activated {
+  background: @yellow;
+  color: @base;
+}
+
+#idle_inhibitor:hover {
+  color: @mauve;
+}
+
+#clock.time {
+  background: @time;
+  margin-left: -2px;
+  padding: 0 3px 0 0;
+}
+
+#custom-right3 {
+  color: @time;
+  background: @date;
+}
+
+/* ---------------------------------------------------------------- date --- */
+
+#clock.date {
+  background: @date;
+}
+
+#clock.date:hover {
+  color: @hover-fg;
+}
+
+/* ---------------------------------------------------------- media info --- */
+
+#mpris {
+  color: @text;
+  border-radius: 10px;
+  margin: 2px 4px 2px 0;
+  padding: 0 6px 0 9px;
+}
+
+#mpris:hover {
+  background-color: @surface2;
+}
+
+/*
+    output device
+*/
+
+#pulseaudio {
+  color: @text;
+  background-color: @surface1;
+  border-radius: 10px;
+  margin: 2px 4px 2px 0;
+  padding: 0 6px 0 9px;
+}
+
+#pulseaudio:hover {
+  background-color: @surface2;
+}
+
+#pulseaudio.muted {
+  color: @base;
+  background-color: @yellow;
+}
+
+#pulseaudio.bluetooth {
+  color: @base;
+  background-color: @sky;
+}
+
+/* ---------------------------------------------------------- brightness --- */
+
+#backlight {
+  color: @text;
+  background: @surface1;
+  border-radius: 10px;
+  margin: 2px 4px 2px 0;
+  padding: 0 6px 0 9px;
+}
+
+/* ------------------------------------------------------------- battery --- */
+
+#battery {
+  color: @text;
+  background-color: @surface1;
+  border-radius: 10px;
+  margin: 2px 4px 2px 0;
+  padding: 0 6px 0 9px;
+}
+
+#battery.warning {
+  color: @base;
+  background-color: @yellow;
+}
+
+#battery.critical {
+  color: @base;
+  background-color: @red;
+}
+
+#battery.charging {
+  color: @base;
+  background-color: @teal;
+}
+
+/* -------------------------------------------------------- power button --- */
+
+#custom-power {
+  color: @base;
+  background: @sky;
+  border-radius: 10px;
+  margin: 2px 4px 2px 0;
+  padding: 0 6px 0 9px;
+}
+
+#custom-power:hover {
+  color: @base;
+  background: @sky;
+  text-shadow: none;
+  box-shadow: none;
+}
+
+#tray {
+  color: @base;
+  background: @surface1;
+  border-radius: 10px;
+  margin: 2px 4px 2px 0;
+  padding: 2px 6px 2px 9px;
+}
+
+/* ---------------------------------------------------------- FONT SIZES --- */
+
+/*
+    NOTE: Be careful when changing font sizes, as they
+    can affect alignment.
+
+    Try adjusting whole numbers first, then refine with
+    decimals.
+
+    If you increase or decrease a value, make the same
+    change to all properties in this section to keep
+    the layout consistent.
+*/
+
+* {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 12px;
+  font-weight: bold;
+}
+
+tooltip label,
+#window label,
+#mpris {
+  font-weight: normal;
+}
+
+/* WinApps container status module */
+#custom-winapps {
+  margin: 2px 4px 2px 0;
+  padding: 0 11px 0 9px;
+  border-radius: 10px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+#custom-winapps.running {
+  background-color: @green;
+  color: #181825;
+}
+
+#custom-winapps.stopped {
+  background-color: @yellow;
+  color: #181825;
+}
+
+#custom-winapps.unknown {
+  background-color: @blue;
+  color: #181825;
+}
+
+#custom-winapps.missing {
+  background-color: @sky;
+  color: #cdd6f4;
+}
+
+#custom-winapps.error {
+  background-color: @pink;
+  color: #181825;
+  text-decoration: line-through;
+}
+
+#custom-winapps:hover {
+  background-color: #585b70;
+  color: #cdd6f4;
+}
+
+/* Pangolin status module */
+#custom-pangolin,
+#custom-dns{
+  margin: 2px 4px 2px 0;
+  padding: 0 8px 0 8px;
+  border-radius: 10px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+#custom-pangolin.connected,
+#custom-dns.dns {
+  background: @surface1;
+  color: #181825;
+}
+
+#custom-pangolin.stopped,
+#custom-dns.no-dns {
+  background-color: @yellow;
+  color: #181825;
+}
+
+#custom-pangolin:hover,
+#custom-dns:hover {
+  background-color: #585b70;
+  color: #cdd6f4;
+}

@@ -1,0 +1,62 @@
+#!/bin/bash
+set -e
+
+function switch_state() {
+    # check if $1 is recording
+    hyprctl keyword monitor DP-7, addreserved, 0, 0, 0, 0
+    if [ "$1" == "recording" ]; then
+        cat ~/.config/waybar/recording.jsonc >~/.config/waybar/config.jsonc
+        # If OBS is not running, run it
+        if ! pgrep -x "obs" >/dev/null; then
+            hyprctl dispatch exec "[workspace 5] obs"
+            hyprctl dispatch moveworkspacetomonitor 10 "DP-7"
+            hyprctl dispatch moveworkspacetomonitor 5 "DP-8"
+        fi
+        exit 0
+    elif [ "$1" == "recording-math" ]; then
+        cat ~/.config/waybar/recording.jsonc >~/.config/waybar/config.jsonc
+        # If OBS is not running, run it
+        if ! pgrep -x "obs" >/dev/null; then
+            hyprctl dispatch exec "[workspace 5] obs"
+            hyprctl dispatch exec "[workspace 10] rnote"
+            hyprctl dispatch exec "[workspace 10] gtk-launch 'Casio FX--fx-991DE X Emulator--1741030725.517427.desktop'"
+            hyprctl dispatch exec "[workspace 10] kitty"
+            hyprctl dispatch moveworkspacetomonitor 10 "DP-7"
+            hyprctl dispatch moveworkspacetomonitor 5 "DP-8"
+        fi
+        exit 0
+    elif [ "$1" == "short-rnote" ]; then
+        cat ~/.config/waybar/recording.jsonc >~/.config/waybar/config.jsonc
+
+        # If OBS is not running, run it
+        if ! pgrep -x "obs" >/dev/null; then
+            hyprctl dispatch exec "[workspace 5] obs"
+        fi
+
+        hyprctl dispatch moveworkspacetomonitor 5 "DP-8"
+        hyprctl dispatch moveworkspacetomonitor 10 "DP-7"
+
+        # Add reserved area for recording
+        hyprctl keyword monitor DP-7, addreserved, 0, 180, 650, 590
+        exit 0
+    elif [ "$1" == "short-terminal" ]; then
+        cat ~/.config/waybar/recording.jsonc >~/.config/waybar/config.jsonc
+
+        # If OBS is not running, run it
+        if ! pgrep -x "obs" >/dev/null; then
+            hyprctl dispatch exec "[workspace 5] obs"
+        fi
+        hyprctl dispatch moveworkspacetomonitor 5 "DP-8"
+        hyprctl dispatch moveworkspacetomonitor 10 "DP-7"
+        # Add reserved area for recording
+        hyprctl keyword monitor DP-7, addreserved, 0, 348, 656, 656
+        exit 0
+    else
+        cat ~/.config/waybar/default.jsonc >~/.config/waybar/config.jsonc
+        exit 0
+    fi
+}
+
+# choose state with rofi
+choose_state=$(echo -e "default\nrecording\nrecording-math\nshort-rnote\nshort-terminal" | rofi -dmenu -p "Choose a state")
+switch_state $choose_state

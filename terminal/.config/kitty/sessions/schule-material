@@ -1,0 +1,12 @@
+cd Sources/schule-material
+launch source .env
+launch nvim
+
+new_tab Process
+cd Sources/schule-material
+launch sh -c "source .env && exec zsh"
+
+new_tab File Manager
+cd Sources/schule-material
+launch source .env
+launch yazi

@@ -1,0 +1,12 @@
+[[plugin.deps]]
+use = "boydaihungst/gvfs"
+rev = "9046dd8"
+hash = "3d31be8146da9555d48b1a731bf195dd"
+
+[[plugin.deps]]
+use = "boydaihungst/save-clipboard-to-file"
+rev = "9fcd6c4"
+hash = "d67c9d3df0b067be229fb526c77b08ae"
+
+[flavor]
+deps = []

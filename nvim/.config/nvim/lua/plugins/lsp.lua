@@ -1,127 +1,101 @@
-require("mason").setup(
-  {
-    ui = {
-      icons = {
-        server_installed = "✓",
-        server_pending = "➜",
-        server_uninstalled = "✗"
-      }
-    }
-  }
-)
+-- LSP-related plugins
 
-require("mason-lspconfig").setup(
+return {
+  -- Fidget for LSP progress notifications
   {
-    ensure_installed = {
-      "astro",
-      "tsserver", -- for javascript
-      "jsonls", -- for json
-      "jdtls", -- for java
-      "texlab", -- for latex
-      "ltex",
-      "sqlls", -- for sql
-      "pyright", -- for python
-      "lua_ls", -- for lua
-      "gopls", -- for go
-      "yamlls",
-      "bashls",
-      "dockerls",
-      "html",
-      "cssls",
-      "marksman"
-    }
-  }
-)
-
-require("mason-tool-installer").setup {
-  ensure_installed = {
-    "checkstyle",
-    "codespell",
-    "java-debug-adapter",
-    "js-debug-adapter",
-    "luaformatter",
-    "latexindent"
+    'j-hui/fidget.nvim',
+    event = 'VeryLazy',
+    opts = {},
   },
-  auto_update = true,
-  run_on_start = true,
-  start_delay = 3000,
-  debouce_hours = 5
-}
 
-require("mason-lspconfig").setup_handlers {
-  -- default handler - setup with default settings
-  function(server_name)
-    require("lspconfig")[server_name].setup {}
-  end,
-  ["lua_ls"] = function()
-    require("lspconfig").lua_ls.setup {
-      settings = {
-        Lua = {
-          diagnostics = {
-            globals = {"vim"}
-          }
-        }
-      }
-    }
-  end,
-  ["texlab"] = function()
-    require("lspconfig").texlab.setup {
-      settings = {
-        texlab = {
-          auxDirectory = "build/pdf",
-          chktex = {
-            onEdit = true
-          },
-          build = {
-            executable = "latexmk",
-            forwardSearchAfter = false,
-            onSave = false
-          }
-        }
-      }
-    }
-  end,
-  ["ltex"] = function()
-    require("lspconfig").ltex.setup(
-      {
-        settings = {
-          ltex = {
-            enabled = {"latex", "tex", "bib", "markdown", "text", "txt"},
-            diagnosticSeverity = "information",
-            setenceCacheSize = 2000,
-            additionalRules = {
-              enablePickyRules = true,
-              motherTongue = "de"
-            },
-            trace = {server = "verbose"},
-            dictionary = {},
-            disabledRules = {},
-            hiddenFalsePositives = {}
-          }
-        }
-      }
-    )
-  end
-}
-
--- options for lsp diagnostic
-vim.lsp.handlers["textDocument/publishDiagnostics"] =
-  vim.lsp.with(
-  vim.lsp.diagnostic.on_publish_diagnostics,
+  -- Native LSP configuration
   {
-    underline = true,
-    signs = true,
-    update_in_insert = true,
-    virtual_text = {
-      true,
-      spacing = 6
-      --severity_limit='Error'  -- Only show virtual text on error
-    }
-  }
-)
+    name = 'native-lsp-config',
+    dir = vim.fn.stdpath('config'),
+    event = { 'BufReadPre', 'BufNewFile' },
+    config = function()
+      -- Diagnostic configuration
+      vim.diagnostic.config {
+        severity_sort = true,
+        float = { border = 'rounded', source = 'if_many' },
+        underline = { severity = vim.diagnostic.severity.ERROR },
+        signs = vim.g.have_nerd_font and {
+          text = {
+            [vim.diagnostic.severity.ERROR] = '󰅚 ',
+            [vim.diagnostic.severity.WARN] = '󰀪 ',
+            [vim.diagnostic.severity.INFO] = '󰋽 ',
+            [vim.diagnostic.severity.HINT] = '󰌶 ',
+          },
+        } or {},
+        virtual_text = {
+          source = 'if_many',
+          spacing = 2,
+          format = function(diagnostic)
+            return diagnostic.message
+          end,
+        },
+      }
 
--- se LSP diagnostic symbols/signs
-vim.api.nvim_command [[ sign define LspDiagnosticsSignError         text=✗ texthl=LspDiagnosticsSignError       linehl= numhl= ]]
-vim.api.nvim_command [[ sign define LspDiagnosticsSignWarning       text=⚠ texthl=LspDiagnosticsSignWarning     linehl= numhl= ]]
-vim.api.nvim_command [[ sign define LspDiagnosticsSignInformation   text= texthl=LspDiagnosticsSignInformation linehl= numhl= ]]
-vim.api.nvim_command [[ sign define LspDiagnosticsSignHint          text= texthl=LspDiagnosticsSignHint        linehl= numhl= ]]
+      -- NOTE: LSP servers are configured in ftplugin/{filetype}.lua files
+      -- NOTE: LSP keymaps are configured in lua/config/autocmds.lua (LspAttach)
+    end,
+  },
+
+  -- Blink.cmp for completion
+  {
+    'saghen/blink.cmp',
+    event = 'VimEnter',
+    version = '1.*',
+    dependencies = {
+      {
+        'L3MON4D3/LuaSnip',
+        version = '2.*',
+        build = (function()
+          if vim.fn.has('win32') == 1 or vim.fn.executable('make') == 0 then
+            return
+          end
+          return 'make install_jsregexp'
+        end)(),
+        opts = {},
+      },
+      'folke/lazydev.nvim',
+    },
+    opts = {
+      keymap = { preset = 'default' },
+      appearance = { nerd_font_variant = 'mono' },
+      completion = {
+        documentation = { auto_show = false, auto_show_delay_ms = 500 },
+      },
+      sources = {
+        default = { 'lsp', 'path', 'snippets', 'lazydev' },
+        providers = {
+          lazydev = { module = 'lazydev.integrations.blink', score_offset = 100 },
+        },
+      },
+      snippets = { preset = 'luasnip' },
+      fuzzy = { implementation = 'lua' },
+      signature = { enabled = true },
+    },
+  },
+
+  -- Catppuccin colorscheme
+  {
+    'catppuccin/nvim',
+    name = 'catppuccin',
+    priority = 1000,
+    init = function()
+      vim.cmd.colorscheme('catppuccin-mocha')
+    end,
+  },
+
+  -- Lazydev for Lua/Neovim development
+  {
+    'folke/lazydev.nvim',
+    ft = 'lua',
+    opts = {
+      library = {
+        { path = '${3rd}/luv/library', words = { 'vim%.uv' } },
+      },
+    },
+  },
+}

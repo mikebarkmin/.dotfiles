@@ -12,7 +12,3 @@ for folder in $(echo $STOW_FOLDERS | sed "s/,/ /g"); do
 done
 popd
 
-nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
-
-$HOME/.tmux/plugins/tpm/bin/install_plugins
-$HOME/.tmux/plugins/tpm/bin/update_plugins all

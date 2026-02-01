@@ -1,0 +1,10 @@
+cd Sources/openpatch/hyperbook
+launch nvim
+
+new_tab Process
+cd Sources/openpatch/hyperbook
+launch sh -c "git pull && pnpm i && exec zsh"
+
+new_tab File Manager
+cd Sources/openpatch/hyperbook
+launch yazi

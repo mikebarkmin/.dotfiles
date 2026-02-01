@@ -3,7 +3,7 @@
 ## Getting Started
 
 My `dotfiles` are managed by `stow`. So you need that before continuing. You also need `git-crypt` for the private
-`personal` and `work` submodule. These contain information not for the public eyes. You can take a look at the `demo`
+`personal` submodule. These contain information not for the public eyes. You can take a look at the `demo`
 submodule to get an idea how these work.
 
 ## Installation
@@ -20,20 +20,16 @@ You can install three variants of the dotfiles.
 |-----|----|----|
 | demo | `./install-demo` | Just for demonstration |
 | personal | `./install-personal` | Personal config |
-| work | `./install-work` | Work config |
 
-For personal and work use private repositories which are encrypted with `git-crypt`. So, you also need the correct pgp
+For personal use private repositories which are encrypted with `git-crypt`. So, you also need the correct pgp
 key.
 
 ## Auto Installation and Setup
 
-You can use this script to automatic setup a Fedora Silverblue installation.
-
 ```
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/mikebarkmin/silberblau/main/bin/install.sh)
+cd ~/.dotfiles
+./install-personal
 ```
-
-For more information visit the [silberblau repository](https://github.com/mikebarkmin/silberblau).
 
 ## Inspiration
 

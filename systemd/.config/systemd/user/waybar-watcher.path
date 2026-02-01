@@ -1,0 +1,5 @@
+[Path]
+PathModified=%h/.config/waybar
+
+[Install]
+WantedBy=graphical-session.target

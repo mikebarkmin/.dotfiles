@@ -1,0 +1,183 @@
+#!/bin/bash
+
+# Hyprland Monitor Hot-plug Handler
+# Handles automatic monitor configuration for laptop with external displays
+
+LAPTOP_MONITOR="eDP-1"
+EXTERNAL_MONITOR_2="BNQ BenQ RL2460H KCF01940SL0"
+EXTERNAL_MONITOR_1="BNQ BenQ BL2405 H4H02869SL0"
+BEAMER_MONITOR="HDMI-A-1"
+
+# Log file for debugging
+LOG_FILE="/tmp/hyprland-monitors.log"
+
+# Function to log messages
+log_message() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "$LOG_FILE"
+}
+
+# Function to get connected monitors
+get_connected_monitors() {
+    hyprctl monitors all -j | jq -r '.[].name'
+    hyprctl monitors all -j | jq -r '.[].description'
+}
+
+# Function to check if monitor is connected
+is_monitor_connected() {
+    local monitor="$1"
+    get_connected_monitors | grep -q "^$monitor$"
+}
+
+# Function to configure monitors when both external monitors are connected
+configure_external_setup() {
+    log_message "Configuring external monitor setup"
+    
+    # Disable laptop monitor
+    hyprctl keyword monitor "$LAPTOP_MONITOR,disable"
+    
+    # Configure external monitors
+    hyprctl keyword monitor "desc:$EXTERNAL_MONITOR_1,1920x1080@60.0,0x0,1.0"
+    hyprctl keyword monitor "desc:$EXTERNAL_MONITOR_2,1920x1080@60.0,1920x0,1.0"
+    
+    log_message "External setup configured - laptop monitor disabled"
+}
+
+# Function to configure monitors when external monitors are disconnected
+configure_laptop_setup() {
+    log_message "Configuring laptop-only setup"
+    
+    # Enable laptop monitor
+    hyprctl keyword monitor "$LAPTOP_MONITOR,1920x1200@60.0,0x0,1.0"
+    
+    # Ensure external monitors are disabled if they exist
+    hyprctl keyword monitor "desc:$EXTERNAL_MONITOR_1,disable" 2>/dev/null
+    hyprctl keyword monitor "desc:$EXTERNAL_MONITOR_2,disable" 2>/dev/null
+    
+    log_message "Laptop setup configured - external monitors disabled"
+}
+
+# Function to configure beamer/projector mode
+configure_beamer_mode() {
+    log_message "Configuring beamer mode (mirroring to HDMI-A-1)"
+    
+    # Enable laptop monitor at standard resolution
+    hyprctl keyword monitor "$LAPTOP_MONITOR,1920x1200@60.0,0x0,1.0"
+    
+    # Mirror laptop display to beamer
+    hyprctl keyword monitor "$BEAMER_MONITOR,preferred,auto,1.0,mirror,$LAPTOP_MONITOR"
+    
+    # Disable external monitors if they exist
+    hyprctl keyword monitor "desc:$EXTERNAL_MONITOR_1,disable" 2>/dev/null
+    hyprctl keyword monitor "desc:$EXTERNAL_MONITOR_2,disable" 2>/dev/null
+    
+    log_message "Beamer mode configured - eDP-1 mirrored to HDMI-A-1"
+}
+
+# Main function to handle monitor configuration
+handle_monitor_change() {
+    local dp7_connected=false
+    local dp9_connected=false
+    local beamer_connected=false
+    
+    # Check which monitors are connected
+    if is_monitor_connected "$EXTERNAL_MONITOR_1"; then
+        dp7_connected=true
+    fi
+    
+    if is_monitor_connected "$EXTERNAL_MONITOR_2"; then
+        dp9_connected=true
+    fi
+    
+    if is_monitor_connected "$BEAMER_MONITOR"; then
+        beamer_connected=true
+    fi
+    
+    log_message "Monitor status - DP-7: $dp7_connected, DP-9: $dp9_connected, HDMI-A-1: $beamer_connected"
+    
+    # Configure based on connected monitors (beamer mode takes priority)
+    if [ "$beamer_connected" = true ]; then
+        configure_beamer_mode
+    elif [ "$dp7_connected" = true ] && [ "$dp9_connected" = true ]; then
+        configure_external_setup
+    else
+        configure_laptop_setup
+    fi
+}
+
+# Function to monitor for changes using udev
+monitor_hotplug() {
+    log_message "Starting monitor hotplug daemon"
+    
+    # Initial configuration
+    handle_monitor_change
+    
+    # Monitor for udev events
+    udevadm monitor --udev --subsystem-match=drm | while read -r line; do
+        if echo "$line" | grep -q "drm"; then
+            log_message "Detected display event: $line"
+            # Small delay to allow the system to register the change
+            sleep 1
+            handle_monitor_change
+        fi
+    done
+}
+
+# Function to run as a one-time check
+run_once() {
+    log_message "Running one-time monitor configuration check"
+    handle_monitor_change
+}
+
+# Function to show current monitor status
+show_status() {
+    echo "Current monitor configuration:"
+    hyprctl monitors
+    echo
+    echo "Connected monitors:"
+    get_connected_monitors
+}
+
+# Function to show help
+show_help() {
+    cat << EOF
+Hyprland Monitor Hot-plug Handler
+
+Usage: $0 [OPTION]
+
+Options:
+    -d, --daemon     Run as daemon to monitor hot-plug events
+    -o, --once       Run configuration check once and exit
+    -s, --status     Show current monitor status
+    -h, --help       Show this help message
+
+Configuration:
+    - When HDMI-A-1 is connected: Beamer mode (eDP-1 mirrored to HDMI-A-1)
+    - When both DP-7 and DP-9 are connected: Laptop monitor (eDP-1) is disabled
+    - When both external monitors are disconnected: Laptop monitor is enabled
+    - When only one external monitor is connected: Both laptop and external monitor are enabled
+
+Priority order: Beamer mode > Dual external > Mixed > Laptop only
+
+Log file: $LOG_FILE
+EOF
+}
+
+# Parse command line arguments
+case "${1:-}" in
+    -d|--daemon)
+        monitor_hotplug
+        ;;
+    -o|--once)
+        run_once
+        ;;
+    -s|--status)
+        show_status
+        ;;
+    -h|--help)
+        show_help
+        ;;
+    *)
+        echo "Use --help for usage information"
+        exit 1
+        ;;
+esac

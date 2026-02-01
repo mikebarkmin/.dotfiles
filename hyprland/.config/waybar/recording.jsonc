@@ -1,0 +1,10 @@
+{
+  "include": [
+    "~/.config/waybar/default.jsonc",
+    "~/.config/waybar/shared.jsonc"
+  ],
+  "output": [
+    "eDP-1",
+    "DP-9"
+  ]
+}

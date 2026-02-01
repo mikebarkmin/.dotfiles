@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+# Usage:
+# ./generate-module-info.sh <module-name> <src-folder> <output-file>
+# Example:
+# ./generate-module-info.sh org.openpatch.scratch src module-info.java
+
+MODULE_NAME="$1"
+SRC_DIR="$2"
+OUTPUT_FILE="$3"
+
+if [[ -z "$MODULE_NAME" || -z "$SRC_DIR" || -z "$OUTPUT_FILE" ]]; then
+    echo "Usage: $0 <module-name> <src-folder> <output-file>"
+    exit 1
+fi
+
+# 1️⃣ Find all packages and turn them into `exports` lines
+echo "module $MODULE_NAME {" > "$OUTPUT_FILE"
+
+find "$SRC_DIR" -type f -name "*.java" \
+    | sed -n 's/^.*package \([^;]*\);$/\1/p' \
+    | sort -u \
+    | while read -r pkg; do
+        echo "    exports $pkg;" >> "$OUTPUT_FILE"
+    done
+
+# 2️⃣ Compile to temp directory to run jdeps
+TMP_DIR=$(mktemp -d)
+javac -d "$TMP_DIR" $(find "$SRC_DIR" -name "*.java") 2>/dev/null
+
+# 3️⃣ Use jdeps to detect required modules
+REQUIRES=$(jdeps --module-path "$TMP_DIR" --multi-release 17 --print-module-deps "$TMP_DIR" 2>/dev/null)
+
+if [[ -n "$REQUIRES" ]]; then
+    for mod in $(echo "$REQUIRES" | tr ',' ' '); do
+        if [[ "$mod" != "$MODULE_NAME" ]]; then
+            echo "    requires $mod;" >> "$OUTPUT_FILE"
+        fi
+    done
+fi
+
+echo "}" >> "$OUTPUT_FILE"
+
+# 4️⃣ Show result
+echo "Generated $OUTPUT_FILE:"
+cat "$OUTPUT_FILE"
+

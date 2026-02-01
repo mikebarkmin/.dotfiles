@@ -1,0 +1,92 @@
+2025-05-27 22:30:24 - Configuring mixed setup with 
+2025-05-27 22:30:24 - Mixed setup configured with 
+2025-05-27 22:31:03 - Configuring mixed setup with 
+2025-05-27 22:31:03 - Mixed setup configured with 
+2025-05-27 22:33:43 - Running one-time monitor configuration check
+2025-05-27 22:33:43 - Monitor status - DP-7: true, DP-9: true, HDMI-A-1: false
+2025-05-27 22:33:43 - Configuring external monitor setup
+2025-05-27 22:33:43 - External setup configured - laptop monitor disabled
+2025-05-27 22:34:35 - Running one-time monitor configuration check
+2025-05-27 22:34:35 - Monitor status - DP-7: false, DP-9: false, HDMI-A-1: false
+2025-05-27 22:34:35 - Configuring laptop-only setup
+2025-05-27 22:34:36 - Laptop setup configured - external monitors disabled
+2025-05-27 22:35:14 - Running one-time monitor configuration check
+2025-05-27 22:35:14 - Monitor status - DP-7: true, DP-9: true, HDMI-A-1: false
+2025-05-27 22:35:14 - Configuring external monitor setup
+2025-05-27 22:35:15 - External setup configured - laptop monitor disabled
+2025-05-27 22:35:37 - Running one-time monitor configuration check
+2025-05-27 22:35:39 - Monitor status - DP-7: true, DP-9: true, HDMI-A-1: false
+2025-05-27 22:35:39 - Configuring external monitor setup
+2025-05-27 22:35:39 - External setup configured - laptop monitor disabled
+2025-05-27 22:36:22 - Running one-time monitor configuration check
+2025-05-27 22:36:22 - Monitor status - DP-7: true, DP-9: true, HDMI-A-1: false
+2025-05-27 22:36:22 - Configuring external monitor setup
+2025-05-27 22:36:23 - External setup configured - laptop monitor disabled
+2025-05-27 22:42:46 - Starting monitor hotplug daemon
+2025-05-27 22:42:46 - Monitor status - DP-7: true, DP-9: true, HDMI-A-1: false
+2025-05-27 22:42:46 - Configuring external monitor setup
+2025-05-27 22:42:47 - External setup configured - laptop monitor disabled
+2025-05-27 22:49:06 - Starting monitor hotplug daemon
+2025-05-27 22:49:06 - Monitor status - DP-7: false, DP-9: false, HDMI-A-1: false
+2025-05-27 22:49:06 - Configuring laptop-only setup
+2025-05-27 22:49:07 - Laptop setup configured - external monitors disabled
+2025-05-27 22:49:18 - Detected display event: UDEV  [544.709227] change   /devices/pci0000:00/0000:00:08.1/0000:c4:00.0/drm/card1 (drm)
+2025-05-27 22:49:19 - Monitor status - DP-7: false, DP-9: false, HDMI-A-1: false
+2025-05-27 22:49:19 - Configuring laptop-only setup
+2025-05-27 22:49:19 - Laptop setup configured - external monitors disabled
+2025-05-27 22:49:19 - Detected display event: UDEV  [544.710194] remove   /devices/pci0000:00/0000:00:08.1/0000:c4:00.0/drm/card1/card1-DP-8 (drm)
+2025-05-27 22:49:20 - Monitor status - DP-7: false, DP-9: false, HDMI-A-1: false
+2025-05-27 22:49:20 - Configuring laptop-only setup
+2025-05-27 22:49:20 - Laptop setup configured - external monitors disabled
+2025-05-27 22:49:20 - Detected display event: UDEV  [544.710246] remove   /devices/pci0000:00/0000:00:08.1/0000:c4:00.0/drm/card1/card1-DP-10 (drm)
+2025-05-27 22:49:21 - Monitor status - DP-7: false, DP-9: false, HDMI-A-1: false
+2025-05-27 22:49:21 - Configuring laptop-only setup
+2025-05-27 22:49:21 - Laptop setup configured - external monitors disabled
+2025-05-27 22:49:21 - Detected display event: UDEV  [544.711217] change   /devices/pci0000:00/0000:00:08.1/0000:c4:00.0/drm/card1 (drm)
+2025-05-27 22:49:22 - Monitor status - DP-7: false, DP-9: false, HDMI-A-1: false
+2025-05-27 22:49:22 - Configuring laptop-only setup
+2025-05-27 22:49:22 - Laptop setup configured - external monitors disabled
+2025-05-27 22:49:22 - Detected display event: UDEV  [544.712521] remove   /devices/pci0000:00/0000:00:08.1/0000:c4:00.0/drm/card1/card1-DP-11 (drm)
+2025-05-27 22:49:23 - Monitor status - DP-7: false, DP-9: false, HDMI-A-1: false
+2025-05-27 22:49:23 - Configuring laptop-only setup
+2025-05-27 22:49:23 - Laptop setup configured - external monitors disabled
+2025-05-27 22:49:23 - Detected display event: UDEV  [544.714403] change   /devices/pci0000:00/0000:00:08.1/0000:c4:00.0/drm/card1 (drm)
+2025-05-27 22:49:24 - Monitor status - DP-7: false, DP-9: false, HDMI-A-1: false
+2025-05-27 22:49:24 - Configuring laptop-only setup
+2025-05-27 22:49:24 - Laptop setup configured - external monitors disabled
+2025-05-27 22:49:24 - Detected display event: UDEV  [544.834528] change   /devices/pci0000:00/0000:00:08.1/0000:c4:00.0/drm/card1 (drm)
+2025-05-27 22:49:26 - Monitor status - DP-7: false, DP-9: false, HDMI-A-1: false
+2025-05-27 22:49:26 - Configuring laptop-only setup
+2025-05-27 22:49:26 - Laptop setup configured - external monitors disabled
+2025-05-27 22:49:26 - Detected display event: UDEV  [545.017479] change   /devices/pci0000:00/0000:00:08.1/0000:c4:00.0/drm/card1 (drm)
+2025-05-27 22:49:27 - Monitor status - DP-7: false, DP-9: false, HDMI-A-1: false
+2025-05-27 22:49:27 - Configuring laptop-only setup
+2025-05-27 22:49:27 - Laptop setup configured - external monitors disabled
+2025-05-27 22:49:27 - Detected display event: UDEV  [551.723650] add      /devices/pci0000:00/0000:00:08.1/0000:c4:00.0/drm/card1/card1-DP-8 (drm)
+2025-05-27 22:49:29 - Monitor status - DP-7: false, DP-9: false, HDMI-A-1: false
+2025-05-27 22:49:29 - Configuring laptop-only setup
+2025-05-27 22:49:29 - Laptop setup configured - external monitors disabled
+2025-05-27 22:49:29 - Detected display event: UDEV  [551.726027] change   /devices/pci0000:00/0000:00:08.1/0000:c4:00.0/drm/card1 (drm)
+2025-05-27 22:49:30 - Monitor status - DP-7: false, DP-9: false, HDMI-A-1: false
+2025-05-27 22:49:30 - Configuring laptop-only setup
+2025-05-27 22:49:30 - Laptop setup configured - external monitors disabled
+2025-05-27 22:49:30 - Detected display event: UDEV  [551.726773] add      /devices/pci0000:00/0000:00:08.1/0000:c4:00.0/drm/card1/card1-DP-10 (drm)
+2025-05-27 22:49:31 - Monitor status - DP-7: false, DP-9: false, HDMI-A-1: false
+2025-05-27 22:49:31 - Configuring laptop-only setup
+2025-05-27 22:49:31 - Laptop setup configured - external monitors disabled
+2025-05-27 22:49:31 - Detected display event: UDEV  [551.728626] change   /devices/pci0000:00/0000:00:08.1/0000:c4:00.0/drm/card1 (drm)
+2025-05-27 22:49:32 - Monitor status - DP-7: false, DP-9: false, HDMI-A-1: false
+2025-05-27 22:49:32 - Configuring laptop-only setup
+2025-05-27 22:49:32 - Laptop setup configured - external monitors disabled
+2025-05-27 22:49:32 - Detected display event: UDEV  [551.753382] add      /devices/pci0000:00/0000:00:08.1/0000:c4:00.0/drm/card1/card1-DP-11 (drm)
+2025-05-27 22:49:33 - Monitor status - DP-7: false, DP-9: false, HDMI-A-1: false
+2025-05-27 22:49:33 - Configuring laptop-only setup
+2025-05-27 22:49:33 - Laptop setup configured - external monitors disabled
+2025-05-27 22:49:33 - Detected display event: UDEV  [551.755495] change   /devices/pci0000:00/0000:00:08.1/0000:c4:00.0/drm/card1 (drm)
+2025-05-27 22:49:34 - Monitor status - DP-7: false, DP-9: false, HDMI-A-1: false
+2025-05-27 22:49:34 - Configuring laptop-only setup
+2025-05-27 22:49:34 - Laptop setup configured - external monitors disabled
+2025-05-27 22:49:34 - Detected display event: UDEV  [551.757101] change   /devices/pci0000:00/0000:00:08.1/0000:c4:00.0/drm/card1 (drm)
+2025-05-27 22:49:35 - Monitor status - DP-7: false, DP-9: false, HDMI-A-1: false
+2025-05-27 22:49:35 - Configuring laptop-only setup
+2025-05-27 22:49:35 - Laptop setup configured - external monitors disabled

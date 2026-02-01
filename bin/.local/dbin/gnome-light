@@ -1,9 +1,0 @@
-#!/bin/bash
-gsettings set org.gnome.desktop.interface gtk-theme 'adw-gtk3'
-gsettings set org.gnome.desktop.interface color-scheme 'default'
-gsettings set org.gnome.Terminal.ProfilesList default de8a9081-8352-4ce4-9519-5de655ad9361
-dconf write /org/gnome/terminal/legacy/theme-variant "'light'"
-
-sed -i --follow-symlinks 's/tmux_dark/tmux_light/' ~/.tmux.conf
-tmux source-file ~/.tmux.conf
-tmux set-environment THEME 'light'

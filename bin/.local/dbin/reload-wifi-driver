@@ -1,0 +1,2 @@
+ #!/bin/bash
+ sudo modprobe -rv ath11k_pci && sleep 3 && sudo modprobe -v ath11k_pci
