@@ -153,6 +153,30 @@ function y() {
 	rm -f -- "$tmp"
 }
 
+function dot() {
+	pushd $DOTFILES
+	vim .
+	popd
+}
+
+function dotc() {
+	pushd $DOTFILES
+	pushd personal
+	git add .
+	git commit -m "automagic message"
+	git push origin main
+	popd
+	pushd demo
+	git add .
+	git commit -m "automagic message"
+	git push origin main
+	popd
+	git add .
+	git commit -m "automagic message"
+	git push origin main
+	popd
+}
+
 function lbin() {
 	pushd ~/.local/bin/
 	vim
