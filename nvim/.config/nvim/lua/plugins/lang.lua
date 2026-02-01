@@ -6,4 +6,13 @@ return {
     'mfussenegger/nvim-jdtls',
     -- Configured in ftplugin/java.lua
   },
+
+  -- Otter for embedded LSP in markdown code blocks
+  {
+    'jmbuhr/otter.nvim',
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter',
+    },
+    opts = {},
+  },
 }
