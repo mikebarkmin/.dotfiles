@@ -5,7 +5,7 @@ Wants=graphical-session.target
 
 [Service]
 Type=simple
-ExecStart=%h/.local/bin/hyprland-monitor --daemon
+ExecStart=%h/.local/dbin/hyprland-monitor --daemon
 Restart=always
 RestartSec=5
 Environment=HYPRLAND_INSTANCE_SIGNATURE=%i
