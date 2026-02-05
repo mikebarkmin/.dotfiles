@@ -2,7 +2,7 @@
 prepend_keymap = [
     { on = [ "p", "p" ], run = "paste"},
     { on = [ "p", "c" ], run = "plugin save-clipboard-to-file", desc = "Paste clipboard content to file and hover after created" },
-    { on = [ "y", "y"], run = "yank"},
+    { on  = ["y", "y"], run = [ 'shell -- for path in %s; do echo "file://$path"; done | wl-copy -t text/uri-list', "yank" ], desc = "Yank to clipboard"},
     { on = [ "y", "m" ], run = '''shell --
     paths=$(for p in "$@"; do echo "$p"; done | paste -s -d,)
     thunderbird -compose "attachment='$paths'"
