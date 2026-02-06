@@ -91,4 +91,77 @@ return {
   {
     'LunarVim/bigfile.nvim',
   },
+
+  -- Hyperbook development helper
+  {
+    'folke/which-key.nvim',
+    optional = true,
+    opts = function(_, opts)
+      -- Check if .hyperbook or .hyperlibrary exists in root
+      local function is_hyperbook_project()
+        local root = vim.fn.getcwd()
+        return vim.fn.filereadable(root .. '/.hyperbook') == 1
+          or vim.fn.filereadable(root .. '/.hyperlibrary') == 1
+      end
+
+      local hyperbook_job_id = nil
+      local hyperbook_port = 8080
+
+      local function start_hyperbook_dev()
+        if not is_hyperbook_project() then
+          vim.notify('Not a Hyperbook project (.hyperbook or .hyperlibrary not found)', vim.log.levels.WARN)
+          return
+        end
+        if hyperbook_job_id then
+          vim.notify('Hyperbook dev server already running', vim.log.levels.INFO)
+          return
+        end
+        hyperbook_job_id = vim.fn.jobstart('npx hyperbook dev', {
+          on_exit = function()
+            hyperbook_job_id = nil
+          end,
+        })
+        vim.notify('Hyperbook dev server started on port ' .. hyperbook_port, vim.log.levels.INFO)
+      end
+
+      local function stop_hyperbook_dev()
+        if hyperbook_job_id then
+          vim.fn.jobstop(hyperbook_job_id)
+          hyperbook_job_id = nil
+          vim.notify('Hyperbook dev server stopped', vim.log.levels.INFO)
+        else
+          vim.notify('No Hyperbook dev server running', vim.log.levels.WARN)
+        end
+      end
+
+      local function open_hyperbook_browser()
+        if not is_hyperbook_project() then
+          vim.notify('Not a Hyperbook project (.hyperbook or .hyperlibrary not found)', vim.log.levels.WARN)
+          return
+        end
+        local url = 'http://localhost:' .. hyperbook_port
+        vim.fn.jobstart('xdg-open "' .. url .. '"')
+        vim.notify('Opening ' .. url, vim.log.levels.INFO)
+      end
+
+      local function set_hyperbook_port()
+        vim.ui.input({ prompt = 'Hyperbook port: ', default = tostring(hyperbook_port) }, function(input)
+          if input then
+            hyperbook_port = tonumber(input) or 8080
+            vim.notify('Hyperbook port set to ' .. hyperbook_port, vim.log.levels.INFO)
+          end
+        end)
+      end
+
+      -- Register keymaps only if in a hyperbook project
+      if is_hyperbook_project() then
+        vim.keymap.set('n', '<leader>hd', start_hyperbook_dev, { desc = 'Start Hyperbook dev server' })
+        vim.keymap.set('n', '<leader>hs', stop_hyperbook_dev, { desc = 'Stop Hyperbook dev server' })
+        vim.keymap.set('n', '<leader>ho', open_hyperbook_browser, { desc = 'Open Hyperbook in browser' })
+        vim.keymap.set('n', '<leader>hp', set_hyperbook_port, { desc = 'Set Hyperbook port' })
+      end
+
+      return opts
+    end,
+  },
 }
