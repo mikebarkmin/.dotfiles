@@ -121,9 +121,9 @@ function confsd() {
 	popd
 }
 
-function vault() {
-	pushd ~/Obsidian/Vault
-	nvim Index.md
+function confv() {
+	pushd ~/.config/nvim/
+	vim
 	popd
 }
 

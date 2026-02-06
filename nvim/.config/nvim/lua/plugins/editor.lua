@@ -134,10 +134,30 @@ return {
     },
     cmd = 'Neotree',
     keys = {
-      { 'ää', ':Neotree reveal<CR>', desc = 'NeoTree reveal', silent = true },
+      {
+        'ää',
+        function()
+          require('config.git_root').neotree_reveal_at_root()
+        end,
+        desc = 'NeoTree reveal at git root',
+        silent = true,
+      },
+      {
+        '<leader>e',
+        function()
+          require('config.git_root').neotree_at_root()
+        end,
+        desc = 'NeoTree at git root',
+        silent = true,
+      },
     },
     opts = {
       filesystem = {
+        bind_to_cwd = false, -- Don't bind to cwd, we manage root ourselves
+        follow_current_file = {
+          enabled = true,
+          leave_dirs_open = true,
+        },
         window = {
           position = 'right',
           mappings = {
