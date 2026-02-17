@@ -1,0 +1,73 @@
+#!/bin/bash
+
+# Check if Ollama is installed and running
+if ! command -v ollama &> /dev/null; then
+    echo "Error: Ollama is not installed. Please install it first from https://ollama.ai/"
+    exit 1
+fi
+
+# Check if a model is specified (default: llama3)
+MODEL="ministral-3"
+echo "Using Ollama model: $MODEL"
+
+# Get unstaged changes (diff)
+UNSTAGED_CHANGES=$(git diff --name-only --diff-filter=AM 2>/dev/null)
+STAGED_CHANGES=$(git diff --cached --name-only --diff-filter=AM 2>/dev/null)
+
+# If no changes, exit
+if [ -z "$UNSTAGED_CHANGES" ] && [ -z "$STAGED_CHANGES" ]; then
+    echo "No changes detected. Run 'git add' to stage changes first."
+    exit 0
+fi
+
+# Prepare the prompt for Ollama
+PROMPT="Generate a concise and meaningful Git commit message based on the following changes:\n\n"
+
+# Add unstaged changes (if any)
+if [ -n "$UNSTAGED_CHANGES" ]; then
+    PROMPT+="\n--- Unstaged Changes ---\n"
+    git diff --name-only --diff-filter=AM | while read -r file; do
+        PROMPT+="• $file\n"
+    done
+    PROMPT+="\n--- End Unstaged ---\n"
+fi
+
+# Add staged changes (if any)
+if [ -n "$STAGED_CHANGES" ]; then
+    PROMPT+="\n--- Staged Changes ---\n"
+    git diff --cached --name-only --diff-filter=AM | while read -r file; do
+        PROMPT+="• $file\n"
+    done
+    PROMPT+="\n--- End Staged ---\n"
+fi
+
+# Optionally include the full diff (uncomment if needed)
+# PROMPT+="\n--- Full Diff ---\n$(git diff --unified=0)\n--- End Diff ---\n"
+
+# Ask for a summary (optional)
+PROMPT+="\nSummarize the changes in a single commit message following conventional commits (e.g., 'feat: add new API endpoint', 'fix: resolve login bug')."
+
+# Generate the commit message using Ollama
+echo "Generating commit message with Ollama..."
+COMMIT_MSG=$(ollama run "$MODEL" <<< "$PROMPT" | grep -v "^User:" | grep -v "^Assistant:" | sed 's/^.*> //')
+
+# Clean up the response (remove extra newlines)
+COMMIT_MSG=$(echo "$COMMIT_MSG" | sed '/^$/d')
+
+# Display the result
+echo -e "\n=== Suggested Commit Message ==="
+echo "$COMMIT_MSG"
+echo -e "\n=== Copy to clipboard? (y/n) ==="
+read -r ANSWER
+if [[ "$ANSWER" =~ ^[Yy]$ ]]; then
+    echo "$COMMIT_MSG" | wl-copy
+    echo "Copied to clipboard!"
+fi
+
+# Optionally open in editor for manual review
+echo -e "\n=== Open in editor? (y/n) ==="
+read -r ANSWER
+if [[ "$ANSWER" =~ ^[Yy]$ ]]; then
+    echo "$COMMIT_MSG" | wl-copy
+    echo "Paste into your editor and save."
+fi
