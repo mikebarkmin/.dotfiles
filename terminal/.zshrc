@@ -58,7 +58,6 @@ export PATH=~/.local/bin:$PATH
 export PATH=~/.local/dbin:$PATH
 export PATH=~/.local/share/gem/ruby/3.3.0/bin:$PATH
 
-alias rm="trash"
 alias ai="opencode"
 
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
