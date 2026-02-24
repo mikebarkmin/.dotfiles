@@ -1,16 +1,17 @@
 #!/bin/bash
-set -e
 
 function switch_state() {
+    MON_L=desc:$(hyprctl -j monitors | jq -r 'sort_by(.x) | first | .description')
+    MON_R=desc:$(hyprctl -j monitors | jq -r 'sort_by(.x) | last  | .description')
     # check if $1 is recording
-    hyprctl keyword monitor DP-7, addreserved, 0, 0, 0, 0
+    hyprctl keyword monitor "$MON_L,addreserved,0,0,0,0"
     if [ "$1" == "recording" ]; then
         cat ~/.config/waybar/recording.jsonc >~/.config/waybar/config.jsonc
         # If OBS is not running, run it
         if ! pgrep -x "obs" >/dev/null; then
             hyprctl dispatch exec "[workspace 5] obs"
-            hyprctl dispatch moveworkspacetomonitor 10 "DP-7"
-            hyprctl dispatch moveworkspacetomonitor 5 "DP-8"
+            hyprctl dispatch moveworkspacetomonitor 10 "$MON_L"
+            hyprctl dispatch moveworkspacetomonitor 5 "$MON_R"
         fi
         exit 0
     elif [ "$1" == "recording-math" ]; then
@@ -21,8 +22,8 @@ function switch_state() {
             hyprctl dispatch exec "[workspace 10] rnote"
             hyprctl dispatch exec "[workspace 10] gtk-launch 'Casio FX--fx-991DE X Emulator--1741030725.517427.desktop'"
             hyprctl dispatch exec "[workspace 10] kitty"
-            hyprctl dispatch moveworkspacetomonitor 10 "DP-7"
-            hyprctl dispatch moveworkspacetomonitor 5 "DP-8"
+            hyprctl dispatch moveworkspacetomonitor 10 "$MON_L"
+            hyprctl dispatch moveworkspacetomonitor 5 "$MON_R"
         fi
         exit 0
     elif [ "$1" == "short-rnote" ]; then
@@ -33,11 +34,11 @@ function switch_state() {
             hyprctl dispatch exec "[workspace 5] obs"
         fi
 
-        hyprctl dispatch moveworkspacetomonitor 5 "DP-8"
-        hyprctl dispatch moveworkspacetomonitor 10 "DP-7"
+        hyprctl dispatch moveworkspacetomonitor 5 "$MON_R"
+        hyprctl dispatch moveworkspacetomonitor 10 "$MON_L"
 
         # Add reserved area for recording
-        hyprctl keyword monitor DP-7, addreserved, 0, 180, 650, 590
+        hyprctl keyword monitor "$MON_L,addreserved,0,180,650,590"
         exit 0
     elif [ "$1" == "short-terminal" ]; then
         cat ~/.config/waybar/recording.jsonc >~/.config/waybar/config.jsonc
@@ -46,10 +47,10 @@ function switch_state() {
         if ! pgrep -x "obs" >/dev/null; then
             hyprctl dispatch exec "[workspace 5] obs"
         fi
-        hyprctl dispatch moveworkspacetomonitor 5 "DP-8"
-        hyprctl dispatch moveworkspacetomonitor 10 "DP-7"
+        hyprctl dispatch moveworkspacetomonitor 5 "$MON_R"
+        hyprctl dispatch moveworkspacetomonitor 10 "$MON_L"
         # Add reserved area for recording
-        hyprctl keyword monitor DP-7, addreserved, 0, 348, 656, 656
+        hyprctl keyword monitor "$MON_L,addreserved,0,348,656,656"
         exit 0
     else
         cat ~/.config/waybar/default.jsonc >~/.config/waybar/config.jsonc

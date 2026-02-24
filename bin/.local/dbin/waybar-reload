@@ -1,0 +1,4 @@
+#/usr/env bash
+killall waybar 2>/dev/null
+sleep 1
+hyprctl dispatch exec "waybar"
