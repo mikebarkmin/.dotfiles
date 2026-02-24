@@ -6,11 +6,11 @@ choose_mode=$(echo -e "region\nwindow\noutput" | rofi -dmenu -p "Choose a mode")
 
 if [ $choose_mode == "region" ]; then
     # select region
-    hyprshot -m region
+    ~/.local/dbin/hyprshot -m region
 elif [ $choose_mode == "window" ]; then
-    hyprshot -m window
+    ~/.local/dbin/hyprshot -m window
 elif [ $choose_mode == "output" ]; then
-    hyprshot -m output
+    ~/.local/dbin/hyprshot -m output
 else
     echo "No valid mode selected."
     exit 1

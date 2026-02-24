@@ -13,7 +13,6 @@ function switch_state() {
             hyprctl dispatch moveworkspacetomonitor 10 "$MON_L"
             hyprctl dispatch moveworkspacetomonitor 5 "$MON_R"
         fi
-        exit 0
     elif [ "$1" == "recording-math" ]; then
         cat ~/.config/waybar/recording.jsonc >~/.config/waybar/config.jsonc
         # If OBS is not running, run it
@@ -25,7 +24,6 @@ function switch_state() {
             hyprctl dispatch moveworkspacetomonitor 10 "$MON_L"
             hyprctl dispatch moveworkspacetomonitor 5 "$MON_R"
         fi
-        exit 0
     elif [ "$1" == "short-rnote" ]; then
         cat ~/.config/waybar/recording.jsonc >~/.config/waybar/config.jsonc
 
@@ -39,7 +37,6 @@ function switch_state() {
 
         # Add reserved area for recording
         hyprctl keyword monitor "$MON_L,addreserved,0,180,650,590"
-        exit 0
     elif [ "$1" == "short-terminal" ]; then
         cat ~/.config/waybar/recording.jsonc >~/.config/waybar/config.jsonc
 
@@ -51,13 +48,16 @@ function switch_state() {
         hyprctl dispatch moveworkspacetomonitor 10 "$MON_L"
         # Add reserved area for recording
         hyprctl keyword monitor "$MON_L,addreserved,0,348,656,656"
-        exit 0
     else
         cat ~/.config/waybar/default.jsonc >~/.config/waybar/config.jsonc
-        exit 0
     fi
 }
 
 # choose state with rofi
 choose_state=$(echo -e "default\nrecording\nrecording-math\nshort-rnote\nshort-terminal" | rofi -dmenu -p "Choose a state")
-switch_state $choose_state
+if [ -z "$choose_state" ]; then
+    exit 0
+fi
+switch_state "$choose_state"
+sleep 1
+killall waybar && hyprctl dispatch exec waybar 
