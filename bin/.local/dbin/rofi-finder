@@ -51,6 +51,8 @@ fi
 extensions=("typ" "typst")
 if [[ " ${extensions[*]} " == *" ${selection##*.} "* ]]; then
     gtk-launch "nvim.desktop" "$selection" &>/dev/null &
+elif [[ "${selection##*.}" == "sb3" ]]; then
+    gtk-launch "turbowarp-desktop.desktop" "$selection" &>/dev/null &
 else
     xdg-open "$selection" &>/dev/null &
 fi

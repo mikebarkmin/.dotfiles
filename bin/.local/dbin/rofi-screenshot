@@ -1,17 +1,54 @@
 #!/bin/bash
 set -e
 
-# choose state with rofi
+# Signal waybar to refresh the recorder module (signal 8 = SIGRTMIN+8)
+refresh_waybar() {
+    pkill -SIGRTMIN+8 waybar 2>/dev/null || true
+}
+
+# choose type: screenshot or recording
+choose_type=$(echo -e "screenshot\nrecording" | rofi -dmenu -p "Choose type")
+
+# choose mode
 choose_mode=$(echo -e "region\nwindow\noutput" | rofi -dmenu -p "Choose a mode")
 
-if [ $choose_mode == "region" ]; then
-    # select region
-    ~/.local/dbin/hyprshot -m region
-elif [ $choose_mode == "window" ]; then
-    ~/.local/dbin/hyprshot -m window
-elif [ $choose_mode == "output" ]; then
-    ~/.local/dbin/hyprshot -m output
+if [ "$choose_type" == "screenshot" ]; then
+    if [ "$choose_mode" == "region" ]; then
+        ~/.local/dbin/hyprshot -m region
+    elif [ "$choose_mode" == "window" ]; then
+        ~/.local/dbin/hyprshot -m window
+    elif [ "$choose_mode" == "output" ]; then
+        ~/.local/dbin/hyprshot -m output
+    else
+        echo "No valid mode selected."
+        exit 1
+    fi
+
+elif [ "$choose_type" == "recording" ]; then
+    mkdir -p ~/Videos
+    OUTPUT=~/Videos/recording_$(date +%Y-%m-%d_%H-%M-%S).mp4
+
+    if [ "$choose_mode" == "region" ]; then
+        REGION=$(slurp)
+        wf-recorder -g "$REGION" -f "$OUTPUT" &
+    elif [ "$choose_mode" == "window" ]; then
+        # get focused window geometry via hyprctl
+        REGION=$(hyprctl activewindow -j | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"')
+        wf-recorder -g "$REGION" -f "$OUTPUT" &
+    elif [ "$choose_mode" == "output" ]; then
+        wf-recorder -f "$OUTPUT" &
+    else
+        echo "No valid mode selected."
+        exit 1
+    fi
+
+    refresh_waybar
+
+    # Wait for wf-recorder to finish, then refresh waybar again
+    wait
+    refresh_waybar
+
 else
-    echo "No valid mode selected."
+    echo "No valid type selected."
     exit 1
 fi

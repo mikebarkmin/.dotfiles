@@ -9,7 +9,8 @@
     "cpu", // cpu
     "custom/notification",
     "clock#time", // time
-    "clock#date" // date
+    "clock#date", // date
+    "custom/recorder"
   ],
   "modules-right": [
     "mpris", // media info
@@ -278,6 +279,13 @@
     "interval": 5,
     "tooltip": true,
     "on-click": "~/.config/waybar/scripts/pangolin.sh --toggle"
+  },
+  "custom/recorder": {
+    "exec": "~/.config/waybar/scripts/wf-recorder.sh",
+    "return-type": "json",
+    "signal": 8,
+    "interval": 2,
+    "on-click": "~/.config/waybar/scripts/wf-recorder.sh stop"
   },
   "tray": {
     "spacing": 10,

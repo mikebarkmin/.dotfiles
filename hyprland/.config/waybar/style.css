@@ -365,3 +365,19 @@ tooltip label,
   background-color: #585b70;
   color: #cdd6f4;
 }
+
+/* Add to your waybar style.css */
+
+#custom-recorder {
+    color: transparent; /* hidden when not recording */
+}
+
+#custom-recorder.recording {
+    color: #ff4444;
+    font-weight: bold;
+    animation: blink 1s step-start infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
