@@ -8,8 +8,11 @@ export DOTFILES=$HOME/.dotfiles
 
 export SSH_AUTH_SOCK=$XDG_RUNTIME_DIR/gcr/ssh
 
+export FLUTTER_BIN="$HOME/.local/flutter-sdk/flutter/bin"
 export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$PYENV_ROOT/bin:$PATH"
+export PATH="$FLUTTER_BIN:$PATH"
+export PATH="$PATH":"$HOME/.pub-cache/bin"
 eval "$(pyenv init --path)"
 PERSONAL=$XDG_CONFIG_HOME/personal
 for i in `find -L $PERSONAL/env`; do

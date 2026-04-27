@@ -22,7 +22,9 @@ return {
         python = { 'isort', 'black' },
         javascript = { 'prettierd', 'prettier', stop_after_first = true },
         typescript = { 'prettierd', 'prettier', stop_after_first = true },
+        json = { 'prettierd', 'prettier', stop_after_first = true },
         tex = { 'tex-fmt', 'latexindent' },
+        toml = { 'tombi' }
       },
     },
   },
