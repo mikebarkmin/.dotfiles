@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# ─────────────────────────────────────────────────────────────────────────────
+# prusa-stream.sh — Open Prusa camera RTSP stream on Waybar click
+#
+# Called by Waybar's on-click for the custom/prusa module.
+# Tries mpv first (lowest latency), then vlc, then ffplay.
+# ─────────────────────────────────────────────────────────────────────────────
+
+RTSP_URL="${PRUSA_RTSP_URL:-rtsp://192.168.178.94/live}"
+
+# ── mpv (preferred — lowest latency, clean window) ───────────────────────────
+if command -v mpv &>/dev/null; then
+    exec mpv \
+        --title="Prusa Live" \
+        --profile=low-latency \
+        --untimed \
+        --no-cache \
+        --rtsp-transport=tcp \
+        --demuxer-lavf-o="rtsp_transport=tcp" \
+        --geometry=800x600 \
+        "$RTSP_URL"
+fi
+
+# ── vlc (fallback) ────────────────────────────────────────────────────────────
+if command -v vlc &>/dev/null; then
+    exec vlc \
+        --network-caching=300 \
+        --rtsp-tcp \
+        --qt-minimal-view \
+        "$RTSP_URL"
+fi
+
+# ── ffplay (last resort) ──────────────────────────────────────────────────────
+if command -v ffplay &>/dev/null; then
+    exec ffplay \
+        -fflags nobuffer \
+        -flags low_delay \
+        -framedrop \
+        -rtsp_transport tcp \
+        -window_title "Prusa Live" \
+        "$RTSP_URL"
+fi
+
+# ── Nothing available ─────────────────────────────────────────────────────────
+notify-send "Prusa Stream" "No player found. Install mpv, vlc, or ffmpeg." \
+    --icon=dialog-error 2>/dev/null || true

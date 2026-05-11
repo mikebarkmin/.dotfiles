@@ -7,6 +7,14 @@ return {
     -- Configured in ftplugin/java.lua
   },
 
+  -- Otter for embedded LSP in markdown code blocks
+  {
+    'jmbuhr/otter.nvim',
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter',
+    },
+    opts = {},
+  },
   {
     "salkin-mada/openscad.nvim",
     config = function()

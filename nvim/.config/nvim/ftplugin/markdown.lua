@@ -42,3 +42,9 @@ vim.lsp.start {
   root_dir = vim.fs.root(0, { '.git', '.marksman.toml' }) or vim.fn.getcwd(),
   capabilities = capabilities,
 }
+
+-- Activate otter for embedded LSP in code blocks
+local ok, err = pcall(require("otter").activate, { "python", "r", "lua" }) -- adjust languages
+if not ok then
+  vim.notify("otter: " .. err, vim.log.levels.WARN)
+end

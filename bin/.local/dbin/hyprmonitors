@@ -7,6 +7,7 @@ LAPTOP_MONITOR="eDP-1"
 EXTERNAL_MONITOR_2="BNQ BenQ RL2460H KCF01940SL0"
 EXTERNAL_MONITOR_1="BNQ BenQ BL2405 H4H02869SL0"
 BEAMER_MONITOR="HDMI-A-1"
+TOUCHSCREEN_MONITOR="IWB PC Monitor"  # DP-2 touchscreen
 
 # Log file for debugging
 LOG_FILE="/tmp/hyprland-monitors.log"
@@ -32,10 +33,7 @@ is_monitor_connected() {
 configure_external_setup() {
     log_message "Configuring external monitor setup"
     
-    # Disable laptop monitor
     hyprctl keyword monitor "$LAPTOP_MONITOR,disable"
-    
-    # Configure external monitors
     hyprctl keyword monitor "desc:$EXTERNAL_MONITOR_1,1920x1080@60.0,0x0,1.0"
     hyprctl keyword monitor "desc:$EXTERNAL_MONITOR_2,1920x1080@60.0,1920x0,1.0"
     
@@ -46,10 +44,7 @@ configure_external_setup() {
 configure_laptop_setup() {
     log_message "Configuring laptop-only setup"
     
-    # Enable laptop monitor
     hyprctl keyword monitor "$LAPTOP_MONITOR,1920x1200@60.0,0x0,1.0"
-    
-    # Ensure external monitors are disabled if they exist
     hyprctl keyword monitor "desc:$EXTERNAL_MONITOR_1,disable" 2>/dev/null
     hyprctl keyword monitor "desc:$EXTERNAL_MONITOR_2,disable" 2>/dev/null
     
@@ -60,17 +55,34 @@ configure_laptop_setup() {
 configure_beamer_mode() {
     log_message "Configuring beamer mode (mirroring to HDMI-A-1)"
     
-    # Enable laptop monitor at standard resolution
     hyprctl keyword monitor "$LAPTOP_MONITOR,1920x1200@60.0,0x0,1.0"
-    
-    # Mirror laptop display to beamer
     hyprctl keyword monitor "$BEAMER_MONITOR,preferred,auto,1.0,mirror,$LAPTOP_MONITOR"
-    
-    # Disable external monitors if they exist
     hyprctl keyword monitor "desc:$EXTERNAL_MONITOR_1,disable" 2>/dev/null
     hyprctl keyword monitor "desc:$EXTERNAL_MONITOR_2,disable" 2>/dev/null
     
     log_message "Beamer mode configured - eDP-1 mirrored to HDMI-A-1"
+}
+
+# Function to configure touchscreen mirror mode
+# The IWB touchscreen (DP-2) runs at 3840x2160 but we mirror eDP-1 to it.
+# Hyprland will scale the mirrored image automatically.
+# Touch input remapping (if needed) should be handled via a separate
+# libinput/udev rule mapping the touch device to the eDP-1 workspace.
+configure_touchscreen_mode() {
+    log_message "Configuring touchscreen mirror mode (mirroring eDP-1 to IWB DP-2)"
+    
+    # Keep laptop monitor active as the primary — touch events will map to it
+    hyprctl keyword monitor "$LAPTOP_MONITOR,1920x1200@60.0,0x0,1.0"
+    
+    # Mirror laptop display to the IWB touchscreen at its native resolution
+    hyprctl keyword monitor "desc:$TOUCHSCREEN_MONITOR,3840x2160@60.0,1920x0,1.0,mirror,$LAPTOP_MONITOR"
+    
+    # Disable external BenQ monitors and beamer if connected
+    hyprctl keyword monitor "desc:$EXTERNAL_MONITOR_1,disable" 2>/dev/null
+    hyprctl keyword monitor "desc:$EXTERNAL_MONITOR_2,disable" 2>/dev/null
+    hyprctl keyword monitor "$BEAMER_MONITOR,disable" 2>/dev/null
+    
+    log_message "Touchscreen mode configured - eDP-1 mirrored to IWB PC Monitor (DP-2)"
 }
 
 # Main function to handle monitor configuration
@@ -78,8 +90,8 @@ handle_monitor_change() {
     local dp7_connected=false
     local dp9_connected=false
     local beamer_connected=false
+    local touchscreen_connected=false
     
-    # Check which monitors are connected
     if is_monitor_connected "$EXTERNAL_MONITOR_1"; then
         dp7_connected=true
     fi
@@ -92,11 +104,17 @@ handle_monitor_change() {
         beamer_connected=true
     fi
     
-    log_message "Monitor status - DP-7: $dp7_connected, DP-9: $dp9_connected, HDMI-A-1: $beamer_connected"
+    if is_monitor_connected "$TOUCHSCREEN_MONITOR"; then
+        touchscreen_connected=true
+    fi
     
-    # Configure based on connected monitors (beamer mode takes priority)
+    log_message "Monitor status - DP-7: $dp7_connected, DP-9: $dp9_connected, HDMI-A-1: $beamer_connected, IWB: $touchscreen_connected"
+    
+    # Priority order: Beamer > Touchscreen > Dual external > Laptop only
     if [ "$beamer_connected" = true ]; then
         configure_beamer_mode
+    elif [ "$touchscreen_connected" = true ]; then
+        configure_touchscreen_mode
     elif [ "$dp7_connected" = true ] && [ "$dp9_connected" = true ]; then
         configure_external_setup
     else
@@ -108,14 +126,11 @@ handle_monitor_change() {
 monitor_hotplug() {
     log_message "Starting monitor hotplug daemon"
     
-    # Initial configuration
     handle_monitor_change
     
-    # Monitor for udev events
     udevadm monitor --udev --subsystem-match=drm | while read -r line; do
         if echo "$line" | grep -q "drm"; then
             log_message "Detected display event: $line"
-            # Small delay to allow the system to register the change
             sleep 1
             handle_monitor_change
         fi
@@ -151,12 +166,16 @@ Options:
     -h, --help       Show this help message
 
 Configuration:
-    - When HDMI-A-1 is connected: Beamer mode (eDP-1 mirrored to HDMI-A-1)
-    - When both DP-7 and DP-9 are connected: Laptop monitor (eDP-1) is disabled
-    - When both external monitors are disconnected: Laptop monitor is enabled
-    - When only one external monitor is connected: Both laptop and external monitor are enabled
+    - When HDMI-A-1 is connected:          Beamer mode (eDP-1 mirrored to HDMI-A-1)
+    - When IWB touchscreen (DP-2) is connected: Touchscreen mode (eDP-1 mirrored to IWB at 4K)
+    - When both BenQ monitors are connected: Laptop monitor (eDP-1) disabled, dual external active
+    - When no external monitors are connected: Laptop-only mode
 
-Priority order: Beamer mode > Dual external > Mixed > Laptop only
+Priority order: Beamer > Touchscreen > Dual external > Laptop only
+
+Note: Touch input mapping for the IWB screen requires a libinput/udev rule
+      pointing the touch device at the eDP-1 workspace. See your udev rules
+      or use 'hyprctl keyword input:touchdevice:output eDP-1' if supported.
 
 Log file: $LOG_FILE
 EOF

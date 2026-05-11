@@ -25,7 +25,7 @@ done
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
 ZSH_THEME="bira"
 
-plugins=(git virtualenv poetry-env pipenv pyenv zoxide nvm last-working-dir)
+plugins=(git virtualenv poetry-env pyenv zoxide nvm last-working-dir)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -56,6 +56,7 @@ if [[ -n $SSH_CONNECTION ]]; then
 else
   export EDITOR='nvim'
 fi
+alias vim="nvim"
 
 export PATH=~/.local/bin:$PATH
 export PATH=~/.local/dbin:$PATH
