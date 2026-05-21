@@ -1,17 +1,26 @@
 #!/bin/sh
+default_sink=$(pactl get-default-sink)
 
-# Create a list of sinks with pretty names
-options=$(pactl -f json list sinks | jq -r '.[] | .description')
+options=$(pactl -f json list sinks | jq -r --arg default "$default_sink" '
+  .[] |
+  (.active_port as $ap |
+    if $ap == null then true
+    else (first(.ports[] | select(.name == $ap)) | .availability) != "not available"
+    end
+  ) as $usable |
+  select($usable) |
+  if .name == $default then "● " + .description else "  " + .description end
+')
 
-# Let the user select a description
 selection=$(echo "$options" | dmenu -i -l 5 -c -p "Output:")
+clean_selection=$(echo "$selection" | sed 's/^[● ] *//')
 
-# Extract the corresponding sink name
-sink_name=$(pactl -f json list sinks | jq -r --arg sink_pretty_name "$selection" '.[] | select(.description == $sink_pretty_name) | .name')
+sink_name=$(pactl -f json list sinks | jq -r --arg desc "$clean_selection" '
+  .[] | select(.description == $desc) | .name
+')
 
-# Set the selected sink as default
 if [ -n "$sink_name" ]; then
-    pactl set-default-sink "$sink_name" && notify-send "Audio switched to: $selection"
+    pactl set-default-sink "$sink_name" && notify-send "Audio switched to: $clean_selection"
 else
     notify-send "Audio switch failed"
 fi

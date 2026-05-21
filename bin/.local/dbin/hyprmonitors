@@ -72,7 +72,7 @@ configure_touchscreen_mode() {
     log_message "Configuring touchscreen mirror mode (mirroring eDP-1 to IWB DP-2)"
     
     # Keep laptop monitor active as the primary — touch events will map to it
-    hyprctl keyword monitor "$LAPTOP_MONITOR,1920x1200@60.0,0x0,1.0"
+    hyprctl keyword monitor "$LAPTOP_MONITOR,1920x1080@60.0,0x0,1.0"
     
     # Mirror laptop display to the IWB touchscreen at its native resolution
     hyprctl keyword monitor "desc:$TOUCHSCREEN_MONITOR,3840x2160@60.0,1920x0,1.0,mirror,$LAPTOP_MONITOR"

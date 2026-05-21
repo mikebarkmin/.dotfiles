@@ -10,9 +10,6 @@ return {
   -- Otter for embedded LSP in markdown code blocks
   {
     'jmbuhr/otter.nvim',
-    dependencies = {
-      'nvim-treesitter/nvim-treesitter',
-    },
     opts = {},
   },
   {

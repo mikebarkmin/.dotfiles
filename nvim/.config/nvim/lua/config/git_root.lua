@@ -87,7 +87,7 @@ local function update_lsp_workspace(client, bufnr)
 
   -- Add the git root as workspace folder if client supports it
   if client:supports_method('workspace/didChangeWorkspaceFolders') then
-    client.notify('workspace/didChangeWorkspaceFolders', {
+    client:notify('workspace/didChangeWorkspaceFolders', {
       event = {
         added = { { uri = vim.uri_from_fname(git_root), name = git_root } },
         removed = {},

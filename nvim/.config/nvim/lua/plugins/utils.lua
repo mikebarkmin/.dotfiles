@@ -67,31 +67,6 @@ return {
     'vimpostor/vim-lumen',
   },
 
-  -- Smart text wrapping for prose
-  {
-    'andrewferrier/wrapping.nvim',
-    config = function()
-      require('wrapping').setup {
-        auto_set_mode_filetype_allowlist = {
-          'asciidoc',
-          'gitcommit',
-          'latex',
-          'mail',
-          'markdown',
-          'org',
-          'rst',
-          'tex',
-          'text',
-        },
-      }
-    end,
-  },
-
-  -- Performance for large files
-  {
-    'LunarVim/bigfile.nvim',
-  },
-
   -- Hyperbook development helper
   {
     'folke/which-key.nvim',
