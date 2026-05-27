@@ -48,20 +48,6 @@ local menu = "rofi -show drun"
 local menu_backup = "rofi -show drun"
 local emoji = "rofi -modi emoji -show emoji"
 
---################
---## AUTOSTART ###
---################
-
--- Theme
--- for libadwaita gtk4 apps you can use this command:
-
--- for gtk3 apps you need to install adw-gtk3 theme (in arch linux sudo pacman -S adw-gtk-theme)
-
--- Autostart necessary processes (like notifications daemons, status bars, etc.)
--- Or execute your favorite apps at launch like this:
-
--- exec-once = swaybg -i ~/.config/hypr/wallpaper.png
-
 --####################
 --## LOOK AND FEEL ###
 --####################
@@ -243,15 +229,6 @@ hl.bind(mainMod .. " + SHIFT + 8", hl.dsp.window.move({ workspace = 8 }))
 hl.bind(mainMod .. " + SHIFT + 9", hl.dsp.window.move({ workspace = 9 }))
 hl.bind(mainMod .. " + SHIFT + 0", hl.dsp.window.move({ workspace = 10 }))
 
--- TODO: manual review on line 324 — no mapping for dispatcher "movecurrentworkspacetomonitor"
--- hl.bind(mainMod .. " + CTRL + h", hl.dsp.movecurrentworkspacetomonitor("l"))
--- TODO: manual review on line 325 — no mapping for dispatcher "movecurrentworkspacetomonitor"
--- hl.bind(mainMod .. " + CTRL + l", hl.dsp.movecurrentworkspacetomonitor("r"))
--- TODO: manual review on line 326 — no mapping for dispatcher "movecurrentworkspacetomonitor"
--- hl.bind(mainMod .. " + CTRL + k", hl.dsp.movecurrentworkspacetomonitor("u"))
--- TODO: manual review on line 327 — no mapping for dispatcher "movecurrentworkspacetomonitor"
--- hl.bind(mainMod .. " + CTRL + j", hl.dsp.movecurrentworkspacetomonitor("d"))
-
 hl.bind(mainMod .. " + SHIFT + mouse_down", hl.dsp.exec_cmd("hyprctl -q keyword cursor:zoom_factor $(hyprctl getoption cursor:zoom_factor -j | jq '.float * 1.1')"))
 hl.bind(mainMod .. " + SHIFT + mouse_up", hl.dsp.exec_cmd("hyprctl -q keyword cursor:zoom_factor $(hyprctl getoption cursor:zoom_factor -j | jq '(.float * 0.9) | if . < 1 then 1 else . end')"))
 hl.bind(mainMod .. " + SHIFT + plus", hl.dsp.exec_cmd("hyprctl -q keyword cursor:zoom_factor $(hyprctl getoption cursor:zoom_factor -j | jq '.float * 1.1')"), { repeating = true })
@@ -273,6 +250,7 @@ hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = tru
 hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true })
 
 hl.bind(mainMod .. " + S", hl.dsp.workspace.toggle_special("terminal"))
+hl.workspace_rule({ workspace = "special:terminal", on_created_empty = "[float; size 1000 800; center] kitty",  })
 
 hl.workspace_rule({
     workspace = "10",
