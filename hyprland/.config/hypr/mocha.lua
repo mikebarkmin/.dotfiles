@@ -1,0 +1,132 @@
+local rosewater = "rgb(f5e0dc)"
+local rosewaterAlpha = "f5e0dc"
+
+local flamingo = "rgb(f2cdcd)"
+local flamingoAlpha = "f2cdcd"
+
+local pink = "rgb(f5c2e7)"
+local pinkAlpha = "f5c2e7"
+
+local mauve = "rgb(cba6f7)"
+local mauveAlpha = "cba6f7"
+
+local red = "rgb(f38ba8)"
+local redAlpha = "f38ba8"
+
+local maroon = "rgb(eba0ac)"
+local maroonAlpha = "eba0ac"
+
+local peach = "rgb(fab387)"
+local peachAlpha = "fab387"
+
+local yellow = "rgb(f9e2af)"
+local yellowAlpha = "f9e2af"
+
+local green = "rgb(a6e3a1)"
+local greenAlpha = "a6e3a1"
+
+local teal = "rgb(94e2d5)"
+local tealAlpha = "94e2d5"
+
+local sky = "rgb(89dceb)"
+local skyAlpha = "89dceb"
+
+local sapphire = "rgb(74c7ec)"
+local sapphireAlpha = "74c7ec"
+
+local blue = "rgb(89b4fa)"
+local blueAlpha = "89b4fa"
+
+local lavender = "rgb(b4befe)"
+local lavenderAlpha = "b4befe"
+
+local text = "rgb(cdd6f4)"
+local textAlpha = "cdd6f4"
+
+local subtext1 = "rgb(bac2de)"
+local subtext1Alpha = "bac2de"
+
+local subtext0 = "rgb(a6adc8)"
+local subtext0Alpha = "a6adc8"
+
+local overlay2 = "rgb(9399b2)"
+local overlay2Alpha = "9399b2"
+
+local overlay1 = "rgb(7f849c)"
+local overlay1Alpha = "7f849c"
+
+local overlay0 = "rgb(6c7086)"
+local overlay0Alpha = "6c7086"
+
+local surface2 = "rgb(585b70)"
+local surface2Alpha = "585b70"
+
+local surface1 = "rgb(45475a)"
+local surface1Alpha = "45475a"
+
+local surface0 = "rgb(313244)"
+local surface0Alpha = "313244"
+
+local base = "rgb(1e1e2e)"
+local baseAlpha = "1e1e2e"
+
+local mantle = "rgb(181825)"
+local mantleAlpha = "181825"
+
+local crust = "rgb(11111b)"
+local crustAlpha = "11111b"
+
+return {
+    rosewater = rosewater,
+    rosewaterAlpha = rosewaterAlpha,
+    flamingo = flamingo,
+    flamingoAlpha = flamingoAlpha,
+    pink = pink,
+    pinkAlpha = pinkAlpha,
+    mauve = mauve,
+    mauveAlpha = mauveAlpha,
+    red = red,
+    redAlpha = redAlpha,
+    maroon = maroon,
+    maroonAlpha = maroonAlpha,
+    peach = peach,
+    peachAlpha = peachAlpha,
+    yellow = yellow,
+    yellowAlpha = yellowAlpha,
+    green = green,
+    greenAlpha = greenAlpha,
+    teal = teal,
+    tealAlpha = tealAlpha,
+    sky = sky,
+    skyAlpha = skyAlpha,
+    sapphire = sapphire,
+    sapphireAlpha = sapphireAlpha,
+    blue = blue,
+    blueAlpha = blueAlpha,
+    lavender = lavender,
+    lavenderAlpha = lavenderAlpha,
+    text = text,
+    textAlpha = textAlpha,
+    subtext1 = subtext1,
+    subtext1Alpha = subtext1Alpha,
+    subtext0 = subtext0,
+    subtext0Alpha = subtext0Alpha,
+    overlay2 = overlay2,
+    overlay2Alpha = overlay2Alpha,
+    overlay1 = overlay1,
+    overlay1Alpha = overlay1Alpha,
+    overlay0 = overlay0,
+    overlay0Alpha = overlay0Alpha,
+    surface2 = surface2,
+    surface2Alpha = surface2Alpha,
+    surface1 = surface1,
+    surface1Alpha = surface1Alpha,
+    surface0 = surface0,
+    surface0Alpha = surface0Alpha,
+    base = base,
+    baseAlpha = baseAlpha,
+    mantle = mantle,
+    mantleAlpha = mantleAlpha,
+    crust = crust,
+    crustAlpha = crustAlpha,
+}

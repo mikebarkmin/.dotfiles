@@ -33,9 +33,9 @@ is_monitor_connected() {
 configure_external_setup() {
     log_message "Configuring external monitor setup"
     
-    hyprctl keyword monitor "$LAPTOP_MONITOR,disable"
-    hyprctl keyword monitor "desc:$EXTERNAL_MONITOR_1,1920x1080@60.0,0x0,1.0"
-    hyprctl keyword monitor "desc:$EXTERNAL_MONITOR_2,1920x1080@60.0,1920x0,1.0"
+    hyprctl eval 'hl.monitor({ output = "'"$LAPTOP_MONITOR"'", disabled = true })'
+    hyprctl eval 'hl.monitor({ output = "'"$EXTERNAL_MONITOR_1"'", mode = "1920x1080@60", position = "0x0", scale = 1 })'
+    hyprctl eval 'hl.monitor({ output = "'"$EXTERNAL_MONITOR_2"'", mode = "1920x1080@60", position = "1920x0", scale = 1 })'
     
     log_message "External setup configured - laptop monitor disabled"
 }
@@ -44,9 +44,9 @@ configure_external_setup() {
 configure_laptop_setup() {
     log_message "Configuring laptop-only setup"
     
-    hyprctl keyword monitor "$LAPTOP_MONITOR,1920x1200@60.0,0x0,1.0"
-    hyprctl keyword monitor "desc:$EXTERNAL_MONITOR_1,disable" 2>/dev/null
-    hyprctl keyword monitor "desc:$EXTERNAL_MONITOR_2,disable" 2>/dev/null
+    hyprctl eval 'hl.monitor({ output = "'"$LAPTOP_MONITOR"'", mode = "1920x1200@60", position = "0x0", scale = 1 })'
+    hyprctl eval 'hl.monitor({ output = "'"$EXTERNAL_MONITOR_1"'", disabled = true })' 2>/dev/null
+    hyprctl eval 'hl.monitor({ output = "'"$EXTERNAL_MONITOR_2"'", disabled = true })' 2>/dev/null
     
     log_message "Laptop setup configured - external monitors disabled"
 }
@@ -55,10 +55,10 @@ configure_laptop_setup() {
 configure_beamer_mode() {
     log_message "Configuring beamer mode (mirroring to HDMI-A-1)"
     
-    hyprctl keyword monitor "$LAPTOP_MONITOR,1920x1200@60.0,0x0,1.0"
-    hyprctl keyword monitor "$BEAMER_MONITOR,preferred,auto,1.0,mirror,$LAPTOP_MONITOR"
-    hyprctl keyword monitor "desc:$EXTERNAL_MONITOR_1,disable" 2>/dev/null
-    hyprctl keyword monitor "desc:$EXTERNAL_MONITOR_2,disable" 2>/dev/null
+    hyprctl eval 'hl.monitor({ output = "'"$LAPTOP_MONITOR"'", mode = "1920x1200@60", position = "0x0", scale = 1 })'
+    hyprctl eval 'hl.monitor({ output = "'"$BEAMER_MONITOR"'", mode = "preferred", position = "auto", scale = 1, mirror = "'"$LAPTOP_MONITOR"'" })'
+    hyprctl eval 'hl.monitor({ output = "'"$EXTERNAL_MONITOR_1"'", disabled = true })' 2>/dev/null
+    hyprctl eval 'hl.monitor({ output = "'"$EXTERNAL_MONITOR_2"'", disabled = true })' 2>/dev/null
     
     log_message "Beamer mode configured - eDP-1 mirrored to HDMI-A-1"
 }
@@ -72,15 +72,15 @@ configure_touchscreen_mode() {
     log_message "Configuring touchscreen mirror mode (mirroring eDP-1 to IWB DP-2)"
     
     # Keep laptop monitor active as the primary — touch events will map to it
-    hyprctl keyword monitor "$LAPTOP_MONITOR,1920x1080@60.0,0x0,1.0"
+    hyprctl eval 'hl.monitor({ output = "'"$LAPTOP_MONITOR"'", mode = "1920x1080@60", position = "0x0", scale = 1 })'
     
     # Mirror laptop display to the IWB touchscreen at its native resolution
-    hyprctl keyword monitor "desc:$TOUCHSCREEN_MONITOR,3840x2160@60.0,1920x0,1.0,mirror,$LAPTOP_MONITOR"
+    hyprctl eval 'hl.monitor({ output = "'"$TOUCHSCREEN_MONITOR"'", mode = "3840x2160@60", position = "1920x0", scale = 1, mirror = "'"$LAPTOP_MONITOR"'" })'
     
     # Disable external BenQ monitors and beamer if connected
-    hyprctl keyword monitor "desc:$EXTERNAL_MONITOR_1,disable" 2>/dev/null
-    hyprctl keyword monitor "desc:$EXTERNAL_MONITOR_2,disable" 2>/dev/null
-    hyprctl keyword monitor "$BEAMER_MONITOR,disable" 2>/dev/null
+    hyprctl eval 'hl.monitor({ output = "'"$EXTERNAL_MONITOR_1"'", disabled = true })' 2>/dev/null
+    hyprctl eval 'hl.monitor({ output = "'"$EXTERNAL_MONITOR_2"'", disabled = true })' 2>/dev/null
+    hyprctl eval 'hl.monitor({ output = "'"$BEAMER_MONITOR"'", disabled = true })' 2>/dev/null
     
     log_message "Touchscreen mode configured - eDP-1 mirrored to IWB PC Monitor (DP-2)"
 }

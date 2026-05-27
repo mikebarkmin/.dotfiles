@@ -3,51 +3,51 @@
 function switch_state() {
     MON_L=desc:$(hyprctl -j monitors | jq -r 'sort_by(.x) | first | .description')
     MON_R=desc:$(hyprctl -j monitors | jq -r 'sort_by(.x) | last  | .description')
-    # check if $1 is recording
-    hyprctl keyword monitor "$MON_L,addreserved,0,0,0,0"
+    # Reset reserved area
+    hyprctl eval 'hl.monitor({ output = "'"$MON_L"'", reserved_area = 0 })'
     if [ "$1" == "recording" ]; then
         cat ~/.config/waybar/recording.jsonc >~/.config/waybar/config.jsonc
         # If OBS is not running, run it
         if ! pgrep -x "obs" >/dev/null; then
-            hyprctl dispatch exec "[workspace 5] obs"
-            hyprctl dispatch moveworkspacetomonitor 10 "$MON_L"
-            hyprctl dispatch moveworkspacetomonitor 5 "$MON_R"
+            hyprctl eval 'hl.dispatch(hl.dsp.exec_cmd("obs"), { workspace = 5 })'
+            hyprctl eval 'hl.dispatch(hl.dsp.workspace.move({ workspace = 10, monitor = "'"$MON_L"'" }))'
+            hyprctl eval 'hl.dispatch(hl.dsp.workspace.move({ workspace = 5, monitor = "'"$MON_R"'" }))'
         fi
     elif [ "$1" == "recording-math" ]; then
         cat ~/.config/waybar/recording.jsonc >~/.config/waybar/config.jsonc
         # If OBS is not running, run it
         if ! pgrep -x "obs" >/dev/null; then
-            hyprctl dispatch exec "[workspace 5] obs"
-            hyprctl dispatch exec "[workspace 10] rnote"
-            hyprctl dispatch exec "[workspace 10] gtk-launch 'Casio FX--fx-991DE X Emulator--1741030725.517427.desktop'"
-            hyprctl dispatch exec "[workspace 10] kitty"
-            hyprctl dispatch moveworkspacetomonitor 10 "$MON_L"
-            hyprctl dispatch moveworkspacetomonitor 5 "$MON_R"
+            hyprctl eval 'hl.dispatch(hl.dsp.exec_cmd("obs"), { workspace = 5 })'
+            hyprctl eval 'hl.dispatch(hl.dsp.exec_cmd("rnote"), { workspace = 10 })'
+            hyprctl eval "hl.dispatch(hl.dsp.exec_cmd(\"gtk-launch 'Casio FX--fx-991DE X Emulator--1741030725.517427.desktop'\"), { workspace = 10 })"
+            hyprctl eval 'hl.dispatch(hl.dsp.exec_cmd("kitty"), { workspace = 10 })'
+            hyprctl eval 'hl.dispatch(hl.dsp.workspace.move({ workspace = 10, monitor = "'"$MON_L"'" }))'
+            hyprctl eval 'hl.dispatch(hl.dsp.workspace.move({ workspace = 5, monitor = "'"$MON_R"'" }))'
         fi
     elif [ "$1" == "short-rnote" ]; then
         cat ~/.config/waybar/recording.jsonc >~/.config/waybar/config.jsonc
 
         # If OBS is not running, run it
         if ! pgrep -x "obs" >/dev/null; then
-            hyprctl dispatch exec "[workspace 5] obs"
+            hyprctl eval 'hl.dispatch(hl.dsp.exec_cmd("obs"), { workspace = 5 })'
         fi
 
-        hyprctl dispatch moveworkspacetomonitor 5 "$MON_R"
-        hyprctl dispatch moveworkspacetomonitor 10 "$MON_L"
+        hyprctl eval 'hl.dispatch(hl.dsp.workspace.move({ workspace = 5, monitor = "'"$MON_R"'" }))'
+        hyprctl eval 'hl.dispatch(hl.dsp.workspace.move({ workspace = 10, monitor = "'"$MON_L"'" }))'
 
         # Add reserved area for recording
-        hyprctl keyword monitor "$MON_L,addreserved,0,180,650,590"
+        hyprctl eval 'hl.monitor({ output = "'"$MON_L"'", reserved_area = { top = 180, bottom = 590, left = 0, right = 650 } })'
     elif [ "$1" == "short-terminal" ]; then
         cat ~/.config/waybar/recording.jsonc >~/.config/waybar/config.jsonc
 
         # If OBS is not running, run it
         if ! pgrep -x "obs" >/dev/null; then
-            hyprctl dispatch exec "[workspace 5] obs"
+            hyprctl eval 'hl.dispatch(hl.dsp.exec_cmd("obs"), { workspace = 5 })'
         fi
-        hyprctl dispatch moveworkspacetomonitor 5 "$MON_R"
-        hyprctl dispatch moveworkspacetomonitor 10 "$MON_L"
+        hyprctl eval 'hl.dispatch(hl.dsp.workspace.move({ workspace = 5, monitor = "'"$MON_R"'" }))'
+        hyprctl eval 'hl.dispatch(hl.dsp.workspace.move({ workspace = 10, monitor = "'"$MON_L"'" }))'
         # Add reserved area for recording
-        hyprctl keyword monitor "$MON_L,addreserved,0,348,656,656"
+        hyprctl eval 'hl.monitor({ output = "'"$MON_L"'", reserved_area = { top = 348, bottom = 656, left = 0, right = 656 } })'
     else
         cat ~/.config/waybar/default.jsonc >~/.config/waybar/config.jsonc
     fi
