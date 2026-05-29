@@ -13,9 +13,10 @@ case "$selected_option" in
   loginctl lock-session
   ;;
 *Shutdown)
-  systemctl poweroff
+  hyprshutdown -t 'Shutting down...' --post-cmd 'systemctl poweroff'
   ;;
 *Reboot)
+  hyprshutdown -t 'Restarting...' --post-cmd 'systemctl reboot'
   systemctl reboot
   ;;
 *Suspend)
@@ -25,6 +26,6 @@ case "$selected_option" in
   systemctl hibernate
   ;;
 *Logout)
-  uwsm stop
+  hyprctl dispatch "hl.dsp.exit()"
   ;;
 esac

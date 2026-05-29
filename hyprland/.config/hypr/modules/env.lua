@@ -1,0 +1,8 @@
+hl.env("XCURSOR_SIZE", "32")
+hl.env("XCURSOR_THEME", "Bibata-Modern-Amber")
+hl.env("HYPRCURSOR_SIZE", "32")
+hl.env("HYPRCURSOR_THEME", "Bibata-Modern-Amber")
+hl.env("GTK_USE_PORTAL", "1")
+hl.env("QT_QPA_PLATFORMTHEME", "gtk3")
+hl.env("TERMINAL", "kitty")
+hl.env("TERMCMD", "kitty")
