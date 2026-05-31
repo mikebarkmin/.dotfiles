@@ -1,16 +1,28 @@
 #!/bin/bash
 set -e
 
-# Signal waybar to refresh the recorder module (signal 8 = SIGRTMIN+8)
 refresh_waybar() {
     pkill -SIGRTMIN+8 waybar 2>/dev/null || true
 }
 
-# choose type: screenshot or recording
-choose_type=$(echo -e "screenshot\nrecording" | rofi -dmenu -p "Choose type")
 
-# choose mode
-choose_mode=$(echo -e "region\nwindow\noutput" | rofi -dmenu -p "Choose a mode")
+function grab_window() {
+    local monitors=`hyprctl -j monitors`
+    local clients=`hyprctl -j clients | jq -r '[.[] | select(.workspace.id | contains('$(echo $monitors | jq -r 'map(.activeWorkspace.id) | join(",")')'))]'`
+    local boxes="$(echo $clients | jq -r '.[] | "\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1]) \(.title)"' | cut -f1,2 -d' ')"
+    slurp -r <<< "$boxes"
+}
+
+
+function grab_active_output() {
+    hyprctl -j activeworkspace | jq -r '.monitor'
+}
+
+choose_type=$(echo -e "screenshot\nrecording\npresent" | rofi -dmenu -p "Choose type")
+
+if [ "$choose_type" == "screenshot" ] || [ "$choose_type" == "recording" ]; then
+    choose_mode=$(echo -e "region\nwindow\noutput" | rofi -dmenu -p "Choose a mode")
+fi
 
 if [ "$choose_type" == "screenshot" ]; then
     if [ "$choose_mode" == "region" ]; then
@@ -27,13 +39,11 @@ if [ "$choose_type" == "screenshot" ]; then
 elif [ "$choose_type" == "recording" ]; then
     mkdir -p ~/Videos
     OUTPUT=~/Videos/recording_$(date +%Y-%m-%d_%H-%M-%S).mp4
-
     if [ "$choose_mode" == "region" ]; then
         REGION=$(slurp)
         wf-recorder -g "$REGION" -f "$OUTPUT" &
     elif [ "$choose_mode" == "window" ]; then
-        # get focused window geometry via hyprctl
-        REGION=$(hyprctl activewindow -j | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"')
+        REGION=$(grab_window)
         wf-recorder -g "$REGION" -f "$OUTPUT" &
     elif [ "$choose_mode" == "output" ]; then
         wf-recorder -f "$OUTPUT" &
@@ -41,12 +51,45 @@ elif [ "$choose_type" == "recording" ]; then
         echo "No valid mode selected."
         exit 1
     fi
-
     refresh_waybar
-
-    # Wait for wf-recorder to finish, then refresh waybar again
     wait
     refresh_waybar
+
+elif [ "$choose_type" == "present" ]; then
+    choose_present=$(echo -e "mirror\ntoggle-freeze" | rofi -dmenu -p "Present action")
+
+    if [ "$choose_present" == "mirror" ]; then
+        choose_mode=$(echo -e "region\nwindow\noutput" | rofi -dmenu -p "Choose a mode")
+
+        if [ "$choose_mode" == "region" ]; then
+            # Start mirror in background, then let wl-present set-region call slurp interactively
+            wl-present mirror &
+            sleep 0.3
+            wl-present set-region
+
+        elif [ "$choose_mode" == "window" ]; then
+            REGION=$(grab_window)
+            wl-present mirror $(grab_active_output) &
+            sleep 0.3
+            wl-present set-region "$REGION"
+
+        elif [ "$choose_mode" == "output" ]; then
+            # wl-present mirror with no args calls slurp -or to pick an output
+            wl-present mirror &
+
+        else
+            echo "No valid mode selected."
+            exit 1
+        fi
+
+    elif [ "$choose_present" == "toggle-freeze" ]; then
+        sleep 0.3
+        wl-present toggle-freeze
+
+    else
+        echo "No valid present action selected."
+        exit 1
+    fi
 
 else
     echo "No valid type selected."
