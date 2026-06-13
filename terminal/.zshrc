@@ -114,7 +114,7 @@ function confw() {
 
 function confh() {
 	pushd ~/.config/hypr/
-	vim hyprland.conf
+	vim hyprland.lua
 	popd
 }
 

@@ -3,8 +3,9 @@ local EXTERNAL_1  = "BNQ BenQ BL2405 H4H02869SL0"
 local EXTERNAL_2  = "BNQ BenQ RL2460H KCF01940SL0"
 local BEAMER      = "HDMI-A-1"
 local TOUCHSCREEN = "IWB PC Monitor"
+local LOG_FILE    = "/tmp/hyprland-monitors.log"
 
-local LOG_FILE = "/tmp/hyprland-monitors.log"
+local last_config  = nil
 
 local function log(msg)
     local f = io.open(LOG_FILE, "a")
@@ -14,7 +15,6 @@ local function log(msg)
     end
 end
 
--- Match by monitor name or description substring
 local function is_connected(identifier)
     for _, m in ipairs(hl.get_monitors()) do
         if m.name == identifier or (m.description and m.description:find(identifier, 1, true)) then
@@ -33,9 +33,7 @@ end
 
 local function configure_laptop()
     log("Configuring laptop-only setup")
-    hl.monitor({ output = LAPTOP,     mode = "1920x1200@60", position = "0x0", scale = 1 })
-    hl.monitor({ output = EXTERNAL_1, disabled = true })
-    hl.monitor({ output = EXTERNAL_2, disabled = true })
+    hl.monitor({ output = LAPTOP, mode = "1920x1200@60", position = "0x0", scale = 1, disabled = false })
 end
 
 local function configure_beamer()
@@ -46,42 +44,58 @@ local function configure_beamer()
     hl.monitor({ output = EXTERNAL_2, disabled = true })
 end
 
--- The IWB touchscreen (DP-2) runs at 3840x2160.
--- Touch input remapping should be handled via a libinput/udev rule
--- mapping the touch device to the eDP-1 workspace.
 local function configure_touchscreen()
     log("Configuring touchscreen mode (eDP-1 primary, IWB extended at 4K)")
     hl.monitor({ output = LAPTOP,      mode = "1920x1200@60", position = "0x0",    scale = 1 })
-    hl.monitor({ output = TOUCHSCREEN, mode = "3840x2160@60", position = "1920x0", scale = 1 })
+    hl.monitor({ output = TOUCHSCREEN, mode = "3840x2160@60", position = "1920x0", scale = 2 })
     hl.monitor({ output = EXTERNAL_1,  disabled = true })
     hl.monitor({ output = EXTERNAL_2,  disabled = true })
     hl.monitor({ output = BEAMER,      disabled = true })
 end
 
-local function apply()
+local function get_config_name()
     local beamer      = is_connected(BEAMER)
     local touchscreen = is_connected(TOUCHSCREEN)
     local ext1        = is_connected(EXTERNAL_1)
     local ext2        = is_connected(EXTERNAL_2)
+    if beamer then             return "beamer"
+    elseif touchscreen then    return "touchscreen"
+    elseif ext1 and ext2 then  return "external"
+    else                       return "laptop"
+    end
+end
+
+local function apply(event)
+    local ext1        = is_connected(EXTERNAL_1)
+    local ext2        = is_connected(EXTERNAL_2)
+    local beamer      = is_connected(BEAMER)
+    local touchscreen = is_connected(TOUCHSCREEN)
 
     log(string.format(
-        "Monitor status — BenQ1: %s, BenQ2: %s, Beamer: %s, IWB: %s",
-        tostring(ext1), tostring(ext2), tostring(beamer), tostring(touchscreen)
+        "Monitor status (%s) — BenQ1: %s, BenQ2: %s, Beamer: %s, IWB: %s",
+        tostring(event), tostring(ext1), tostring(ext2), tostring(beamer), tostring(touchscreen)
     ))
 
-    -- Priority: Beamer > Touchscreen > Dual external > Laptop only
-    if beamer then
+    local config = get_config_name()
+
+    if config == last_config then
+        log("No config change (still: " .. config .. "), skipping")
+        return
+    end
+
+    last_config = config
+
+    if config == "beamer" then
         configure_beamer()
-    elseif touchscreen then
+    elseif config == "touchscreen" then
         configure_touchscreen()
-    elseif ext1 and ext2 then
+    elseif config == "external" then
         configure_external()
     else
         configure_laptop()
     end
 end
 
-hl.on("monitor.added",   function(_) apply() end)
-hl.on("monitor.removed", function(_) apply() end)
-hl.on("config.reloaded", apply)
-
+hl.on("monitor.added",   function(_) apply("added") end)
+hl.on("monitor.removed", function(_) apply("removed") end)
+hl.on("config.reloaded", function(_) apply("reloaded") end)
