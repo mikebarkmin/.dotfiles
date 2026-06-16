@@ -2,7 +2,6 @@ local mainMod = "SUPER"
 
 local terminal = "kitty"
 local menu = "rofi -show drun"
-local menu_backup = "rofi -show drun"
 local emoji = "rofi -modi emoji -show emoji"
 
 -- General
@@ -11,7 +10,6 @@ hl.bind(mainMod .. " + Q",            hl.dsp.window.close())
 hl.bind(mainMod .. " + SPACE",        hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + F",            hl.dsp.window.fullscreen(""))
 hl.bind(mainMod .. " + D",            hl.dsp.exec_cmd(menu))
-hl.bind(mainMod .. " + SHIFT + D",    hl.dsp.exec_cmd(menu_backup))
 hl.bind(mainMod .. " + R",            hl.dsp.exec_cmd(emoji))
 hl.bind(mainMod .. " + P",            hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + V",            hl.dsp.layout("togglesplit, "))
@@ -22,6 +20,7 @@ hl.bind(mainMod .. " + SHIFT + C",   hl.dsp.exec_cmd("rofi -modi clipboard:~/.lo
 hl.bind(mainMod .. " + SHIFT + S",   hl.dsp.exec_cmd("~/.local/dbin/rofi-state-switcher"))
 hl.bind(mainMod .. " + SHIFT + A",   hl.dsp.exec_cmd("~/.local/dbin/rofi-audio-output-switcher"))
 hl.bind(mainMod .. " + SHIFT + F",   hl.dsp.exec_cmd("~/.local/dbin/rofi-finder"))
+hl.bind(mainMod .. " + SHIFT + R",   hl.dsp.exec_cmd("killall -SIGUSR2 waybar"))
 hl.bind("print",                      hl.dsp.exec_cmd("~/.local/dbin/rofi-screenshot"))
 
 -- Focus

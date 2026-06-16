@@ -34,3 +34,13 @@ hl.window_rule({
     name = "waydroid",
     match = { class = "waydroid.*" },
 })
+
+-- Prusa Live Stream Overlay
+hl.window_rule({
+    name = "prusa-stream-overlay",
+    match = { title = "^prusa-live-float$" },
+    float = true,
+    size = "800 600",
+    center = true,
+    pin = true, -- Optional: Keeps the camera feed pinned on top of other windows
+})

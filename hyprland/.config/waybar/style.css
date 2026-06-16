@@ -378,6 +378,26 @@ tooltip label,
     animation: blink 1s step-start infinite;
 }
 
+#custom-prusa {
+  margin: 2px 4px 2px 0;
+  padding: 0 8px 0 8px;
+  border-radius: 10px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  background: @surface1;
+  color: @text;
+}
+
+#custom-prusa.printing  { color: @green; }
+#custom-prusa.paused    { color: @yellow; }
+#custom-prusa.finished  { color: @sky; }
+#custom-prusa.stopped   { color: @peach; }
+#custom-prusa.error     { color: @red; }
+#custom-prusa.attention { color: @red; animation: blink 1s step-start infinite; }
+#custom-prusa.idle      { color: @overlay0; }
+#custom-prusa.offline   { color: @surface2; }
+#custom-prusa.other     { color: @text; }
+
 @keyframes blink {
     50% { opacity: 0; }
 }

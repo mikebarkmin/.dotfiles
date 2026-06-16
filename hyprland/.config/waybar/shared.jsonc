@@ -14,6 +14,7 @@
   ],
   "modules-right": [
     "mpris", // media info
+    "custom/prusa",
     "power-profiles-daemon", // distro icon
     "custom/winapps",
     "idle_inhibitor", // idle inhibitor
@@ -286,6 +287,13 @@
     "signal": 8,
     "interval": 2,
     "on-click": "~/.config/waybar/scripts/wf-recorder.sh stop"
+  },
+  "custom/prusa": {
+    "format": "{}",
+    "return-type": "json",
+    "interval": 10,
+    "exec": "$HOME/.config/waybar/scripts/prusa.sh",
+    "on-click": "$HOME/.config/waybar/scripts/prusa.sh --stream"
   },
   "tray": {
     "spacing": 10,
