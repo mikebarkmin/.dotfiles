@@ -76,6 +76,8 @@ tooltip label {
 #backlight,
 #battery,
 #custom-winapps,
+#custom-hotspot,
+#custom-dns,
 #custom-power {
   opacity: 1;
   color: @text;
@@ -338,9 +340,10 @@ tooltip label,
   color: #cdd6f4;
 }
 
-/* Pangolin status module */
+/* Pangolin / DNS / Hotspot status modules */
 #custom-pangolin,
-#custom-dns{
+#custom-dns,
+#custom-hotspot {
   margin: 2px 4px 2px 0;
   padding: 0 8px 0 8px;
   border-radius: 10px;
@@ -349,9 +352,10 @@ tooltip label,
 }
 
 #custom-pangolin.connected,
-#custom-dns.dns {
+#custom-dns.dns,
+#custom-hotspot.inactive {
   background: @surface1;
-  color: #181825;
+  color: @text;
 }
 
 #custom-pangolin.stopped,
@@ -360,10 +364,16 @@ tooltip label,
   color: #181825;
 }
 
+#custom-hotspot.active {
+  background-color: @green;
+  color: @base;
+}
+
 #custom-pangolin:hover,
-#custom-dns:hover {
-  background-color: #585b70;
-  color: #cdd6f4;
+#custom-dns:hover,
+#custom-hotspot:hover {
+  background-color: @surface2;
+  color: @text;
 }
 
 /* Add to your waybar style.css */

@@ -136,3 +136,7 @@ export FZF_DEFAULT_OPTS=" \
 
 # opencode
 export PATH=/home/mike/.opencode/bin:$PATH
+
+
+# Added by Antigravity CLI installer
+export PATH="/home/mike/.local/bin:$PATH"

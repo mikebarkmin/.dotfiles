@@ -24,8 +24,15 @@ return {
         typescript = { 'prettierd', 'prettier', stop_after_first = true },
         json = { 'prettierd', 'prettier', stop_after_first = true },
         tex = { 'tex-fmt', 'latexindent' },
-        toml = { 'tombi' }
+        toml = { 'tombi' },
+        dart = { 'dart_format' }
       },
+      formatters = {
+        dart_format = {
+          command = '/home/mike/.local/flutter-sdk/flutter/bin/dart',
+          args = { 'format' }
+        }
+      }
     },
   },
 }

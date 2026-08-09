@@ -1,16 +1,58 @@
 #!/usr/bin/env python3
 
-from http.server import SimpleHTTPRequestHandler, HTTPServer
+import os
+import webbrowser
+from functools import partial
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+
 
 class Handler(SimpleHTTPRequestHandler):
-    def end_headers(self):
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Cross-Origin-Embedder-Policy', 'require-corp')
-        self.send_header('Cross-Origin-Opener-Policy', 'same-origin')
-        SimpleHTTPRequestHandler.end_headers(self)
+    def do_GET(self):
+        # Ignore query string when checking for extensionless HTML
+        path = self.path.split("?", 1)[0]
 
-if __name__ == '__main__':
-    server_address = ('', 8000)
-    httpd = HTTPServer(server_address, Handler)
-    print("Running at: " + "http://0.0.0.0:8000")
-    httpd.serve_forever()
+        # If the URL has no extension, try "<path>.html"
+        if not os.path.splitext(path)[1]:
+            html_path = "." + path + ".html"
+            if os.path.isfile(html_path):
+                self.path = path + ".html"
+
+        super().do_GET()
+
+    def end_headers(self):
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Cross-Origin-Embedder-Policy", "require-corp")
+        self.send_header("Cross-Origin-Opener-Policy", "same-origin")
+        self.send_header("Cache-Control", "no-store")
+        super().end_headers()
+
+
+if __name__ == "__main__":
+    HOST = "127.0.0.1"  # Change to "0.0.0.0" to allow remote access
+    PORT = 8000
+    DIRECTORY = "."     # Change to e.g. "dist" or "build"
+
+    handler = partial(Handler, directory=DIRECTORY)
+
+    while True:
+        try:
+            httpd = ThreadingHTTPServer((HOST, PORT), handler)
+            break
+        except OSError:
+            print(f"Port {PORT} is in use, trying {PORT + 1}...")
+            PORT += 1
+
+    url = f"http://{HOST}:{PORT}"
+    print(f"Serving '{os.path.abspath(DIRECTORY)}'")
+    print(f"Open: {url}")
+
+    try:
+        webbrowser.open(url)
+    except Exception:
+        pass
+
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        print("\nStopping server...")
+        httpd.server_close()

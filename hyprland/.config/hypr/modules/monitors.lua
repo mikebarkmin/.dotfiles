@@ -1,8 +1,8 @@
 local LAPTOP      = "eDP-1"
-local EXTERNAL_1  = "BNQ BenQ BL2405 H4H02869SL0"
-local EXTERNAL_2  = "BNQ BenQ RL2460H KCF01940SL0"
+local EXTERNAL_1  = "desc:BNQ BenQ BL2405 H4H02869SL0"
+local EXTERNAL_2  = "desc:BNQ BenQ RL2460H KCF01940SL0"
 local BEAMER      = "HDMI-A-1"
-local TOUCHSCREEN = "IWB PC Monitor"
+local TOUCHSCREEN = "desc:IWB PC Monitor"
 local LOG_FILE    = "/tmp/hyprland-monitors.log"
 
 local last_config  = nil
@@ -16,8 +16,11 @@ local function log(msg)
 end
 
 local function is_connected(identifier)
+    -- Strip everything before and including the colon from identifier
+    local stripped_identifier = identifier:match(":(.+)") or identifier
+
     for _, m in ipairs(hl.get_monitors()) do
-        if m.name == identifier or (m.description and m.description:find(identifier, 1, true)) then
+        if m.name == stripped_identifier or (m.description and m.description:find(stripped_identifier, 1, true)) then
             return true
         end
     end
@@ -47,7 +50,7 @@ end
 local function configure_touchscreen()
     log("Configuring touchscreen mode (eDP-1 primary, IWB extended at 4K)")
     hl.monitor({ output = LAPTOP,      mode = "1920x1200@60", position = "0x0",    scale = 1 })
-    hl.monitor({ output = TOUCHSCREEN, mode = "3840x2160@60", position = "1920x0", scale = 2 })
+    hl.monitor({ output = TOUCHSCREEN, mode = "preferred", position = "auto-right", scale = 2 })
     hl.monitor({ output = EXTERNAL_1,  disabled = true })
     hl.monitor({ output = EXTERNAL_2,  disabled = true })
     hl.monitor({ output = BEAMER,      disabled = true })
