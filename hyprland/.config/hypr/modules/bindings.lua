@@ -12,7 +12,7 @@ hl.bind(mainMod .. " + F",            hl.dsp.window.fullscreen(""))
 hl.bind(mainMod .. " + D",            hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + R",            hl.dsp.exec_cmd(emoji))
 hl.bind(mainMod .. " + P",            hl.dsp.window.pseudo())
-hl.bind(mainMod .. " + V",            hl.dsp.layout("togglesplit, "))
+hl.bind(mainMod .. " + V",            hl.dsp.layout("togglesplit"))
 hl.bind(mainMod .. " + N",            hl.dsp.exec_cmd("swaync-client -t"))
 hl.bind(mainMod .. " + SHIFT + DELETE", hl.dsp.exec_cmd("hyprctl dispatch exit,"))
 hl.bind(mainMod .. " + SHIFT + P",   hl.dsp.exec_cmd("hyprpicker -a"))
@@ -52,7 +52,6 @@ hl.bind(mainMod .. " + period",       hl.dsp.layout("move +col"))
 hl.bind(mainMod .. " + comma",        hl.dsp.layout("move -col"))
 hl.bind(mainMod .. " + SHIFT + period", hl.dsp.layout("swapcol r"))
 hl.bind(mainMod .. " + SHIFT + comma", hl.dsp.layout("swapcol l"))
-hl.bind(mainMod .. " + minus",        hl.dsp.layout("promote"))
 
 -- Move window to workspace
 hl.bind(mainMod .. " + SHIFT + 1",  hl.dsp.window.move({ workspace = 1 }))
@@ -73,8 +72,8 @@ hl.bind(mainMod .. " + SHIFT + plus",  hl.dsp.exec_cmd("hyprctl -q keyword curso
 hl.bind(mainMod .. " + SHIFT + minus", hl.dsp.exec_cmd("hyprctl -q keyword cursor:zoom_factor $(hyprctl getoption cursor:zoom_factor -j | jq '(.float * 0.9) | if . < 1 then 1 else . end')"), { repeating = true })
 
 -- Mouse window management
-hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag())
-hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize())
+hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
+hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
 -- Media / brightness keys
 hl.bind("XF86AudioRaiseVolume",  hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"),        { locked = true, repeating = true })
