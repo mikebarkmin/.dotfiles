@@ -7,5 +7,15 @@ ExecStart=/usr/bin/ollama serve
 Restart=always
 RestartSec=3
 
+Environment="OLLAMA_HOST=127.0.0.1:11434"
+Environment="OLLAMA_CONTEXT_LENGTH=16384"
+Environment="OLLAMA_KEEP_ALIVE=30m"
+Environment="OLLAMA_NUM_PARALLEL=1"
+Environment="OLLAMA_MAX_LOADED_MODELS=1"
+Environment="OLLAMA_NUM_BATCH=256"
+Environment="OLLAMA_FLASH_ATTENTION=0"
+Environment="OLLAMA_VULKAN=1"
+Environment="OLLAMA_IGPU_ENABLE=true"
+
 [Install]
 WantedBy=default.target
