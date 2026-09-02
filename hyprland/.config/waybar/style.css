@@ -78,7 +78,6 @@ tooltip label {
 #custom-winapps,
 #custom-hotspot,
 #custom-dns,
-#custom-voxtype,
 #custom-power {
   opacity: 1;
   color: @text;
@@ -408,25 +407,6 @@ tooltip label,
 #custom-prusa.idle      { color: @overlay0; }
 #custom-prusa.offline   { color: @surface2; }
 #custom-prusa.other     { color: @text; }
-
-/* Voxtype dictation status module */
-#custom-voxtype {
-  color: @text;
-  background: @surface1;
-  border-radius: 10px;
-  margin: 2px 4px 2px 0;
-  padding: 0 6px 0 9px;
-}
-
-#custom-voxtype:hover {
-  background: @surface2;
-}
-
-#custom-voxtype.dictating {
-  color: @base;
-  background: @green;
-  animation: blink 1s step-start infinite;
-}
 
 @keyframes blink {
     50% { opacity: 0; }

@@ -23,7 +23,6 @@
     "pulseaudio", // output device
     "backlight", // brightness
     "battery", // battery
-    "custom/voxtype", // voxtype dictation status
     "custom/power" // power button
   ],
   "hyprland/workspaces": {
@@ -299,12 +298,5 @@
   "tray": {
     "spacing": 10,
     "icon-size": 14
-  },
-  "custom/voxtype": {
-    "exec": "~/.config/waybar/scripts/voxtype-status.sh",
-    "return-type": "json",
-    "interval": 1,
-    "tooltip": true,
-    "on-click": "~/.config/waybar/scripts/voxtype-status.sh toggle"
   }
 }
