@@ -10,6 +10,7 @@
     "custom/notification",
     "clock#time", // time
     "clock#date", // date
+    "custom/voxtype",
     "custom/recorder"
   ],
   "modules-right": [
@@ -294,6 +295,19 @@
     "interval": 10,
     "exec": "$HOME/.config/waybar/scripts/prusa.sh",
     "on-click": "$HOME/.config/waybar/scripts/prusa.sh --stream"
+  },
+  "custom/voxtype": {
+    "exec": "voxtype status --follow --format json",
+    "return-type": "json",
+    "format": "{}",
+    "format-icons": {
+      "idle": "󰍬",
+      "recording": "󰍭",
+      "transcribing": "󱕒",
+      "stopped": "󰍮"
+    },
+    "tooltip": true,
+    "on-click": "systemctl --user restart voxtype"
   },
   "tray": {
     "spacing": 10,
