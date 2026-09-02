@@ -89,3 +89,7 @@ hl.bind("XF86AudioPrev",         hl.dsp.exec_cmd("playerctl previous"),    { loc
 
 -- Special workspaces
 hl.bind(mainMod .. " + S", hl.dsp.workspace.toggle_special("terminal"))
+
+-- Voxtype dictation (push-to-talk)
+hl.bind(mainMod .. " + SHIFT + X", hl.dsp.exec_cmd("voxtype record start"))
+hl.bind(mainMod .. " + SHIFT + X", hl.dsp.exec_cmd("voxtype record stop"), { release = true })

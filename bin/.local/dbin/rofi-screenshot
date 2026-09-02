@@ -18,47 +18,69 @@ function grab_active_output() {
     hyprctl -j activeworkspace | jq -r '.monitor'
 }
 
-choose_type=$(echo -e "screenshot\nrecording\npresent" | rofi -dmenu -p "Choose type")
+
+choose_type=$(echo -e "screenshot\nrecording\nocr\npresent" | rofi -dmenu -p "Choose type")
 
 if [ "$choose_type" == "screenshot" ] || [ "$choose_type" == "recording" ]; then
     choose_mode=$(echo -e "region\nwindow\noutput" | rofi -dmenu -p "Choose a mode")
 fi
 
+
 if [ "$choose_type" == "screenshot" ]; then
+
     if [ "$choose_mode" == "region" ]; then
         ~/.local/dbin/hyprshot -m region
+
     elif [ "$choose_mode" == "window" ]; then
         ~/.local/dbin/hyprshot -m window
+
     elif [ "$choose_mode" == "output" ]; then
         ~/.local/dbin/hyprshot -m output
+
     else
         echo "No valid mode selected."
         exit 1
     fi
 
+
 elif [ "$choose_type" == "recording" ]; then
+
     mkdir -p ~/Videos
     OUTPUT=~/Videos/recording_$(date +%Y-%m-%d_%H-%M-%S).mp4
+
     if [ "$choose_mode" == "region" ]; then
         REGION=$(slurp)
         wf-recorder -g "$REGION" -f "$OUTPUT" &
+
     elif [ "$choose_mode" == "window" ]; then
         REGION=$(grab_window)
         wf-recorder -g "$REGION" -f "$OUTPUT" &
+
     elif [ "$choose_mode" == "output" ]; then
         wf-recorder -f "$OUTPUT" &
+
     else
         echo "No valid mode selected."
         exit 1
     fi
+
     refresh_waybar
     wait
     refresh_waybar
 
+
+elif [ "$choose_type" == "ocr" ]; then
+
+    # OCR a selected screen region and copy the recognized text to clipboard.
+    ~/.local/dbin/hyprshot -m region --ocr
+
+
 elif [ "$choose_type" == "present" ]; then
+
     choose_present=$(echo -e "mirror\ntoggle-freeze" | rofi -dmenu -p "Present action")
 
     if [ "$choose_present" == "mirror" ]; then
+
         choose_mode=$(echo -e "region\nwindow\noutput" | rofi -dmenu -p "Choose a mode")
 
         if [ "$choose_mode" == "region" ]; then
@@ -90,6 +112,7 @@ elif [ "$choose_type" == "present" ]; then
         echo "No valid present action selected."
         exit 1
     fi
+
 
 else
     echo "No valid type selected."
