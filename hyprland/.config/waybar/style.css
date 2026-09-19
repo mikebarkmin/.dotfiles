@@ -1,4 +1,4 @@
-@import "mocha.css";
+@import "active-theme.css";
 
 * {
   min-height: 0;
@@ -61,7 +61,6 @@ tooltip label {
 
 /* ------------------------------------------------------------- GENERAL --- */
 
-#custom-ws,
 #workspaces,
 #window,
 #memory,
@@ -69,14 +68,12 @@ tooltip label {
 #power-profiles-daemon,
 #idle_inhibitor,
 #clock,
-#custom-wifi,
 #bluetooth,
 #mpris,
 #pulseaudio,
 #backlight,
 #battery,
 #custom-winapps,
-#custom-hotspot,
 #custom-dns,
 #custom-power {
   opacity: 1;
@@ -155,20 +152,15 @@ tooltip label {
 }
 
 #clock.time {
-  background: @time;
+  background: transparent;
   margin-left: -2px;
   padding: 0 3px 0 0;
-}
-
-#custom-right3 {
-  color: @time;
-  background: @date;
 }
 
 /* ---------------------------------------------------------------- date --- */
 
 #clock.date {
-  background: @date;
+  background: transparent;
 }
 
 #clock.date:hover {
@@ -340,10 +332,9 @@ tooltip label,
   color: #cdd6f4;
 }
 
-/* Pangolin / DNS / Hotspot status modules */
+/* Pangolin / DNS status modules */
 #custom-pangolin,
-#custom-dns,
-#custom-hotspot {
+#custom-dns {
   margin: 2px 4px 2px 0;
   padding: 0 8px 0 8px;
   border-radius: 10px;
@@ -352,8 +343,7 @@ tooltip label,
 }
 
 #custom-pangolin.connected,
-#custom-dns.dns,
-#custom-hotspot.inactive {
+#custom-dns.dns {
   background: @surface1;
   color: @text;
 }
@@ -364,14 +354,8 @@ tooltip label,
   color: #181825;
 }
 
-#custom-hotspot.active {
-  background-color: @green;
-  color: @base;
-}
-
 #custom-pangolin:hover,
-#custom-dns:hover,
-#custom-hotspot:hover {
+#custom-dns:hover {
   background-color: @surface2;
   color: @text;
 }

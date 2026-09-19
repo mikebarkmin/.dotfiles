@@ -11,6 +11,7 @@ export FLUTTER_BIN="$HOME/.local/flutter-sdk/flutter/bin"
 export PATH="$PYENV_ROOT/bin:$PATH"
 export PATH="$FLUTTER_BIN:$PATH"
 export PATH="$PATH":"$HOME/.pub-cache/bin"
+export PATH="$PATH":"$HOME/.cargo/bin"
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time Oh My Zsh is loaded, in which case,

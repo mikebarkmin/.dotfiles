@@ -1,4 +1,4 @@
-local theme = require("mocha")
+local theme = require("active-theme")
 
 -- See https://wiki.hyprland.org/Configuring/Variables/
 hl.config({

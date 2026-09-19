@@ -32,8 +32,9 @@ A clean, modular Neovim configuration built on native LSP with manual LSP server
 - **Native LSP** - Pure `vim.lsp.start()` in ftplugin files (no mason, no lspconfig)
 - **Telescope** - Fuzzy finder
 - **Treesitter** - Syntax highlighting
-- **blink.cmp** - Completion with LuaSnip
-- **GitHub Copilot** & **CodeCompanion** - AI assistance
+- **blink.cmp** - Completion with LuaSnip + Copilot
+- **GitHub Copilot** - Inline AI completions via blink.cmp
+- **CodeCompanion** - AI chat assistant
 - **nvim-dap** - Debugging
 - **catppuccin** - Colorscheme
 - **lualine** - Statusline

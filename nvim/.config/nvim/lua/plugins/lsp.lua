@@ -41,6 +41,18 @@ return {
     end,
   },
 
+  -- GitHub Copilot
+  {
+    'zbirenbaum/copilot.lua',
+    event = 'InsertEnter',
+    cmd = 'Copilot',
+    build = ':Copilot auth',
+    opts = {
+      suggestion = { enabled = false },
+      panel = { enabled = false },
+    },
+  },
+
   -- Blink.cmp for completion
   {
     'saghen/blink.cmp',
@@ -59,6 +71,7 @@ return {
         opts = {},
       },
       'folke/lazydev.nvim',
+      'giuxtaposition/blink-cmp-copilot',
     },
     opts = {
       keymap = { preset = 'default' },
@@ -67,25 +80,16 @@ return {
         documentation = { auto_show = false, auto_show_delay_ms = 500 },
       },
       sources = {
-        default = { 'lsp', 'path', 'snippets', 'lazydev' },
+        default = { 'lsp', 'path', 'snippets', 'lazydev', 'copilot' },
         providers = {
           lazydev = { module = 'lazydev.integrations.blink', score_offset = 100 },
+          copilot = { module = 'blink-cmp-copilot', score_offset = 100, async = true },
         },
       },
       snippets = { preset = 'luasnip' },
       fuzzy = { implementation = 'prefer_rust_with_warning' },
       signature = { enabled = true },
     },
-  },
-
-  -- Catppuccin colorscheme
-  {
-    'catppuccin/nvim',
-    name = 'catppuccin',
-    priority = 1000,
-    init = function()
-      vim.cmd.colorscheme('catppuccin-mocha')
-    end,
   },
 
   -- Lazydev for Lua/Neovim development

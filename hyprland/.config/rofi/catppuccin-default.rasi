@@ -1,4 +1,4 @@
-@import "catppuccin-mocha"
+@import "active-theme.rasi"
 
 * {
   selected-active-foreground:  @background;

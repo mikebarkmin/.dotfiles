@@ -1,0 +1,71 @@
+#!/bin/bash
+
+# Applies the active theme's GTK settings (dark/light, gtk theme, icons).
+# Called by rofi-theme-switcher and by the Hyprland config.reloaded hook,
+# so a hyprctl reload re-applies the *current* theme instead of a hardcoded one.
+
+set -uo pipefail
+
+THEMES_DIR="$HOME/.config/hypr/themes"
+ACTIVE_FILE="$HOME/.config/hypr/.active-theme"
+
+active=$(cat "$ACTIVE_FILE" 2>/dev/null || echo "")
+THEME_DIR="$THEMES_DIR/$active"
+[ -d "$THEME_DIR" ] || exit 0
+
+MODE=$(cat "$THEME_DIR/mode" 2>/dev/null || echo "dark")
+ICONS=$(cat "$THEME_DIR/icons" 2>/dev/null || echo "Yaru-blue")
+CURSOR=$(cat "$THEME_DIR/cursor" 2>/dev/null || echo "Bibata-Modern-Amber")
+
+if [ "$MODE" = "light" ]; then
+    SCHEME="prefer-light"
+    GTK_THEME_NAME="adw-gtk3"
+    PREFER_DARK=0
+else
+    SCHEME="prefer-dark"
+    GTK_THEME_NAME="adw-gtk3-dark"
+    PREFER_DARK=1
+fi
+
+# A theme may override the GTK theme explicitly
+[ -f "$THEME_DIR/gtk-theme" ] && GTK_THEME_NAME=$(cat "$THEME_DIR/gtk-theme")
+
+# --- 1. GSettings: libadwaita/GTK4 + xdg-desktop-portal follow these live ---
+gsettings set org.gnome.desktop.interface color-scheme "$SCHEME"
+gsettings set org.gnome.desktop.interface gtk-theme "$GTK_THEME_NAME"
+gsettings set org.gnome.desktop.interface icon-theme "$ICONS"
+gsettings set org.gnome.desktop.interface cursor-theme "$CURSOR"
+
+# --- 2. settings.ini: read at startup by GTK3/GTK4 apps, overrides gsettings ---
+# Without this, newly launched GTK3 apps keep using the stale hardcoded theme.
+write_settings_ini() {
+    local file="$1"
+    mkdir -p "$(dirname "$file")"
+    if [ ! -f "$file" ]; then
+        printf '[Settings]\n' > "$file"
+    fi
+    grep -q '^\[Settings\]' "$file" || sed -i '1i [Settings]' "$file"
+
+    set_key "$file" "gtk-theme-name" "$GTK_THEME_NAME"
+    set_key "$file" "gtk-icon-theme-name" "$ICONS"
+    set_key "$file" "gtk-cursor-theme-name" "$CURSOR"
+    set_key "$file" "gtk-application-prefer-dark-theme" "$PREFER_DARK"
+}
+
+set_key() {
+    local file="$1" key="$2" value="$3"
+    if grep -q "^${key}=" "$file"; then
+        sed -i "s|^${key}=.*|${key}=${value}|" "$file"
+    else
+        sed -i "/^\[Settings\]/a ${key}=${value}" "$file"
+    fi
+}
+
+write_settings_ini "$HOME/.config/gtk-3.0/settings.ini"
+write_settings_ini "$HOME/.config/gtk-4.0/settings.ini"
+
+# --- 3. GTK2 ---
+if [ -f "$HOME/.gtkrc-2.0" ]; then
+    sed -i "s|^gtk-theme-name=.*|gtk-theme-name=\"$GTK_THEME_NAME\"|" "$HOME/.gtkrc-2.0"
+    sed -i "s|^gtk-icon-theme-name=.*|gtk-icon-theme-name=\"$ICONS\"|" "$HOME/.gtkrc-2.0"
+fi

@@ -1,0 +1,104 @@
+#!/bin/bash
+
+# Rofi-based theme switcher for Hyprland desktop
+# Switches: Hyprland colors, Waybar, Rofi, Kitty, Hyprlock, wallpaper, GTK dark/light + icons
+
+set -uo pipefail
+
+THEMES_DIR="$HOME/.config/hypr/themes"
+ACTIVE_FILE="$HOME/.config/hypr/.active-theme"
+
+HYPRA="$HOME/.config/hypr"
+WAYBAR="$HOME/.config/waybar"
+ROFI="$HOME/.config/rofi"
+KITTY="$HOME/.config/kitty"
+
+current=$(cat "$ACTIVE_FILE" 2>/dev/null || echo "none")
+
+# List available themes
+themes=$(find "$THEMES_DIR" -maxdepth 1 -mindepth 1 -type d -exec basename {} \; 2>/dev/null | sort)
+if [ -z "$themes" ]; then
+    notify-send "Theme Switcher" "No themes found in $THEMES_DIR"
+    exit 1
+fi
+
+# Choose via rofi
+selected=$(echo "$themes" | rofi -dmenu -p "Theme ($current)" -i)
+[ -z "$selected" ] && exit 0
+
+THEME_DIR="$THEMES_DIR/$selected"
+
+if [ ! -d "$THEME_DIR" ]; then
+    notify-send "Theme Switcher" "Theme '$selected' not found"
+    exit 1
+fi
+
+# Re-point symlinks to the selected theme
+ln -sf "$THEME_DIR/colors.lua"    "$HYPRA/active-theme.lua"
+ln -sf "$THEME_DIR/colors.conf"   "$HYPRA/active-theme.conf"
+ln -sf "$THEME_DIR/colors.css"   "$WAYBAR/active-theme.css"
+ln -sf "$THEME_DIR/colors.rasi"  "$ROFI/active-theme.rasi"
+ln -sf "$THEME_DIR/kitty.conf"   "$KITTY/active-theme.conf"
+ln -sf "$THEME_DIR/wallpaper.png" "$HYPRA/wallpaper.png"
+ln -sf "$THEME_DIR/neovim.lua"  "$HYPRA/active-theme-nvim.lua"
+
+# Save active theme name
+echo "$selected" > "$ACTIVE_FILE"
+
+# --- GTK: dark/light toggle + icon theme ---
+# Shared with the Hyprland config.reloaded hook so a reload cannot undo it.
+"$HOME/.local/dbin/theme-apply-gtk"
+
+MODE=$(cat "$THEME_DIR/mode" 2>/dev/null || echo "dark")
+
+# --- Reload everything ---
+
+# Hyprland: reload config (picks up new Lua colors)
+hyprctl reload 2>/dev/null
+
+# Waybar: restart to pick up new CSS
+killall waybar 2>/dev/null || true
+hyprctl dispatch 'hl.dsp.exec_cmd("waybar")' 2>/dev/null || true
+
+# Hyprpaper: reload wallpaper
+killall hyprpaper 2>/dev/null || true
+sleep 0.2
+hyprctl dispatch 'hl.dsp.exec_cmd("hyprpaper")' 2>/dev/null || true
+
+# Kitty: live-reload colors in all running instances
+# Kitty 0.48 creates per-instance sockets like @mykitty-<pid>, not a single @mykitty
+for sock in $(ss -lx 2>/dev/null | grep -oP '@mykitty-\d+'); do
+    kitty @ --to "unix:$sock" set-colors --all "$KITTY/active-theme.conf" 2>/dev/null || true
+done
+
+# Neovim: live-reload colorscheme in all running instances.
+# The target colorscheme's plugin is usually not loaded yet in a running
+# session, so ask lazy to load it first and only commit the background once
+# the colorscheme actually applied (otherwise the old theme just flips shade).
+NVIM_COLORS=$(grep -oP "vim\.cmd\.colorscheme\('\K[^']+" "$THEME_DIR/neovim.lua" 2>/dev/null | head -1)
+NVIM_BG=$(grep -oP "vim\.o\.background = '\K[^']+" "$THEME_DIR/neovim.lua" 2>/dev/null | head -1)
+NVIM_PLUGIN=$(grep -oP "name = '\K[^']+" "$THEME_DIR/neovim.lua" 2>/dev/null | head -1)
+[ -z "$NVIM_PLUGIN" ] && NVIM_PLUGIN=$(grep -oP "^\s*'[^']+/\K[^']+" "$THEME_DIR/neovim.lua" 2>/dev/null | head -1)
+
+if [ -n "$NVIM_COLORS" ] && command -v nvim >/dev/null; then
+    RELOAD_LUA="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/theme-nvim-reload.lua"
+    cat > "$RELOAD_LUA" <<EOF
+pcall(function() require('lazy').load({ plugins = { '$NVIM_PLUGIN' } }) end)
+if pcall(vim.cmd.colorscheme, '$NVIM_COLORS') then
+  vim.o.background = '${NVIM_BG:-dark}'
+  vim.g.theme_colorscheme = '$NVIM_COLORS'
+  vim.g.theme_background = '${NVIM_BG:-dark}'
+  vim.cmd.colorscheme('$NVIM_COLORS')
+end
+EOF
+    for sock in "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"/nvim.*; do
+        [ -S "$sock" ] || continue
+        nvim --server "$sock" --remote-send \
+            "<C-\\><C-N>:luafile $RELOAD_LUA<CR>" 2>/dev/null || true
+    done
+fi
+
+# Rofi: picks up new @import on next launch, no reload needed
+
+# Notification
+notify-send "Theme Switcher" "Switched to $selected ($MODE)" 2>/dev/null || true

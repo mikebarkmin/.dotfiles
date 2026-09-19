@@ -21,6 +21,7 @@ hl.bind(mainMod .. " + SHIFT + S",   hl.dsp.exec_cmd("~/.local/dbin/rofi-state-s
 hl.bind(mainMod .. " + SHIFT + A",   hl.dsp.exec_cmd("~/.local/dbin/rofi-audio-output-switcher"))
 hl.bind(mainMod .. " + SHIFT + F",   hl.dsp.exec_cmd("~/.local/dbin/rofi-finder"))
 hl.bind(mainMod .. " + SHIFT + R",   hl.dsp.exec_cmd("killall -SIGUSR2 waybar"))
+hl.bind(mainMod .. " + SHIFT + T",   hl.dsp.exec_cmd("~/.local/dbin/rofi-theme-switcher"))
 hl.bind("print",                      hl.dsp.exec_cmd("~/.local/dbin/rofi-screenshot"))
 
 -- Focus

@@ -1,0 +1,15 @@
+[Unit]
+Description=audiotap — capture Spotify to per-track files
+After=graphical-session.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/Musik/audiotap
+ExecStart=/home/mike/Sources/audiotap/audiotap.py -f mp3 -s -m spotify -l -o %h/Musik/audiotap
+ExecStop=/bin/kill -s TERM $MAINPID
+TimeoutStopSec=10
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=graphical-session.target

@@ -1,0 +1,1 @@
+/home/mike/.config/hypr/themes/catppuccin/neovim.lua
