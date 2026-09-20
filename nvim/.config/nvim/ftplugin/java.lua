@@ -71,3 +71,30 @@ local config = {
   },
 }
 require('jdtls').start_or_attach(config)
+
+vim.keymap.set('n', '<leader>ao', function()
+  local file = vim.api.nvim_buf_get_name(0)
+  if file == '' then
+    vim.notify('Save the Java file before running it', vim.log.levels.WARN)
+    return
+  end
+
+  vim.cmd.update()
+  local package
+  for _, line in ipairs(vim.api.nvim_buf_get_lines(0, 0, -1, false)) do
+    package = line:match('^%s*package%s+([%w_.]+)%s*;')
+    if package then
+      break
+    end
+  end
+
+  local class = vim.fn.fnamemodify(file, ':t:r')
+  local main_class = package and (package .. '.' .. class) or class
+
+  vim.cmd('botright 12new')
+  vim.fn.jobstart({ '/home/mike/.local/dbin/jrun', main_class }, {
+    term = true,
+    cwd = root_dir,
+  })
+  vim.cmd.startinsert()
+end, { buffer = true, desc = 'Run Java file' })

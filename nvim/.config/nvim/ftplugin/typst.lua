@@ -4,10 +4,43 @@ local capabilities = vim.tbl_deep_extend(
   require('blink.cmp').get_lsp_capabilities()
 )
 
+local typst_job
+local typst_terminal
+
 vim.keymap.set('n', '<leader>ao', function()
-  local file = vim.fn.expand('%:p')
-  vim.cmd('split | terminal typst watch ' .. file .. ' --open')
-end, { buffer = true, desc = 'Typst watch and open' })
+  -- Reuse the watcher instead of starting another one for the same buffer.
+  if typst_job and vim.fn.jobwait({ typst_job }, 0)[1] == -1 then
+    local windows = vim.fn.win_findbuf(typst_terminal)
+    if windows[1] then
+      vim.api.nvim_set_current_win(windows[1])
+    else
+      vim.cmd('botright 12split')
+      vim.api.nvim_win_set_buf(0, typst_terminal)
+    end
+    return
+  end
+
+  local file = vim.api.nvim_buf_get_name(0)
+  if file == '' then
+    vim.notify('Save the Typst file before launching the preview', vim.log.levels.WARN)
+    return
+  end
+
+  vim.cmd.update()
+  vim.cmd('botright 12new')
+  typst_terminal = vim.api.nvim_get_current_buf()
+  typst_job = vim.fn.jobstart({ 'typst', 'watch', file, '--open' }, { term = true })
+
+  if typst_job <= 0 then
+    vim.cmd.close()
+    vim.notify('Could not start typst watch', vim.log.levels.ERROR)
+    typst_job = nil
+    typst_terminal = nil
+    return
+  end
+
+  vim.cmd.startinsert()
+end, { buffer = true, desc = 'Launch or focus Typst preview' })
 
 vim.lsp.start {
   name = 'tinymist',
