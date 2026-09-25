@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Print the current directory of the focused window (kitty or Nautilus).
+# Prints nothing if it can't be determined.
+
+win=$(hyprctl activewindow -j)
+class=$(jq -r '.class' <<<"$win")
+
+case $class in
+    kitty)
+        pid=$(jq -r '.pid' <<<"$win")
+        cwd=$(kitty @ --to "unix:@mykitty-$pid" ls 2>/dev/null | jq -r '
+            .[] | select(.is_focused) | .tabs[] | select(.is_focused)
+                | .windows[] | select(.is_focused) | .cwd')
+        ;;
+    org.gnome.Nautilus)
+        # Hyprland only knows the window title (folder name), so match it
+        # against the full paths Nautilus reports over D-Bus.
+        title=$(jq -r '.title' <<<"$win")
+        if [[ $title == "Home" ]]; then
+            cwd=$HOME
+        else
+            cwd=$(busctl --user --json=short get-property \
+                    org.freedesktop.FileManager1 /org/freedesktop/FileManager1 \
+                    org.freedesktop.FileManager1 OpenLocations 2>/dev/null \
+                | jq -r --arg t "$title" '
+                    .data[] | select(startswith("file://")) | ltrimstr("file://")
+                    | select((split("/") | last) == ($t | @uri)
+                             or (split("/") | last) == $t)' \
+                | head -n1)
+            # Decode percent-escapes (e.g. %20 for spaces)
+            cwd=$(printf '%b' "${cwd//%/\\x}")
+        fi
+        ;;
+esac
+
+[[ -n $cwd && -d $cwd ]] && printf '%s\n' "$cwd"

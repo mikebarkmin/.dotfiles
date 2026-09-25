@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Open a new Nautilus window in the focused window's current directory, if known.
+
+cwd=$(~/.local/dbin/focused-cwd)
+exec nautilus --new-window "${cwd:-$HOME}"

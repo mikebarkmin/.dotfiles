@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Open a new kitty in the focused window's current directory, if known.
+
+cwd=$(~/.local/dbin/focused-cwd)
+if [[ -n $cwd ]]; then
+    exec kitty --directory "$cwd"
+else
+    exec kitty
+fi

@@ -1,11 +1,12 @@
 local mainMod = "SUPER"
 
-local terminal = "kitty"
+local terminal = "~/.local/dbin/kitty-cwd"
 local menu = "rofi -show drun"
 local emoji = "rofi -modi emoji -show emoji"
 
 -- General
 hl.bind(mainMod .. " + Return",       hl.dsp.exec_cmd(terminal))
+hl.bind(mainMod .. " + SHIFT + Return", hl.dsp.exec_cmd("~/.local/dbin/nautilus-cwd"))
 hl.bind(mainMod .. " + Q",            hl.dsp.window.close())
 hl.bind(mainMod .. " + SPACE",        hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + F",            hl.dsp.window.fullscreen(""))
