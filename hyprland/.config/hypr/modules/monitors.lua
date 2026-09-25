@@ -7,6 +7,28 @@ local LOG_FILE    = "/tmp/hyprland-monitors.log"
 
 local last_config  = nil
 
+-- In split modes, workspaces 1-5 live on the left monitor and 6-10 on the
+-- right one. Each mode's rules are only enabled while that mode is active so
+-- the other setups keep Hyprland's default placement.
+local LEFT_WORKSPACES  = { 1, 2, 3, 4, 5 }
+local RIGHT_WORKSPACES = { 6, 7, 8, 9, 10 }
+
+local WORKSPACE_SPLITS = {
+    touchscreen = { left = LAPTOP,     right = TOUCHSCREEN },
+    external    = { left = EXTERNAL_1, right = EXTERNAL_2 },
+}
+
+local split_rules = {}
+for config, split in pairs(WORKSPACE_SPLITS) do
+    split_rules[config] = {}
+    for _, id in ipairs(LEFT_WORKSPACES) do
+        table.insert(split_rules[config], hl.workspace_rule({ workspace = tostring(id), monitor = split.left, enabled = false }))
+    end
+    for _, id in ipairs(RIGHT_WORKSPACES) do
+        table.insert(split_rules[config], hl.workspace_rule({ workspace = tostring(id), monitor = split.right, enabled = false }))
+    end
+end
+
 local function log(msg)
     local f = io.open(LOG_FILE, "a")
     if f then
@@ -33,6 +55,38 @@ end
 -- IWB board touches get mapped onto eDP-1 whenever it has focus. Pin them.
 local function bind_touch_input(output)
     hl.config({ input = { touchdevice = { output = output }, tablet = { output = output } } })
+end
+
+-- Rules only affect newly created workspaces, so move the existing ones over.
+local function move_existing_workspaces(ids, identifier)
+    local monitor = find_monitor(identifier)
+    if not monitor then
+        log("Cannot move workspaces, monitor not found: " .. identifier)
+        return
+    end
+    for _, id in ipairs(ids) do
+        if hl.get_workspace(id) then
+            hl.dispatch(hl.dsp.workspace.move({ workspace = tostring(id), monitor = monitor.name }))
+        end
+    end
+end
+
+-- Enable the workspace split for `config` (if it has one) and disable all others.
+local function apply_workspace_split(config)
+    for name, rules in pairs(split_rules) do
+        for _, rule in ipairs(rules) do
+            rule:set_enabled(name == config)
+        end
+    end
+
+    local split = WORKSPACE_SPLITS[config]
+    if not split then return end
+
+    -- Give the modeset a moment before moving workspaces around.
+    hl.timer(function()
+        move_existing_workspaces(LEFT_WORKSPACES, split.left)
+        move_existing_workspaces(RIGHT_WORKSPACES, split.right)
+    end, { timeout = 500, type = "oneshot" })
 end
 
 local function configure_external()
@@ -112,6 +166,8 @@ local function apply(event)
     else
         configure_laptop()
     end
+
+    apply_workspace_split(config)
 end
 
 hl.on("monitor.added",   function(_) apply("added") end)
