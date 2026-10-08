@@ -1,0 +1,98 @@
+// Bottom toolbar for the interactive whiteboard (IWB).
+// Toggled by ~/.local/dbin/smartboard-bar (SUPER+B).
+// Overlay layer keeps it above the classroom tool screens and fullscreen windows.
+{
+  "layer": "overlay",
+  "position": "bottom",
+  "exclusive": true,
+  "passthrough": false,
+  "reload_style_on_change": true,
+  "gtk-layer-shell": true,
+  "height": 44,
+  "modules-center": [
+    "custom/board",
+    "custom/snap"
+  ],
+  "modules-left": [
+    "custom/timer",
+    "custom/noise",
+    "custom/task",
+    "custom/signal",
+    "custom/pick",
+    "custom/groups",
+    "custom/dice",
+    "custom/blank"
+  ],
+  "modules-right": [
+    "custom/light-dark",
+    "custom/classroom-end"
+  ],
+  "custom/timer": {
+    "exec": "~/.local/dbin/class-timer status",
+    "return-type": "json",
+    "interval": 1,
+    "signal": 10,
+    "tooltip-format": "Timer: Zeit einstellen, pausieren, als Vollbild zeigen",
+    "on-click": "~/.local/dbin/class-tools timer"
+  },
+  "custom/noise": {
+    // Streams the level while a work mode is set, the microphone is off otherwise.
+    "exec": "~/.local/dbin/class-noise",
+    "return-type": "json",
+    "tooltip-format": "Lautstärke: Arbeitsform und Grenze einstellen, Mikrofon an/aus",
+    "on-click": "~/.local/dbin/class-tools noise"
+  },
+  "custom/task": {
+    "format": "󰨸",
+    "tooltip-format": "Arbeitsauftrag: zusammenstellen, groß zeigen oder anheften",
+    "on-click": "~/.local/dbin/class-tools task"
+  },
+  "custom/signal": {
+    "format": "󰂞",
+    "tooltip-format": "Aufmerksamkeit: Gong und „Alle schauen nach vorne“",
+    "on-click": "~/.local/dbin/class-tools signal"
+  },
+  "custom/pick": {
+    "format": "󰭙",
+    "tooltip-format": "Zufällig aufrufen: niemand doppelt, bis alle dran waren",
+    "on-click": "~/.local/dbin/class-tools pick"
+  },
+  "custom/groups": {
+    "format": "󰡉",
+    "tooltip-format": "Gruppen bilden: nach Größe oder Anzahl",
+    "on-click": "~/.local/dbin/class-tools groups"
+  },
+  "custom/dice": {
+    "format": "󰇎",
+    "tooltip-format": "Würfeln: 1–6, 1–10, 1–20 oder 1–100",
+    "on-click": "~/.local/dbin/class-tools dice"
+  },
+  "custom/blank": {
+    "format": "󰶐",
+    "tooltip-format": "Bildschirm schwarz, tippen zum Zurückkehren",
+    "on-click": "~/.local/dbin/class-tools blank"
+  },
+  "custom/board": {
+    "format": "󰽉",
+    "tooltip-format": "Tafel zeigen oder verstecken (Xournal++)",
+    "on-click": "~/.local/dbin/class-tools board"
+  },
+  "custom/snap": {
+    "format": "󰹑",
+    "tooltip-format": "Bildschirmfoto als neue Seite an die Tafel anhängen",
+    "on-click": "~/.local/dbin/class-tools snap"
+  },
+  "custom/light-dark": {
+    "exec": "~/.local/dbin/theme-light-dark status",
+    "return-type": "json",
+    "interval": "once",
+    "tooltip-format": "Helles oder dunkles Design",
+    // setsid: the theme switch restarts this bar, the switch must outlive it
+    "on-click": "setsid -f ~/.local/dbin/theme-light-dark toggle"
+  },
+  "custom/classroom-end": {
+    "format": "󰈆",
+    "tooltip-format": "Unterricht beenden: Klassenmodus aus, alles zurücksetzen",
+    "on-click": "~/.local/dbin/classroom-mode off"
+  }
+}

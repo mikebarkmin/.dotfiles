@@ -1,0 +1,124 @@
+@import "active-theme.css";
+
+* {
+  min-height: 0;
+  border: none;
+  margin: 0;
+  padding: 0;
+  font-family: "JetBrainsMono Nerd Font Propo";
+  font-size: 15px;
+  font-weight: bold;
+}
+
+window#waybar {
+  background: @base;
+}
+
+#custom-timer,
+#custom-noise,
+#custom-task,
+#custom-signal,
+#custom-pick,
+#custom-groups,
+#custom-dice,
+#custom-blank,
+#custom-board,
+#custom-snap,
+#custom-light-dark,
+#custom-classroom-end {
+  color: @text;
+  background: @surface0;
+  border-radius: 10px;
+  margin: 4px;
+  padding: 0 16px;
+}
+
+/* The board: the main tools in the middle */
+#custom-board,
+#custom-snap {
+  color: @base;
+  background: @mauve;
+}
+
+/* Timer: coloured by the time left, like the noise meter */
+#custom-timer.plenty {
+  color: @base;
+  background: @green;
+}
+
+#custom-timer.half {
+  color: @base;
+  background: @yellow;
+}
+
+#custom-timer.low {
+  color: @base;
+  background: @peach;
+}
+
+#custom-timer.paused {
+  color: @text;
+  background: @surface1;
+}
+
+@keyframes timer-done {
+  to { background: @maroon; }
+}
+
+#custom-timer.done {
+  color: @base;
+  background: @red;
+  animation: timer-done 0.6s ease-in-out 6 alternate;
+}
+
+/* Icon-only buttons: square touch targets */
+#custom-timer,
+#custom-noise,
+#custom-task,
+#custom-signal,
+#custom-pick,
+#custom-groups,
+#custom-dice,
+#custom-blank,
+#custom-board,
+#custom-snap,
+#custom-light-dark,
+#custom-classroom-end {
+  min-width: 20px;
+  font-size: 20px;
+}
+
+/* Noise meter: level against the threshold of the work mode */
+#custom-noise.off {
+  color: @overlay1;
+}
+
+#custom-noise.quiet {
+  color: @base;
+  background: @green;
+}
+
+#custom-noise.ok {
+  color: @base;
+  background: @yellow;
+}
+
+#custom-noise.loud {
+  color: @base;
+  background: @peach;
+}
+
+@keyframes too-loud {
+  to { background: @maroon; }
+}
+
+#custom-noise.too-loud {
+  color: @base;
+  background: @red;
+  animation: too-loud 0.6s ease-in-out infinite alternate;
+}
+
+#custom-classroom-end {
+  color: @base;
+  background: @red;
+}

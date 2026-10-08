@@ -1,0 +1,31 @@
+#!/bin/bash
+# Usage: theme-light-dark toggle | status
+# Switches between a dark and a light theme (used by the smartboard bar).
+set -e
+
+DARK=catppuccin
+LIGHT=catppuccin-latte
+ACTIVE_FILE="$HOME/.config/hypr/.active-theme"
+
+current=$(cat "$ACTIVE_FILE" 2>/dev/null || echo "$DARK")
+
+case "$1" in
+    toggle)
+        if [ "$current" = "$LIGHT" ]; then
+            ~/.local/dbin/rofi-theme-switcher "$DARK"
+        else
+            ~/.local/dbin/rofi-theme-switcher "$LIGHT"
+        fi
+        ;;
+    status)
+        if [ "$current" = "$LIGHT" ]; then
+            echo '{"text": "󰖔", "class": "light"}'
+        else
+            echo '{"text": "󰖨", "class": "dark"}'
+        fi
+        ;;
+    *)
+        echo "Usage: theme-light-dark toggle | status" >&2
+        exit 1
+        ;;
+esac

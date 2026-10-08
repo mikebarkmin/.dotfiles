@@ -19,7 +19,7 @@ function grab_active_output() {
 }
 
 
-choose_type=$(echo -e "screenshot\nrecording\nocr\npresent" | rofi -dmenu -p "Choose type")
+choose_type=$(echo -e "screenshot\nrecording\nocr\nannotate\npresent" | rofi -dmenu -p "Choose type")
 
 if [ "$choose_type" == "screenshot" ] || [ "$choose_type" == "recording" ]; then
     choose_mode=$(echo -e "region\nwindow\noutput" | rofi -dmenu -p "Choose a mode")
@@ -73,6 +73,26 @@ elif [ "$choose_type" == "ocr" ]; then
 
     # OCR a selected screen region and copy the recognized text to clipboard.
     ~/.local/dbin/hyprshot -m region --ocr
+
+
+elif [ "$choose_type" == "annotate" ]; then
+
+    choose_annotate=$(echo -e "live\nfrozen" | rofi -dmenu -p "Annotate mode")
+
+    # Let rofi close before the overlay (and a possible freeze) appears.
+    sleep 0.2
+    pgrep -x wayscriber >/dev/null || { setsid wayscriber --daemon >/dev/null 2>&1 & sleep 0.5; }
+
+    if [ "$choose_annotate" == "live" ]; then
+        wayscriber --daemon-toggle
+
+    elif [ "$choose_annotate" == "frozen" ]; then
+        wayscriber --daemon-toggle --freeze
+
+    else
+        echo "No valid annotate mode selected."
+        exit 1
+    fi
 
 
 elif [ "$choose_type" == "present" ]; then

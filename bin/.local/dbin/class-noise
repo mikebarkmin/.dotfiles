@@ -1,0 +1,149 @@
+#!/usr/bin/python3
+"""Usage: class-noise
+
+Noise meter for the smartboard bar (a waybar module with continuous output).
+While a work mode is set, it listens to the default microphone and prints the
+smoothed level as bars, coloured against the mode's threshold:
+quiet (green) · ok (yellow) · loud (orange) · too-loud (red, at the threshold).
+With the mode off the microphone is not opened at all. Nothing is recorded.
+
+The work mode and thresholds are set with `class-overlay noise`, which reads the
+live level from LEVEL. Thresholds are dBFS per mode and survive restarts.
+"""
+import array
+import ctypes
+import json
+import math
+import os
+import signal
+import subprocess
+import sys
+import time
+
+RUN = os.environ.get("XDG_RUNTIME_DIR", "/tmp")
+STATE = os.path.join(os.environ.get("XDG_STATE_HOME", os.path.expanduser("~/.local/state")), "classroom")
+MODE = os.path.join(RUN, "class-noise-mode")          # silent | whisper | group, missing = off
+LEVEL = os.path.join(RUN, "class-noise-level")        # current smoothed level in dBFS
+THRESHOLDS = os.path.join(STATE, "noise-thresholds.json")
+
+DEFAULT_THRESHOLDS = {"silent": -46.0, "whisper": -38.0, "group": -30.0}
+ICONS = {"silent": "󰖁", "whisper": "󰕿", "group": "󰕾"}
+RATE = 16000
+CHUNK = RATE // 4             # 250 ms per update
+SMOOTHING = 0.2               # per chunk, about a second to follow a change
+BARS = "▁▂▃▄▅▆▇█"
+RANGE = 24                    # dB shown below the threshold, the last bar is the threshold
+
+
+def read_mode():
+    try:
+        with open(MODE) as f:
+            mode = f.read().strip()
+    except OSError:
+        return None
+    return mode if mode in ICONS else None
+
+
+def read_thresholds():
+    thresholds = dict(DEFAULT_THRESHOLDS)
+    try:
+        with open(THRESHOLDS) as f:
+            thresholds.update(json.load(f))
+    except (OSError, ValueError):
+        pass
+    return thresholds
+
+
+def zone(db, threshold):
+    """Colour zone of a level: shared with the settings screen in class-overlay."""
+    if db >= threshold:
+        return "too-loud"
+    if db >= threshold - 5:
+        return "loud"
+    if db >= threshold - 10:
+        return "ok"
+    return "quiet"
+
+
+def emit(text, css_class):
+    print(json.dumps({"text": text, "class": css_class}, ensure_ascii=False), flush=True)
+
+
+def meter(mode, db, threshold):
+    lit = round((db - (threshold - RANGE)) / RANGE * len(BARS))
+    bars = "".join(BARS[i] if i < lit else "·" for i in range(len(BARS)))
+    return f"{ICONS[mode]} {bars}"
+
+
+def die_with_parent():
+    ctypes.CDLL("libc.so.6").prctl(1, signal.SIGTERM)  # PR_SET_PDEATHSIG
+
+
+def listen():
+    return subprocess.Popen(
+        ["parec", "--raw", "--format=s16le", f"--rate={RATE}", "--channels=1",
+         "--latency-msec=100", "--client-name=class-noise"],
+        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, preexec_fn=die_with_parent,
+    )
+
+
+def stop(recorder):
+    if recorder:
+        recorder.terminate()
+        recorder.wait()
+    try:
+        os.remove(LEVEL)
+    except OSError:
+        pass
+
+
+def main():
+    signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))
+    recorder = None
+    power = None
+    last = None
+    try:
+        while True:
+            mode = read_mode()
+            if mode is None:
+                if recorder:
+                    stop(recorder)
+                    recorder = power = None
+                if last != "off":
+                    emit("󰍭", "off")
+                    last = "off"
+                time.sleep(0.5)
+                continue
+
+            if recorder is None:
+                recorder = listen()
+                recorder.stdout.read(CHUNK * 2)  # skip the click of opening the microphone
+            data = recorder.stdout.read(CHUNK * 2)
+            if len(data) < CHUNK * 2:  # microphone gone, try again later
+                stop(recorder)
+                recorder = power = None
+                emit(f"{ICONS[mode]} 󰍭", "off")
+                last = None
+                time.sleep(2)
+                continue
+
+            samples = array.array("h", data)
+            mean = sum(samples) / len(samples)  # some microphones have a large DC offset
+            chunk_power = sum((s - mean) ** 2 for s in samples) / len(samples) / 32768**2
+            power = chunk_power if power is None else power + SMOOTHING * (chunk_power - power)
+            db = 10 * math.log10(max(power, 1e-10))
+            with open(LEVEL + ".tmp", "w") as f:
+                f.write(f"{db:.1f}\n")
+            os.replace(LEVEL + ".tmp", LEVEL)
+
+            threshold = read_thresholds()[mode]
+            emit(meter(mode, db, threshold), zone(db, threshold))
+            last = None
+    except (BrokenPipeError, SystemExit):
+        pass
+    finally:
+        stop(recorder)
+
+
+if __name__ == "__main__":
+    main()

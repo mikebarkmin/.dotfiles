@@ -1,0 +1,170 @@
+#!/bin/bash
+# Usage: classroom-mode toggle | on | off | status | restart-waybar | reapply-scale
+# Teaching setup: do-not-disturb, no idle lock, smartboard toolbar. With the smartboard
+# connected also a bigger UI scale there (its bars shrunk back) and a bigger kitty font.
+#
+# restart-waybar: restart all bars in the right layout (used by the theme switcher).
+# reapply-scale:  restore the smartboard scale after `hyprctl reload` reset it.
+set -e
+
+RUN="${XDG_RUNTIME_DIR:-/tmp}"
+STATE="$RUN/classroom-mode"
+FONT_SIZE=16      # kitty, smartboard only; kitty-cwd also uses this for new windows
+SCALE_FACTOR=1.25 # applied to the smartboard only
+SMARTBOARD_DESC="${SMARTBOARD_DESC:-IWB PC Monitor}"
+
+active() {
+    [ -f "$STATE" ]
+}
+
+load_state() {
+    # shellcheck disable=SC1090
+    source "$STATE"
+}
+
+refresh_waybar() {
+    # Skip bars that just started: they read the state themselves and die on
+    # signals that arrive before waybar installs its handlers.
+    pkill --older 1 -SIGRTMIN+9 waybar 2>/dev/null || true
+}
+
+# Prints "name mode position scale" of the smartboard, nothing if not connected.
+smartboard_monitor() {
+    hyprctl monitors -j | jq -r --arg desc "$SMARTBOARD_DESC" '
+        .[] | select(.description | contains($desc))
+        | "\(.name) \(.width)x\(.height)@\(.refreshRate) \(.x)x\(.y) \(.scale)"'
+}
+
+set_scale() {
+    hyprctl -q eval "hl.monitor({ output = \"$1\", mode = \"$2\", position = \"$3\", scale = $4 })"
+}
+
+stop_all_waybar() {
+    ~/.local/dbin/smartboard-bar stop
+    pkill -x waybar 2>/dev/null || true
+    while pgrep -x waybar >/dev/null; do sleep 0.1; done
+}
+
+# Normal main bar, or while classroom mode runs on the smartboard: a normal
+# instance everywhere else plus one with a shrunk stylesheet on the board.
+# Stylesheets are regenerated each time, so this also picks up theme changes.
+start_waybar() {
+    if ! active; then
+        setsid waybar >/dev/null 2>&1 &
+        return
+    fi
+
+    load_state
+    if [ -z "$monitor" ]; then
+        setsid waybar >/dev/null 2>&1 &
+        ~/.local/dbin/smartboard-bar start
+        return
+    fi
+
+    local style
+    style=$(~/.local/dbin/waybar-shrink-css ~/.config/waybar/style.css "$SCALE_FACTOR" "$RUN/classroom-waybar-style")
+    printf '{ "include": ["~/.config/waybar/config.jsonc"], "output": ["!%s", "*"] }\n' "$monitor" >"$RUN/classroom-waybar-rest.jsonc"
+    printf '{ "include": ["~/.config/waybar/config.jsonc"], "output": ["%s"] }\n' "$monitor" >"$RUN/classroom-waybar-board.jsonc"
+    setsid waybar -c "$RUN/classroom-waybar-rest.jsonc" -s ~/.config/waybar/style.css >/dev/null 2>&1 &
+    setsid waybar -c "$RUN/classroom-waybar-board.jsonc" -s "$style" >/dev/null 2>&1 &
+    ~/.local/dbin/smartboard-bar start "$monitor" "$SCALE_FACTOR"
+}
+
+restart_waybar() {
+    stop_all_waybar
+    start_waybar
+}
+
+reapply_scale() {
+    active || return 0
+    load_state
+    [ -n "$monitor" ] || return 0
+    local name mode pos scale
+    read -r name mode pos scale <<<"$(smartboard_monitor)"
+    [ "$name" = "$monitor" ] || return 0
+    set_scale "$name" "$mode" "$pos" "$(jq -n "$monitor_scale * $SCALE_FACTOR")"
+}
+
+kitty_font() {
+    for pid in $(pgrep -x kitty); do
+        kitty @ --to "unix:@mykitty-$pid" set-font-size --all "$1" 2>/dev/null || true
+    done
+}
+
+on() {
+    active && return
+    local dnd_before
+    dnd_before=$(swaync-client -D 2>/dev/null || echo false)
+    swaync-client -dn >/dev/null 2>&1 || true
+
+    setsid systemd-inhibit --what=idle --who=classroom-mode --why="Teaching" sleep infinity >/dev/null 2>&1 &
+    local inhibit_pid=$!
+
+    local name="" mode="" pos="" scale="" kitty_font_size=""
+    read -r name mode pos scale <<<"$(smartboard_monitor)"
+    if [ -n "$name" ]; then
+        set_scale "$name" "$mode" "$pos" "$(jq -n "$scale * $SCALE_FACTOR")"
+        kitty_font "$FONT_SIZE"
+        kitty_font_size=$FONT_SIZE
+    fi
+
+    printf 'inhibit_pid=%s\ndnd_before=%s\nmonitor=%q\nmonitor_mode=%q\nmonitor_pos=%q\nmonitor_scale=%q\nkitty_font_size=%q\n' \
+        "$inhibit_pid" "$dnd_before" "$name" "$mode" "$pos" "$scale" "$kitty_font_size" >"$STATE"
+
+    if [ -n "$name" ]; then
+        restart_waybar
+    else
+        ~/.local/dbin/smartboard-bar start
+        refresh_waybar
+    fi
+}
+
+off() {
+    active || return 0
+    load_state
+    rm -f "$STATE"
+
+    kill "$inhibit_pid" 2>/dev/null || true
+    [ "$dnd_before" = "true" ] || swaync-client -df >/dev/null 2>&1 || true
+
+    ~/.local/dbin/class-timer reset
+    ~/.local/dbin/class-tools reset
+    [ -z "$kitty_font_size" ] || kitty_font 0
+
+    if [ -n "$monitor" ]; then
+        set_scale "$monitor" "$monitor_mode" "$monitor_pos" "$monitor_scale"
+        restart_waybar
+    else
+        ~/.local/dbin/smartboard-bar stop
+        refresh_waybar
+    fi
+}
+
+status() {
+    if active; then
+        echo '{"text": "󰑴 ", "class": "active", "tooltip": "Classroom mode on"}'
+    else
+        echo '{"text": "󰑴 ", "class": "inactive", "tooltip": "Classroom mode off"}'
+    fi
+}
+
+case "$1" in
+    toggle)         if active; then off; else on; fi ;;
+    on)             on ;;
+    off)            off ;;
+    status)         status ;;
+    active)         active ;;
+    restart-waybar) restart_waybar ;;
+    reapply-scale)  reapply_scale ;;
+    kitty-font-size)
+        # Prints the kitty font size to use for new windows, if classroom mode set one.
+        if active; then
+            load_state
+            [ -n "$kitty_font_size" ] && echo "$kitty_font_size"
+        fi
+        ;;
+    *)
+        echo "Usage: classroom-mode toggle | on | off | status | restart-waybar | reapply-scale" >&2
+        exit 1
+        ;;
+esac

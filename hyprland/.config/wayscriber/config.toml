@@ -1,0 +1,316 @@
+[drawing]
+default_color = [
+    255,
+    0,
+    0,
+]
+default_thickness = 12.0
+default_eraser_size = 12.0
+default_eraser_mode = "brush"
+marker_opacity = 0.32
+default_fill_enabled = false
+default_font_size = 32.0
+hit_test_tolerance = 6.0
+hit_test_linear_threshold = 400
+undo_stack_limit = 100
+font_family = "Sans"
+font_weight = "bold"
+font_style = "normal"
+text_background_enabled = false
+
+[presets]
+slot_count = 5
+
+[history]
+undo_all_delay_ms = 1000
+redo_all_delay_ms = 1000
+custom_section_enabled = false
+custom_undo_delay_ms = 1000
+custom_redo_delay_ms = 1000
+custom_undo_steps = 5
+custom_redo_steps = 5
+
+[arrow]
+length = 20.0
+angle_degrees = 30.0
+head_at_end = false
+
+[performance]
+buffer_count = 3
+enable_vsync = true
+ui_animation_fps = 30
+
+[ui]
+theme = "dark"
+show_capabilities_warning = false
+show_toolbar_hint = false
+show_onboarding_hints = false
+show_status_bar = true
+show_frozen_badge = false
+status_bar_position = "bottom-left"
+xdg_fullscreen = false
+
+[ui.status_bar_style]
+font_size = 21.0
+padding = 15.0
+bg_color = [
+    0.0,
+    0.0,
+    0.0,
+    0.85,
+]
+text_color = [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+]
+dot_radius = 6.0
+
+[ui.help_overlay_style]
+font_size = 18.0
+line_height = 28.0
+padding = 32.0
+bg_color = [
+    0.09,
+    0.1,
+    0.13,
+    0.92,
+]
+border_color = [
+    0.33,
+    0.39,
+    0.52,
+    0.88,
+]
+border_width = 2.0
+text_color = [
+    0.95,
+    0.96,
+    0.98,
+    1.0,
+]
+
+[ui.click_highlight]
+enabled = false
+radius = 24.0
+outline_thickness = 4.0
+duration_ms = 750
+fill_color = [
+    1.0,
+    0.8,
+    0.0,
+    0.35,
+]
+outline_color = [
+    1.0,
+    0.6,
+    0.0,
+    0.9,
+]
+use_pen_color = true
+
+[ui.context_menu]
+enabled = true
+
+[ui.toolbar]
+layout_mode = "regular"
+top_pinned = true
+side_pinned = true
+use_icons = true
+show_more_colors = false
+show_actions_section = true
+show_actions_advanced = false
+show_presets = true
+show_step_section = false
+show_text_controls = false
+show_settings_section = true
+show_delay_sliders = false
+show_marker_opacity_section = false
+show_preset_toasts = false
+top_offset = 221.69921875
+top_offset_y = 16.109375
+side_offset = 0.0
+side_offset_x = 0.0
+force_inline = false
+
+[ui.toolbar.mode_overrides.simple]
+
+[ui.toolbar.mode_overrides.regular]
+
+[ui.toolbar.mode_overrides.advanced]
+
+[board]
+enabled = true
+default_mode = "transparent"
+whiteboard_color = [
+    0.992,
+    0.992,
+    0.992,
+]
+blackboard_color = [
+    0.067,
+    0.067,
+    0.067,
+]
+whiteboard_pen_color = [
+    0.0,
+    0.0,
+    0.0,
+]
+blackboard_pen_color = [
+    1.0,
+    1.0,
+    1.0,
+]
+auto_adjust_pen = true
+
+[keybindings]
+exit = [
+    "Escape",
+    "Ctrl+Q",
+    "StylusSecondary",
+    "MouseBack",
+    "MouseForward",
+]
+enter_text_mode = ["T"]
+clear_canvas = ["E"]
+undo = ["Ctrl+Z"]
+redo = [
+    "Ctrl+Shift+Z",
+    "Ctrl+Y",
+]
+undo_all = []
+redo_all = []
+undo_all_delayed = []
+redo_all_delayed = []
+duplicate_selection = ["Ctrl+D"]
+move_selection_to_front = ["]"]
+move_selection_to_back = ["["]
+nudge_selection_up = ["ArrowUp"]
+nudge_selection_down = ["ArrowDown"]
+nudge_selection_left = ["ArrowLeft"]
+nudge_selection_right = ["ArrowRight"]
+delete_selection = ["Delete"]
+increase_thickness = [
+    "+",
+    "=",
+]
+decrease_thickness = [
+    "-",
+    "_",
+]
+increase_marker_opacity = ["Ctrl+Alt+ArrowUp"]
+decrease_marker_opacity = ["Ctrl+Alt+ArrowDown"]
+select_marker_tool = ["H"]
+select_eraser_tool = ["D"]
+toggle_eraser_mode = ["Ctrl+Shift+E"]
+select_pen_tool = ["F"]
+select_line_tool = []
+select_rect_tool = []
+select_ellipse_tool = []
+select_arrow_tool = []
+select_highlight_tool = []
+increase_font_size = [
+    "Ctrl+Shift++",
+    "Ctrl+Shift+=",
+]
+decrease_font_size = [
+    "Ctrl+Shift+-",
+    "Ctrl+Shift+_",
+]
+toggle_whiteboard = ["Ctrl+W"]
+toggle_blackboard = ["Ctrl+B"]
+return_to_transparent = ["Ctrl+Shift+T"]
+toggle_help = [
+    "F10",
+    "F1",
+]
+toggle_status_bar = [
+    "F12",
+    "F4",
+]
+toggle_click_highlight = ["Ctrl+Shift+H"]
+toggle_toolbar = [
+    "F2",
+    "F9",
+]
+toggle_fill = []
+toggle_highlight_tool = ["Ctrl+Alt+H"]
+open_context_menu = [
+    "Shift+F10",
+    "Menu",
+]
+open_configurator = ["F11"]
+set_color_red = ["R"]
+set_color_green = ["G"]
+set_color_blue = ["B"]
+set_color_yellow = ["Y"]
+set_color_orange = ["O"]
+set_color_pink = ["P"]
+set_color_white = ["W"]
+set_color_black = ["K"]
+capture_full_screen = ["Ctrl+Shift+P"]
+capture_active_window = ["Ctrl+Shift+O"]
+capture_selection = ["Ctrl+Shift+I"]
+capture_clipboard_full = ["Ctrl+C"]
+capture_file_full = ["Ctrl+S"]
+capture_clipboard_selection = ["Ctrl+Shift+C"]
+capture_file_selection = ["Ctrl+Shift+S"]
+capture_clipboard_region = ["Ctrl+6"]
+capture_file_region = ["Ctrl+Shift+6"]
+toggle_frozen_mode = ["Ctrl+Shift+F"]
+zoom_in = [
+    "Ctrl+Alt++",
+    "Ctrl+Alt+=",
+]
+zoom_out = [
+    "Ctrl+Alt+-",
+    "Ctrl+Alt+_",
+]
+reset_zoom = ["Ctrl+Alt+0"]
+toggle_zoom_lock = ["Ctrl+Alt+L"]
+refresh_zoom_capture = ["Ctrl+Alt+R"]
+apply_preset_1 = ["1"]
+apply_preset_2 = ["2"]
+apply_preset_3 = ["3"]
+apply_preset_4 = ["4"]
+apply_preset_5 = ["5"]
+save_preset_1 = ["Shift+1"]
+save_preset_2 = ["Shift+2"]
+save_preset_3 = ["Shift+3"]
+save_preset_4 = ["Shift+4"]
+save_preset_5 = ["Shift+5"]
+clear_preset_1 = []
+clear_preset_2 = []
+clear_preset_3 = []
+clear_preset_4 = []
+clear_preset_5 = []
+
+[capture]
+enabled = true
+save_directory = "~/Pictures/Wayscriber"
+filename_template = "screenshot_%Y-%m-%d_%H%M%S"
+format = "png"
+copy_to_clipboard = true
+exit_after_capture = false
+
+[tablet]
+enabled = false
+pressure_enabled = true
+min_thickness = 1.0
+max_thickness = 8.0
+
+[session]
+persist_transparent = false
+persist_whiteboard = false
+persist_blackboard = false
+persist_history = true
+restore_tool_state = true
+storage = "auto"
+max_shapes_per_frame = 10000
+max_file_size_mb = 10
+compress = "auto"
+auto_compress_threshold_kb = 100
+backup_retention = 1
+per_output = true

@@ -1,0 +1,14 @@
+#!/bin/bash
+# Usage: hypr-zoom in|out|reset
+set -e
+
+current=$(hyprctl getoption cursor:zoom_factor -j | jq '.float')
+
+case "$1" in
+    in)    new=$(jq -n "$current * 1.1") ;;
+    out)   new=$(jq -n "[$current * 0.9, 1] | max") ;;
+    reset) new=1 ;;
+    *)     echo "Usage: hypr-zoom in|out|reset" >&2; exit 1 ;;
+esac
+
+hyprctl -q eval "hl.config({ cursor = { zoom_factor = $new } })"

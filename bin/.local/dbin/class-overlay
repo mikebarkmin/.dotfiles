@@ -1,0 +1,1087 @@
+#!/usr/bin/python3
+"""Usage: class-overlay blank
+       class-overlay pick
+       class-overlay groups CHOICE
+       class-overlay task [--pinned]
+       class-overlay signal
+       class-overlay choose TITLE OPTION...
+       class-overlay noise
+       class-overlay timer [--countdown]
+       class-overlay dice [--sides N] [--remember FILE]
+
+Full-screen overlay for the classroom tools, on the same monitor as the smartboard bar,
+made to be used by touch alone.
+
+pick:   A random student (class-tools pick-next), picked again in place.
+groups: The class dealt into groups by CHOICE (class-tools groups-deal), shuffled
+        again in place.
+task:   The task for the class ("Arbeitsauftrag"), put together by tapping or taken
+        from the prepared tasks in TASKS_FILE (blocks separated by empty lines).
+        Shown big, or with --pinned as a small card in the top right corner.
+signal: Attention signal, "Alle schauen nach vorne".
+choose: Big buttons for the options, prints the tapped one. Exits 1 if cancelled.
+noise:  Settings of the noise meter (class-noise): work mode, which also switches the
+        microphone on and off, and its threshold, set on a live meter by dragging or
+        by calibrating to the room.
+timer:  Settings of the class timer (class-timer): presets, +1/+5 min, pause, reset.
+        With --countdown just the time, as big as possible, for the class to see.
+dice:   A die, rolled again in place. The number of sides can be changed there and is
+        written to FILE for the next time.
+
+Tapping outside a button or Escape closes the overlay. Only one full-screen overlay
+runs at a time (PIDFILE, used by class-tools to close it), the pinned card beside it.
+"""
+import argparse
+import importlib.machinery
+import importlib.util
+import json
+import math
+import os
+import random
+import signal
+import subprocess
+import sys
+
+# class-noise is loaded as a module below, keep ~/.local/dbin free of __pycache__.
+sys.dont_write_bytecode = True
+
+# gtk4-layer-shell only works if it is loaded before libwayland-client.
+LAYER_SHELL = "/usr/lib/libgtk4-layer-shell.so"
+if LAYER_SHELL not in os.environ.get("LD_PRELOAD", ""):
+    os.environ["LD_PRELOAD"] = LAYER_SHELL
+    os.execv(sys.executable, [sys.executable] + sys.argv)
+
+import gi
+
+gi.require_version("Gdk", "4.0")
+gi.require_version("Gtk", "4.0")
+gi.require_version("Gtk4LayerShell", "1.0")
+gi.require_version("PangoCairo", "1.0")
+from gi.repository import Gdk, Gio, GLib, Gtk, Pango  # noqa: E402
+from gi.repository import Gtk4LayerShell as LayerShell  # noqa: E402
+from gi.repository import PangoCairo  # noqa: E402
+
+RUN = os.environ.get("XDG_RUNTIME_DIR", "/tmp")
+BAR_CONFIG = os.path.join(RUN, "smartboard-bar.jsonc")
+COLORS = os.path.expanduser("~/.config/waybar/active-theme.css")
+CLASS_TOOLS = os.path.expanduser("~/.local/dbin/class-tools")
+CLASS_NOISE = os.path.expanduser("~/.local/dbin/class-noise")
+CLASS_TIMER = os.path.expanduser("~/.local/dbin/class-timer")
+CLASS_OVERLAY = os.path.abspath(__file__)
+PIDFILE = os.path.join(RUN, "class-overlay.pid")
+PIN_PIDFILE = os.path.join(RUN, "class-task-pin.pid")
+TASK = os.path.join(RUN, "class-task.json")
+TASKS_FILE = os.path.join(os.environ.get("XDG_DATA_HOME", os.path.expanduser("~/.local/share")),
+                          "classroom", "aufgaben.txt")
+
+CSS = """
+* { font-family: "JetBrainsMono Nerd Font Propo"; font-weight: bold; }
+window { background: alpha(@crust, 0.94); }
+window.blank { background: black; }
+.title { color: @subtext0; font-size: 36px; }
+.big { color: @text; }
+.big.final { color: @yellow; }
+.card { background: @surface0; border-radius: 20px; padding: 18px 28px; }
+.card-label { color: @mauve; font-size: 24px; }
+.card-names { color: @text; font-size: 30px; }
+.hint { color: @overlay0; font-size: 18px; }
+button { background: @surface0; color: @text; border: none; border-radius: 16px;
+         box-shadow: none; font-size: 28px; padding: 18px 36px; min-width: 80px; }
+button:active { background: @mauve; color: @base; }
+button.action { background: @surface1; font-size: 24px; padding: 14px 28px; }
+button.selected { background: @mauve; color: @base; }
+button.done { background: @mauve; color: @base; }
+.time { color: @text; }
+.time.plenty { color: @green; }
+.time.half { color: @yellow; }
+.time.low { color: @peach; }
+.time.done { color: @red; }
+.time.paused { color: @overlay1; }
+button.small { font-size: 22px; padding: 10px 18px; min-width: 44px; border-radius: 12px; }
+.field-label { color: @subtext0; font-size: 22px; }
+button.field { background: @base; border: 2px solid @surface1; min-width: 140px; }
+button.field.active { border-color: @mauve; }
+.task-form { color: @mauve; font-size: 36px; }
+.task-main { color: @text; font-size: 72px; }
+.task-text { color: @text; font-size: 44px; }
+.task-timer { font-size: 44px; }
+window.pinned { background: transparent; }
+.pin-card { background: alpha(@crust, 0.92); border: 2px solid @mauve; border-radius: 18px;
+            padding: 14px 22px; }
+.pin-form { color: @mauve; font-size: 18px; }
+.pin-line { color: @text; font-size: 24px; }
+.pin-timer { font-size: 24px; }
+@keyframes pulse { to { opacity: 0.45; } }
+.signal-icon { color: @yellow; font-size: 220px; animation: pulse 0.9s ease-in-out infinite alternate; }
+.signal-text { color: @yellow; font-size: 80px; }
+"""
+
+
+def bar_monitor():
+    """The monitor the smartboard bar runs on, None to let the compositor choose."""
+    try:
+        with open(BAR_CONFIG) as f:
+            output = json.load(f)["output"][0]
+    except (OSError, ValueError, KeyError, IndexError):
+        return None
+    for monitor in Gdk.Display.get_default().get_monitors():
+        if monitor.get_connector() == output:
+            return monitor
+    return None
+
+
+def load_css():
+    css = CSS
+    try:
+        with open(COLORS) as f:
+            css = f.read() + css
+    except OSError:
+        pass
+    provider = Gtk.CssProvider()
+    provider.load_from_string(css)
+    Gtk.StyleContext.add_provider_for_display(
+        Gdk.Display.get_default(), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+    )
+
+
+class Spinner:
+    """A huge label that flicks through candidates, slowing down, then lands on a
+    result. A new spin stops the animation of the previous one."""
+
+    def __init__(self, width):
+        self.width = width
+        self.label = Gtk.Label(css_classes=["big"])
+        self.spin_id = 0
+
+    def spin(self, candidates, result):
+        self.spin_id += 1
+        self.label.remove_css_class("final")
+        self.step(self.spin_id, candidates, result, 0)
+
+    def step(self, spin_id, candidates, result, step):
+        if spin_id != self.spin_id:
+            return False
+        if step < 18:
+            self.label.set_markup(big_markup(random.choice(candidates), self.width))
+            GLib.timeout_add(40 + step * step, self.step, spin_id, candidates, result, step + 1)
+        else:
+            self.label.set_markup(big_markup(result, self.width))
+            self.label.add_css_class("final")
+        return False
+
+
+def big_markup(text, width):
+    """Markup sized so that `text` fills most of the screen width (monospace font)."""
+    px = min(260, width * 0.7 / (max(len(text), 3) * 0.6))
+    return f'<span font_size="{int(px * 0.75)}pt">{GLib.markup_escape_text(text)}</span>'
+
+
+def columns(n):
+    """Grid columns for n items: one row up to five, then roughly square-ish."""
+    if n <= 5:
+        return n
+    if n <= 8:
+        return math.ceil(n / 2)
+    return math.ceil(math.sqrt(n * 1.6))
+
+
+def flowbox(n):
+    return Gtk.FlowBox(
+        selection_mode=Gtk.SelectionMode.NONE,
+        homogeneous=True,
+        column_spacing=20,
+        row_spacing=20,
+        max_children_per_line=columns(n),
+        min_children_per_line=columns(n),
+        halign=Gtk.Align.CENTER,
+    )
+
+
+def cards_grid(cards, label):
+    grid = flowbox(len(cards))
+    for i, names in enumerate(cards, 1):
+        card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8, css_classes=["card"])
+        if label:
+            card.append(Gtk.Label(label=f"{label} {i}", css_classes=["card-label"], xalign=0))
+        card.append(Gtk.Label(label=names, css_classes=["card-names"], xalign=0))
+        grid.append(card)
+    return grid
+
+
+def run_tool(app, *args):
+    """Hands over to another class-tools screen."""
+    subprocess.Popen([CLASS_TOOLS, *args], start_new_session=True)
+    app.quit()
+
+
+def tool_json(*args):
+    result = subprocess.run([CLASS_TOOLS, *args], capture_output=True, text=True, check=True)
+    return json.loads(result.stdout)
+
+
+def action_button(label, callback):
+    button = Gtk.Button(label=label, css_classes=["action"])
+    button.connect("clicked", lambda _b: callback())
+    return button
+
+
+def choose(app, option):
+    app.choice = option
+    app.quit()
+
+
+def load_noise():
+    """class-noise as a module, for its paths, thresholds and colour zones."""
+    loader = importlib.machinery.SourceFileLoader("class_noise", CLASS_NOISE)
+    module = importlib.util.module_from_spec(importlib.util.spec_from_loader("class_noise", loader))
+    loader.exec_module(module)
+    return module
+
+
+def theme_colors():
+    """The @define-color values of the theme as (r, g, b) tuples for cairo."""
+    colors = {}
+    try:
+        with open(COLORS) as f:
+            for line in f:
+                parts = line.split()
+                if len(parts) == 3 and parts[0] == "@define-color" and parts[2].startswith("#"):
+                    rgb = parts[2].rstrip(";").lstrip("#")
+                    colors[parts[1]] = tuple(int(rgb[i:i + 2], 16) / 255 for i in (0, 2, 4))
+    except (OSError, ValueError):
+        pass
+    return colors
+
+
+class NoisePanel:
+    MODES = [("silent", "󰖁  Stillarbeit"), ("whisper", "󰕿  Flüstern"), ("group", "󰕾  Gruppenarbeit"), (None, "󰍭  Aus")]
+    LOW, HIGH = -75.0, -5.0  # dBFS shown on the meter
+    ZONE_COLORS = {"quiet": "green", "ok": "yellow", "loud": "peach", "too-loud": "red"}
+
+    def __init__(self, app, box, width):
+        self.app = app
+        self.noise = load_noise()
+        self.colors = theme_colors()
+        self.mode = self.noise.read_mode()
+        self.thresholds = self.noise.read_thresholds()
+        self.level = None
+        self.calibration = None
+
+        box.append(Gtk.Label(label="Lautstärke", css_classes=["title"]))
+        modes = Gtk.Box(spacing=16, halign=Gtk.Align.CENTER)
+        self.mode_buttons = {}
+        for mode, label in self.MODES:
+            button = Gtk.Button(label=label)
+            button.connect("clicked", lambda _b, m=mode: self.set_mode(m))
+            modes.append(button)
+            self.mode_buttons[mode] = button
+        box.append(modes)
+
+        self.meter = Gtk.DrawingArea(content_width=int(width * 0.6), content_height=140, margin_top=24)
+        self.meter.set_draw_func(self.draw)
+        drag = Gtk.GestureDrag()
+        drag.connect("drag-begin", lambda _g, x, _y: self.set_threshold_at(x))
+        drag.connect("drag-update", lambda g, dx, _dy: self.set_threshold_at(g.get_start_point()[1] + dx))
+        drag.connect("drag-end", lambda *_: self.save())
+        self.meter.add_controller(drag)
+        box.append(self.meter)
+        self.hint = Gtk.Label(css_classes=["hint"])
+        box.append(self.hint)
+
+        adjust = Gtk.Box(spacing=16, halign=Gtk.Align.CENTER)
+        self.minus = Gtk.Button(label="−  Strenger", css_classes=["action"])
+        self.minus.connect("clicked", lambda _b: self.nudge(-2))
+        self.calibrate_button = Gtk.Button(label="󰑓  Einmessen", css_classes=["action"])
+        self.calibrate_button.connect("clicked", lambda _b: self.calibrate())
+        self.plus = Gtk.Button(label="+  Lockerer", css_classes=["action"])
+        self.plus.connect("clicked", lambda _b: self.nudge(2))
+        for button in (self.minus, self.calibrate_button, self.plus):
+            adjust.append(button)
+        box.append(adjust)
+
+        done = Gtk.Button(label="Fertig", css_classes=["done"], halign=Gtk.Align.CENTER, margin_top=16)
+        done.connect("clicked", lambda _b: app.quit())
+        box.append(done)
+
+        self.update_controls()
+        GLib.timeout_add(100, self.poll)
+
+    def update_controls(self):
+        for mode, button in self.mode_buttons.items():
+            if mode == self.mode:
+                button.add_css_class("selected")
+            else:
+                button.remove_css_class("selected")
+        for button in (self.minus, self.calibrate_button, self.plus):
+            button.set_sensitive(self.mode is not None and self.calibration is None)
+        if self.mode is None:
+            self.hint.set_label("Mikrofon aus · Arbeitsform wählen, um zu messen")
+        elif self.calibration is not None:
+            self.hint.set_label(f"Höre in den Raum … {5 - len(self.calibration) // 10} s")
+        else:
+            self.hint.set_label("Linie ziehen: ab hier wird es rot · es wird nichts aufgenommen")
+        self.meter.queue_draw()
+
+    def set_mode(self, mode):
+        self.mode = mode
+        if mode is None:
+            try:
+                os.remove(self.noise.MODE)
+            except OSError:
+                pass
+        else:
+            with open(self.noise.MODE, "w") as f:
+                f.write(mode + "\n")
+        self.calibration = None
+        self.update_controls()
+
+    def poll(self):
+        try:
+            with open(self.noise.LEVEL) as f:
+                self.level = float(f.read())
+        except (OSError, ValueError):
+            self.level = None
+        if self.calibration is not None and self.level is not None:
+            self.calibration.append(self.level)
+            if len(self.calibration) >= 50:
+                # A bit above the usual level while the class works as it should.
+                levels = sorted(self.calibration)
+                self.set_threshold(levels[int(len(levels) * 0.8)] + 4)
+                self.save()
+                self.calibration = None
+            self.update_controls()
+        self.meter.queue_draw()
+        return True
+
+    def calibrate(self):
+        self.calibration = []
+        self.update_controls()
+
+    def set_threshold(self, db):
+        if self.mode:
+            self.thresholds[self.mode] = round(min(max(db, self.LOW + 10), self.HIGH), 1)
+            self.meter.queue_draw()
+
+    def set_threshold_at(self, x):
+        if self.calibration is None:
+            width = self.meter.get_width()
+            self.set_threshold(self.LOW + x / width * (self.HIGH - self.LOW))
+
+    def nudge(self, db):
+        self.set_threshold(self.thresholds[self.mode] + db)
+        self.save()
+
+    def save(self):
+        os.makedirs(os.path.dirname(self.noise.THRESHOLDS), exist_ok=True)
+        with open(self.noise.THRESHOLDS, "w") as f:
+            json.dump(self.thresholds, f, indent=2)
+
+    def color(self, name, alpha=1.0):
+        r, g, b = self.colors.get(name, (0.5, 0.5, 0.5))
+        return r, g, b, alpha
+
+    def draw(self, _area, cr, width, height):
+        def x_of(db):
+            return (min(max(db, self.LOW), self.HIGH) - self.LOW) / (self.HIGH - self.LOW) * width
+
+        bar_top, bar_height = 32, height - 72
+        if self.mode is None:
+            cr.set_source_rgba(*self.color("surface0"))
+            cr.rectangle(0, bar_top, width, bar_height)
+            cr.fill()
+            return
+
+        threshold = self.thresholds[self.mode]
+        zones = [("quiet", self.LOW, threshold - 10), ("ok", threshold - 10, threshold - 5),
+                 ("loud", threshold - 5, threshold), ("too-loud", threshold, self.HIGH)]
+        for zone, start, end in zones:
+            # Dim zones as the scale, the live level lights them up.
+            color = self.ZONE_COLORS[zone]
+            cr.set_source_rgba(*self.color(color, 0.35))
+            cr.rectangle(x_of(start), bar_top, x_of(end) - x_of(start), bar_height)
+            cr.fill()
+            if self.level is not None and self.level > start:
+                cr.set_source_rgba(*self.color(color))
+                cr.rectangle(x_of(start), bar_top, x_of(min(self.level, end)) - x_of(start), bar_height)
+                cr.fill()
+
+        # The threshold: a line with a handle to drag.
+        x = x_of(threshold)
+        cr.set_source_rgba(*self.color("text"))
+        cr.rectangle(x - 3, bar_top - 14, 6, bar_height + 28)
+        cr.fill()
+        cr.arc(x, bar_top - 14, 18, 0, 2 * math.pi)
+        cr.fill()
+
+        layout = self.meter.create_pango_layout("leise")
+        layout.set_font_description(Pango.FontDescription.from_string("JetBrainsMono Nerd Font Propo Bold 14"))
+        cr.set_source_rgba(*self.color("subtext0"))
+        cr.move_to(0, height - 28)
+        PangoCairo.show_layout(cr, layout)
+        layout.set_text("laut")
+        cr.move_to(width - layout.get_pixel_size()[0], height - 28)
+        PangoCairo.show_layout(cr, layout)
+
+
+class TimerPanel:
+    PRESETS = [1, 2, 3, 5, 10, 15, 20, 30]
+    ZONE_COLORS = {"plenty": "green", "half": "yellow", "low": "peach", "done": "red", "paused": "overlay1"}
+
+    def __init__(self, app, box, width, countdown):
+        self.app = app
+        self.width = width
+        self.countdown = countdown
+        self.colors = theme_colors()
+        self.status = {}
+
+        if not countdown:
+            box.append(Gtk.Label(label="Timer", css_classes=["title"]))
+        self.time = Gtk.Label(css_classes=["time"])
+        box.append(self.time)
+        self.progress = Gtk.DrawingArea(content_width=int(width * (0.8 if countdown else 0.6)),
+                                        content_height=48 if countdown else 28)
+        self.progress.set_draw_func(self.draw)
+        self.progress.set_can_target(False)  # a tap on it closes the countdown
+        box.append(self.progress)
+
+        if countdown:
+            box.append(Gtk.Label(label="Tippen zum Schließen", css_classes=["hint"]))
+        else:
+            presets = Gtk.Box(spacing=12, halign=Gtk.Align.CENTER, margin_top=24)
+            for minutes in self.PRESETS:
+                button = Gtk.Button(label=f"{minutes} min")
+                button.connect("clicked", lambda _b, m=minutes: self.run("set", str(m)))
+                presets.append(button)
+            box.append(presets)
+
+            controls = Gtk.Box(spacing=16, halign=Gtk.Align.CENTER)
+            for label, args in (("+1 min", ("add", "1")), ("+5 min", ("add", "5"))):
+                button = Gtk.Button(label=label, css_classes=["action"])
+                button.connect("clicked", lambda _b, a=args: self.run(*a))
+                controls.append(button)
+            self.pause = Gtk.Button(css_classes=["action"])
+            self.pause.connect("clicked", lambda _b: self.run("pause"))
+            controls.append(self.pause)
+            self.reset = Gtk.Button(label="󰑓  Zurücksetzen", css_classes=["action"])
+            self.reset.connect("clicked", lambda _b: self.run("reset"))
+            controls.append(self.reset)
+            box.append(controls)
+
+            bottom = Gtk.Box(spacing=16, halign=Gtk.Align.CENTER, margin_top=16)
+            show = Gtk.Button(label="󰊓  Vollbild", css_classes=["action"])
+            show.connect("clicked", lambda _b: self.show_countdown())
+            bottom.append(show)
+            done = Gtk.Button(label="Fertig", css_classes=["done"])
+            done.connect("clicked", lambda _b: app.quit())
+            bottom.append(done)
+            box.append(bottom)
+
+        self.poll()
+        GLib.timeout_add(250, self.poll)
+
+    def run(self, *args):
+        subprocess.run([CLASS_TIMER, *args], check=False)
+        self.poll()
+
+    def show_countdown(self):
+        subprocess.Popen([CLASS_OVERLAY, "timer", "--countdown"], start_new_session=True)
+        self.app.quit()
+
+    def poll(self):
+        try:
+            result = subprocess.run([CLASS_TIMER, "status"], capture_output=True, text=True, check=True)
+            self.status = json.loads(result.stdout)
+        except (subprocess.CalledProcessError, ValueError):
+            self.status = {}
+        zone = self.status.get("class", "idle")
+        left = self.status.get("left", 0)
+        text = "Zeit ist um" if zone == "done" else f"{left // 60:02d}:{left % 60:02d}"
+        if self.countdown:
+            self.time.set_markup(big_markup(text, self.width))
+        else:
+            self.time.set_markup(f'<span font_size="96pt">{text}</span>')
+        for css_class in self.ZONE_COLORS:
+            if css_class == zone:
+                self.time.add_css_class(css_class)
+            else:
+                self.time.remove_css_class(css_class)
+        if not self.countdown:
+            running = zone not in ("idle", "done")
+            self.pause.set_label("󰐊  Weiter" if self.status.get("paused") else "󰏤  Pause")
+            self.pause.set_sensitive(running)
+            self.reset.set_sensitive(zone != "idle")
+        self.progress.queue_draw()
+        return True
+
+    def draw(self, _area, cr, width, height):
+        r, g, b = self.colors.get("surface0", (0.3, 0.3, 0.3))
+        cr.set_source_rgb(r, g, b)
+        rounded_rect(cr, 0, 0, width, height, height / 2)
+        cr.fill()
+        total = self.status.get("total", 0)
+        if total:
+            zone = self.status.get("class")
+            r, g, b = self.colors.get(self.ZONE_COLORS.get(zone, "text"), (0.8, 0.8, 0.8))
+            cr.set_source_rgb(r, g, b)
+            fill = width * self.status.get("left", 0) / total
+            if fill > 0:
+                rounded_rect(cr, 0, 0, max(fill, height), height, height / 2)
+                cr.fill()
+
+
+class DicePanel:
+    SIDES = [6, 10, 20, 100]
+
+    def __init__(self, box, width, sides, remember):
+        self.sides = sides
+        self.remember = remember
+
+        self.title = Gtk.Label(css_classes=["title"])
+        box.append(self.title)
+        self.spinner = Spinner(width)
+        box.append(self.spinner.label)
+
+        buttons = Gtk.Box(spacing=16, halign=Gtk.Align.CENTER, margin_top=24)
+        buttons.append(action_button("󰇎  Neu würfeln", self.roll))
+        self.side_buttons = {}
+        for n in self.SIDES:
+            button = Gtk.Button(label=f"1–{n}", css_classes=["action"])
+            button.connect("clicked", lambda _b, n=n: self.set_sides(n))
+            buttons.append(button)
+            self.side_buttons[n] = button
+        box.append(buttons)
+        box.append(Gtk.Label(label="Daneben tippen zum Schließen", css_classes=["hint"]))
+
+        self.set_sides(sides)
+
+    def set_sides(self, sides):
+        self.sides = sides
+        self.title.set_label(f"Würfel 1–{sides}")
+        for n, button in self.side_buttons.items():
+            if n == sides:
+                button.add_css_class("selected")
+            else:
+                button.remove_css_class("selected")
+        if self.remember:
+            with open(self.remember, "w") as f:
+                f.write(f"{sides}\n")
+        self.roll()
+
+    def roll(self):
+        numbers = [str(n) for n in range(1, self.sides + 1)]
+        self.spinner.spin(numbers, random.choice(numbers))
+
+
+class PickPanel:
+    def __init__(self, app, box, width):
+        self.title = Gtk.Label(css_classes=["title"])
+        box.append(self.title)
+        self.spinner = Spinner(width)
+        box.append(self.spinner.label)
+
+        buttons = Gtk.Box(spacing=16, halign=Gtk.Align.CENTER, margin_top=24)
+        buttons.append(action_button("󰒟  Nächste:r", self.next))
+        buttons.append(action_button("󰀎  Klasse wechseln", lambda: run_tool(app, "class", "pick")))
+        box.append(buttons)
+        box.append(Gtk.Label(label="Daneben tippen zum Schließen", css_classes=["hint"]))
+        self.next()
+
+    def next(self):
+        pick = tool_json("pick-next")
+        self.title.set_label(f"{pick['title']} · noch {pick['left']} in dieser Runde")
+        self.spinner.spin(pick["names"], pick["name"])
+
+
+class GroupsPanel:
+    def __init__(self, app, box, choice):
+        self.choice = choice
+        self.title = Gtk.Label(css_classes=["title"])
+        box.append(self.title)
+        self.grid = Gtk.Box(halign=Gtk.Align.CENTER)
+        box.append(self.grid)
+
+        buttons = Gtk.Box(spacing=16, halign=Gtk.Align.CENTER, margin_top=24)
+        buttons.append(action_button("󰒟  Neu mischen", self.shuffle))
+        buttons.append(action_button("󰡉  Andere Größe", lambda: run_tool(app, "groups")))
+        buttons.append(action_button("󰀎  Klasse wechseln", lambda: run_tool(app, "class", "groups")))
+        box.append(buttons)
+        box.append(Gtk.Label(label="Daneben tippen zum Schließen", css_classes=["hint"]))
+        self.shuffle()
+
+    def shuffle(self):
+        deal = tool_json("groups-deal", self.choice)
+        self.title.set_label(f"{deal['title']} · {deal['choice']}")
+        if child := self.grid.get_first_child():
+            self.grid.remove(child)
+        self.grid.append(cards_grid(deal["groups"], "Gruppe"))
+
+
+def timer_status():
+    try:
+        result = subprocess.run([CLASS_TIMER, "status"], capture_output=True, text=True, check=True)
+        return json.loads(result.stdout)
+    except (subprocess.CalledProcessError, ValueError):
+        return {}
+
+
+def show_timer(label, status):
+    """Shows the time left of the class timer on a label, hides it without timer."""
+    zone = status.get("class", "idle")
+    left = status.get("left", 0)
+    label.set_visible(zone != "idle")
+    label.set_label("󰔛  Zeit ist um" if zone == "done" else f"󰔛  {left // 60:02d}:{left % 60:02d}")
+    for css_class in TimerPanel.ZONE_COLORS:
+        if css_class == zone:
+            label.add_css_class(css_class)
+        else:
+            label.remove_css_class(css_class)
+
+
+def pid_alive(pidfile):
+    try:
+        with open(pidfile) as f:
+            pid = int(f.read())
+        with open(f"/proc/{pid}/cmdline", "rb") as f:
+            return b"class-overlay" in f.read() and pid
+    except (OSError, ValueError):
+        return False
+
+
+FORMS = {"single": ("󰀄", "Einzelarbeit"), "pair": ("󰀎", "Partnerarbeit"), "group": ("󰡉", "Gruppenarbeit")}
+MATERIALS = {"book": ("󱗖", "Buch"), "sheet": ("󰧮", "Arbeitsblatt"), "notebook": ("󰺿", "Heft"),
+             "tablet": ("󰓶", "Tablet")}
+
+
+def read_task():
+    try:
+        with open(TASK) as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return {}
+
+
+def write_task(task):
+    with open(TASK + ".tmp", "w") as f:
+        json.dump(task, f)
+    os.replace(TASK + ".tmp", TASK)
+
+
+def task_form(task):
+    icon, name = FORMS.get(task.get("form"), ("", ""))
+    return f"{icon}  {name}" if name else ""
+
+
+def task_lines(task):
+    """The task as lines: material with page, task numbers, free text."""
+    lines = []
+    icon, name = MATERIALS.get(task.get("material"), ("", ""))
+    material = f"{icon}  {name}" if name else ""
+    if task.get("page"):
+        material = f"{material} S. {task['page']}".strip()
+    if material:
+        lines.append(material)
+    if task.get("numbers"):
+        lines.append(f"Nr. {task['numbers']}")
+    return lines
+
+
+def prepared_tasks():
+    try:
+        with open(TASKS_FILE) as f:
+            blocks = f.read().split("\n\n")
+    except OSError:
+        return []
+    return [block.strip() for block in blocks if block.strip()]
+
+
+class TaskPanel:
+    KEYS = [list("1234567890") + ["⌫"], list("abcdefgh") + [",", "–", "+"]]
+    TIMES = [0, 5, 10, 15, 20, 30]
+
+    def __init__(self, app, box, width):
+        self.app = app
+        self.task = read_task()
+        self.field = "page"
+        self.stack = Gtk.Stack(transition_type=Gtk.StackTransitionType.CROSSFADE)
+        self.stack.add_named(self.build_show(width), "show")
+        self.stack.add_named(self.build_edit(), "edit")
+        self.stack.add_named(self.build_prepared(), "prepared")
+        box.append(self.stack)
+        if self.task:
+            self.show()
+        else:
+            self.edit()
+        GLib.timeout_add(500, self.poll)
+
+    # Showing the task
+
+    def build_show(self, width):
+        page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=20)
+        page.append(Gtk.Label(label="Arbeitsauftrag", css_classes=["title"]))
+        self.form_label = Gtk.Label(css_classes=["task-form"])
+        page.append(self.form_label)
+        self.lines = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        page.append(self.lines)
+        self.timer_label = Gtk.Label(css_classes=["time", "task-timer"])
+        page.append(self.timer_label)
+        buttons = Gtk.Box(spacing=16, halign=Gtk.Align.CENTER, margin_top=24)
+        buttons.append(action_button("󰲶  Bearbeiten", self.edit))
+        self.pin_button = action_button("", self.toggle_pin)
+        buttons.append(self.pin_button)
+        page.append(buttons)
+        page.append(Gtk.Label(label="Daneben tippen zum Schließen", css_classes=["hint"]))
+        self.max_chars = int(width / 30)
+        return page
+
+    def show(self):
+        self.form_label.set_label(task_form(self.task))
+        self.form_label.set_visible(bool(self.task.get("form")))
+        while child := self.lines.get_first_child():
+            self.lines.remove(child)
+        for line in task_lines(self.task):
+            self.lines.append(Gtk.Label(label=line, css_classes=["task-main"]))
+        if self.task.get("text"):
+            self.lines.append(Gtk.Label(label=self.task["text"], css_classes=["task-text"], wrap=True,
+                                        max_width_chars=self.max_chars, justify=Gtk.Justification.CENTER))
+        self.pin_button.set_label("󰤱  Lösen" if pid_alive(PIN_PIDFILE) else "󰤱  Anheften")
+        self.stack.set_visible_child_name("show")
+
+    def toggle_pin(self):
+        pid = pid_alive(PIN_PIDFILE)
+        if pid:
+            os.kill(pid, 15)
+            self.pin_button.set_label("󰤱  Anheften")
+        else:
+            subprocess.Popen([CLASS_OVERLAY, "task", "--pinned"], start_new_session=True)
+            self.app.quit()
+
+    def poll(self):
+        show_timer(self.timer_label, timer_status())
+        return True
+
+    # Putting the task together
+
+    def build_edit(self):
+        page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
+        page.append(Gtk.Label(label="Arbeitsauftrag", css_classes=["title"]))
+        grid = Gtk.Grid(column_spacing=16, row_spacing=14, halign=Gtk.Align.CENTER)
+        page.append(grid)
+
+        self.form_buttons = self.chips(grid, 0, "Sozialform", [(k, f"{i}  {n}") for k, (i, n) in FORMS.items()],
+                                       "form")
+        self.material_buttons = self.chips(grid, 1, "Material",
+                                           [(k, f"{i}  {n}") for k, (i, n) in MATERIALS.items()], "material")
+
+        fields = Gtk.Box(spacing=12)
+        self.field_buttons = {}
+        for key, label in (("page", "Seite"), ("numbers", "Nr.")):
+            fields.append(Gtk.Label(label=label, css_classes=["field-label"]))
+            button = Gtk.Button(css_classes=["small", "field"])
+            button.connect("clicked", lambda _b, k=key: self.select_field(k))
+            fields.append(button)
+            self.field_buttons[key] = button
+        grid.attach(Gtk.Label(label="Aufgabe", css_classes=["field-label"], xalign=1), 0, 2, 1, 1)
+        grid.attach(fields, 1, 2, 1, 1)
+
+        keypad = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        for row in self.KEYS:
+            keys = Gtk.Box(spacing=8)
+            for key in row:
+                button = Gtk.Button(label=key, css_classes=["small"])
+                button.connect("clicked", lambda _b, k=key: self.type(k))
+                keys.append(button)
+            keypad.append(keys)
+        grid.attach(keypad, 1, 3, 1, 1)
+
+        self.time_buttons = self.chips(grid, 4, "Zeit",
+                                       [(m, f"{m} min" if m else "ohne") for m in self.TIMES], "minutes")
+
+        self.text_label = Gtk.Label(css_classes=["field-label"], wrap=True, max_width_chars=60)
+        page.append(self.text_label)
+
+        buttons = Gtk.Box(spacing=16, halign=Gtk.Align.CENTER, margin_top=8)
+        self.prepared_button = action_button("󰈙  Vorbereitet", self.choose_prepared)
+        buttons.append(self.prepared_button)
+        buttons.append(action_button("󰧧  Leeren", self.clear))
+        done = Gtk.Button(label="󰄬  Anzeigen", css_classes=["done"])
+        done.connect("clicked", lambda _b: self.save())
+        buttons.append(done)
+        page.append(buttons)
+        return page
+
+    def chips(self, grid, row, label, options, key):
+        grid.attach(Gtk.Label(label=label, css_classes=["field-label"], xalign=1), 0, row, 1, 1)
+        box = Gtk.Box(spacing=8)
+        buttons = {}
+        for value, text in options:
+            button = Gtk.Button(label=text, css_classes=["small"])
+            button.connect("clicked", lambda _b, v=value: self.toggle(key, v))
+            box.append(button)
+            buttons[value] = button
+        grid.attach(box, 1, row, 1, 1)
+        return buttons
+
+    def toggle(self, key, value):
+        # Tapping the selected chip again unselects it.
+        self.draft[key] = None if self.draft.get(key) == value and key != "minutes" else value
+        self.update_edit()
+
+    def select_field(self, key):
+        self.field = key
+        self.update_edit()
+
+    def type(self, key):
+        value = self.draft.get(self.field) or ""
+        self.draft[self.field] = value[:-1] if key == "⌫" else value + key
+        self.update_edit()
+
+    def edit(self):
+        self.draft = dict(self.task)
+        self.draft.setdefault("minutes", 0)
+        self.update_edit()
+        self.stack.set_visible_child_name("edit")
+
+    def update_edit(self):
+        for key, buttons in (("form", self.form_buttons), ("material", self.material_buttons),
+                             ("minutes", self.time_buttons)):
+            for value, button in buttons.items():
+                if self.draft.get(key) == value:
+                    button.add_css_class("selected")
+                else:
+                    button.remove_css_class("selected")
+        for key, button in self.field_buttons.items():
+            button.set_label(self.draft.get(key) or "–")
+            if key == self.field:
+                button.add_css_class("active")
+            else:
+                button.remove_css_class("active")
+        self.text_label.set_label(self.draft.get("text") or "")
+        self.text_label.set_visible(bool(self.draft.get("text")))
+        self.prepared_button.set_visible(bool(prepared_tasks()))
+
+    def clear(self):
+        self.draft = {"minutes": 0}
+        self.update_edit()
+
+    def save(self):
+        task = {key: value for key, value in self.draft.items() if value}
+        if not task:
+            try:
+                os.remove(TASK)
+            except OSError:
+                pass
+            self.app.quit()
+            return
+        # Starts the timer, unless it already runs for this task.
+        minutes = task.get("minutes")
+        if minutes and (minutes != self.task.get("minutes") or timer_status().get("class") in ("idle", "done")):
+            subprocess.run([CLASS_TIMER, "set", str(minutes)], check=False)
+        write_task(task)
+        self.task = task
+        self.show()
+
+    # Prepared tasks
+
+    def build_prepared(self):
+        page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=20)
+        page.append(Gtk.Label(label="Vorbereitete Aufgaben", css_classes=["title"]))
+        self.prepared_list = Gtk.Box()
+        page.append(self.prepared_list)
+        page.append(action_button("Zurück", lambda: self.stack.set_visible_child_name("edit")))
+        return page
+
+    def choose_prepared(self):
+        tasks = prepared_tasks()
+        grid = flowbox(len(tasks))
+        for text in tasks:
+            label = text.splitlines()[0]
+            button = Gtk.Button(label=label if len(label) <= 40 else label[:39] + "…", css_classes=["small"])
+            button.connect("clicked", lambda _b, t=text: self.use_prepared(t))
+            grid.append(button)
+        if child := self.prepared_list.get_first_child():
+            self.prepared_list.remove(child)
+        self.prepared_list.append(grid)
+        self.stack.set_visible_child_name("prepared")
+
+    def use_prepared(self, text):
+        self.draft["text"] = text
+        self.update_edit()
+        self.stack.set_visible_child_name("edit")
+
+
+def build_pinned(app):
+    """The task as a small card in the top right corner, tap it to show it big."""
+    win = Gtk.ApplicationWindow(application=app, css_classes=["pinned"])
+    LayerShell.init_for_window(win)
+    LayerShell.set_namespace(win, "class-task-pin")
+    LayerShell.set_layer(win, LayerShell.Layer.OVERLAY)
+    LayerShell.set_keyboard_mode(win, LayerShell.KeyboardMode.NONE)
+    LayerShell.set_anchor(win, LayerShell.Edge.TOP, True)
+    LayerShell.set_anchor(win, LayerShell.Edge.RIGHT, True)
+    LayerShell.set_margin(win, LayerShell.Edge.TOP, 16)
+    LayerShell.set_margin(win, LayerShell.Edge.RIGHT, 16)
+    monitor = bar_monitor()
+    if monitor:
+        LayerShell.set_monitor(win, monitor)
+
+    card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6, css_classes=["pin-card"])
+    form = Gtk.Label(css_classes=["pin-form"], xalign=0)
+    card.append(form)
+    lines = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+    card.append(lines)
+    timer = Gtk.Label(css_classes=["time", "pin-timer"], xalign=0)
+    card.append(timer)
+    win.set_child(card)
+
+    shown = {}
+
+    def poll():
+        task = read_task()
+        if not task:
+            app.quit()
+            return False
+        if task != shown.get("task"):
+            shown["task"] = task
+            form.set_label(task_form(task))
+            form.set_visible(bool(task.get("form")))
+            while child := lines.get_first_child():
+                lines.remove(child)
+            texts = task_lines(task) + ([task["text"]] if task.get("text") else [])
+            for text in texts:
+                lines.append(Gtk.Label(label=text, css_classes=["pin-line"], xalign=0, wrap=True,
+                                       max_width_chars=32))
+        show_timer(timer, timer_status())
+        return True
+
+    poll()
+    GLib.timeout_add(1000, poll)
+    click = Gtk.GestureClick()
+    click.connect("released", lambda *_: subprocess.Popen([CLASS_TOOLS, "task"], start_new_session=True))
+    win.add_controller(click)
+    win.present()
+
+
+class SignalPanel:
+    def __init__(self, box):
+        box.append(Gtk.Label(label="󰛐", css_classes=["signal-icon"]))
+        box.append(Gtk.Label(label="Alle schauen nach vorne", css_classes=["signal-text"]))
+        box.append(Gtk.Label(label="Tippen zum Schließen", css_classes=["hint"]))
+
+
+def rounded_rect(cr, x, y, width, height, radius):
+    cr.new_sub_path()
+    cr.arc(x + width - radius, y + radius, radius, -math.pi / 2, 0)
+    cr.arc(x + width - radius, y + height - radius, radius, 0, math.pi / 2)
+    cr.arc(x + radius, y + height - radius, radius, math.pi / 2, math.pi)
+    cr.arc(x + radius, y + radius, radius, math.pi, 3 * math.pi / 2)
+    cr.close_path()
+
+
+def interactive(widget):
+    """Whether a tap on the widget should not close the overlay."""
+    while widget:
+        if isinstance(widget, (Gtk.Button, Gtk.DrawingArea)):
+            return True
+        widget = widget.get_parent()
+    return False
+
+
+def build(app, args):
+    load_css()
+    if args.command == "task" and args.pinned:
+        build_pinned(app)
+        return
+    win = Gtk.ApplicationWindow(application=app)
+    LayerShell.init_for_window(win)
+    LayerShell.set_namespace(win, "class-overlay")
+    LayerShell.set_layer(win, LayerShell.Layer.OVERLAY)
+    LayerShell.set_keyboard_mode(win, LayerShell.KeyboardMode.ON_DEMAND)
+    for edge in (LayerShell.Edge.TOP, LayerShell.Edge.BOTTOM, LayerShell.Edge.LEFT, LayerShell.Edge.RIGHT):
+        LayerShell.set_anchor(win, edge, True)
+    monitor = bar_monitor()
+    if monitor:
+        LayerShell.set_monitor(win, monitor)
+    monitor = monitor or Gdk.Display.get_default().get_monitors()[0]
+    width = monitor.get_geometry().width
+
+    box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=24, valign=Gtk.Align.CENTER, halign=Gtk.Align.CENTER)
+    if args.command == "blank":
+        # Covers the bars too, the board should show nothing at all.
+        LayerShell.set_exclusive_zone(win, -1)
+        win.add_css_class("blank")
+    elif args.command == "task":
+        TaskPanel(app, box, width)
+    elif args.command == "signal":
+        SignalPanel(box)
+    elif args.command == "pick":
+        PickPanel(app, box, width)
+    elif args.command == "groups":
+        GroupsPanel(app, box, args.choice)
+    elif args.command == "dice":
+        DicePanel(box, width, args.sides, args.remember)
+    elif args.command == "timer":
+        TimerPanel(app, box, width, args.countdown)
+    elif args.command == "noise":
+        NoisePanel(app, box, width)
+    elif args.command == "choose":
+        box.append(Gtk.Label(label=args.title, css_classes=["title"]))
+        grid = flowbox(len(args.options))
+        for option in args.options:
+            button = Gtk.Button(label=option)
+            button.connect("clicked", lambda _b, o=option: choose(app, o))
+            grid.append(button)
+        box.append(grid)
+        box.append(Gtk.Label(label="Daneben tippen zum Abbrechen", css_classes=["hint"]))
+    win.set_child(box)
+
+    click = Gtk.GestureClick()
+    click.connect("released", lambda _g, _n, x, y: interactive(win.pick(x, y, Gtk.PickFlags.DEFAULT)) or app.quit())
+    win.add_controller(click)
+    keys = Gtk.EventControllerKey()
+    keys.connect("key-pressed", lambda _c, key, *_: key == Gdk.KEY_Escape and app.quit())
+    win.add_controller(keys)
+    win.present()
+
+
+def main():
+    parser = argparse.ArgumentParser(prog="class-overlay")
+    sub = parser.add_subparsers(dest="command", required=True)
+    sub.add_parser("blank")
+    sub.add_parser("noise")
+    dice = sub.add_parser("dice")
+    dice.add_argument("--sides", type=int, default=6)
+    dice.add_argument("--remember")
+    timer = sub.add_parser("timer")
+    timer.add_argument("--countdown", action="store_true")
+    sub.add_parser("pick")
+    sub.add_parser("signal")
+    task = sub.add_parser("task")
+    task.add_argument("--pinned", action="store_true")
+    groups = sub.add_parser("groups")
+    groups.add_argument("choice")
+    choose_parser = sub.add_parser("choose")
+    choose_parser.add_argument("title")
+    choose_parser.add_argument("options", nargs="+")
+    args = parser.parse_args()
+
+    pidfile = PIN_PIDFILE if args.command == "task" and args.pinned else PIDFILE
+    with open(pidfile, "w") as f:
+        f.write(f"{os.getpid()}\n")
+
+    app = Gtk.Application(application_id="de.mikebarkmin.ClassOverlay", flags=Gio.ApplicationFlags.NON_UNIQUE)
+    app.choice = None
+    app.connect("activate", build, args)
+    GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, lambda: app.quit() or False)
+    try:
+        app.run([])
+    finally:
+        if pid_alive(pidfile) == os.getpid():
+            os.remove(pidfile)
+    if args.command == "choose":
+        if app.choice is None:
+            sys.exit(1)
+        print(app.choice)
+
+
+if __name__ == "__main__":
+    main()

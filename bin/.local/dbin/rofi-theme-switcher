@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Rofi-based theme switcher for Hyprland desktop
-# Switches: Hyprland colors, Waybar, Rofi, Kitty, Hyprlock, wallpaper, GTK dark/light + icons
+# Usage: rofi-theme-switcher [theme]  (without a theme it asks via rofi)
+# Switches: Hyprland colors, Waybar, Rofi, Kitty, Hyprlock, wallpaper, GTK dark/light + icons, Wayscriber
 
 set -uo pipefail
 
@@ -22,8 +23,9 @@ if [ -z "$themes" ]; then
     exit 1
 fi
 
-# Choose via rofi
-selected=$(echo "$themes" | rofi -dmenu -p "Theme ($current)" -i)
+# Theme from the first argument, otherwise choose via rofi
+selected="${1:-}"
+[ -z "$selected" ] && selected=$(echo "$themes" | rofi -dmenu -p "Theme ($current)" -i)
 [ -z "$selected" ] && exit 0
 
 THEME_DIR="$THEMES_DIR/$selected"
@@ -56,9 +58,24 @@ MODE=$(cat "$THEME_DIR/mode" 2>/dev/null || echo "dark")
 # Hyprland: reload config (picks up new Lua colors)
 hyprctl reload 2>/dev/null
 
-# Waybar: restart to pick up new CSS
-killall waybar 2>/dev/null || true
-hyprctl dispatch 'hl.dsp.exec_cmd("waybar")' 2>/dev/null || true
+# Hyprland reload resets the smartboard scale; classroom mode raises it again
+"$HOME/.local/dbin/classroom-mode" reapply-scale 2>/dev/null || true
+
+# Waybar: restart to pick up new CSS (keeps the classroom-mode bar layout)
+"$HOME/.local/dbin/classroom-mode" restart-waybar 2>/dev/null || true
+
+# Wayscriber: overlay chrome follows the theme mode
+WAYSCRIBER_CONF="$HOME/.config/wayscriber/config.toml"
+if [ -f "$WAYSCRIBER_CONF" ]; then
+    if grep -q '^theme = ' "$WAYSCRIBER_CONF"; then
+        sed -i "s/^theme = .*/theme = \"$MODE\"/" "$WAYSCRIBER_CONF"
+    else
+        sed -i "/^\[ui\]$/a theme = \"$MODE\"" "$WAYSCRIBER_CONF"
+    fi
+    pkill -x wayscriber 2>/dev/null || true
+    sleep 0.3
+    setsid wayscriber --daemon >/dev/null 2>&1 &
+fi
 
 # Hyprpaper: reload wallpaper
 killall hyprpaper 2>/dev/null || true

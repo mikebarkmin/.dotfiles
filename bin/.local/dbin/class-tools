@@ -1,0 +1,278 @@
+#!/bin/bash
+# Usage: class-tools pick | groups [CHOICE] | dice [SIDES] | blank | task | signal | board | snap
+#                    | noise | timer | class [TOOL] | reset
+#                    | pick-next | groups-deal CHOICE
+# Classroom tools on the smartboard bar, made for touch alone: results and choices
+# are shown full screen by class-overlay, with buttons for the follow-up actions.
+#
+# pick:   random student, nobody twice until everyone had a turn
+# groups: random groups of a chosen size or count
+# dice:   1–SIDES, by default the last number of sides (6 at first)
+# blank:  black screen until tapped
+# task:   the task for the class ("Arbeitsauftrag"), big or pinned to a corner
+# signal: attention signal, a gong and "Alle schauen nach vorne"
+# snap:   screenshot of the board as a new page in the open Xournal++ document, to annotate
+# board:  the board, one Xournal++ window on the smartboard: shows and hides it, starts it
+#         with a new dotted page saved to BOARDS; load a PDF there to work on it instead
+# class:  choose the class list for pick and groups (asked on first use), then run TOOL
+# timer:  settings of the class timer in the bar, see class-timer
+# noise:  settings of the noise meter in the bar (work mode, threshold), see class-noise
+#
+# pick-next and groups-deal print the next result as JSON, for the screens of
+# class-overlay, which stay open to pick or shuffle again.
+#
+# Class lists live outside the dotfiles, one name per line (# starts a comment):
+#   ~/.local/share/classroom/<class>.txt
+# Prepared tasks, separated by empty lines, the first line is the button label:
+#   ~/.local/share/classroom/aufgaben.txt
+set -e
+
+RUN="${XDG_RUNTIME_DIR:-/tmp}"
+CLASSES="${XDG_DATA_HOME:-$HOME/.local/share}/classroom"
+CLASS="$RUN/class-tools-class"      # names of the chosen class, first line is its title
+REMAINING="$RUN/class-tools-pick"   # names not picked yet in this round
+DICE="$RUN/class-tools-dice"        # last number of sides
+NOISE_MODE="$RUN/class-noise-mode"
+TASK="$RUN/class-task.json"
+GONG="${XDG_CACHE_HOME:-$HOME/.cache}/classroom/gong.wav"
+BOARDS="$(xdg-user-dir DOCUMENTS 2>/dev/null || echo "$HOME")/Tafelbilder"
+SNAP="$RUN/class-snap.png"          # read (and removed) by the Tafelbild plugin of Xournal++
+XOURNAL="class:.*xournalpp.*"
+NUMBERS="Nummern 1…N"
+
+# Usage: kill_overlay PIDFILE — only if the pid still belongs to class-overlay.
+kill_overlay() {
+    local pid
+    pid=$(cat "$1" 2>/dev/null) || return 0
+    grep -qa class-overlay "/proc/$pid/cmdline" 2>/dev/null && kill "$pid" 2>/dev/null || true
+}
+
+# Closes the full-screen overlay, a pinned task card stays.
+close_overlay() {
+    kill_overlay "$RUN/class-overlay.pid"
+}
+
+overlay() {
+    close_overlay
+    setsid -f ~/.local/dbin/class-overlay "$@" >/dev/null 2>&1
+}
+
+# Usage: menu TITLE OPTION... — prints the tapped option, nothing if cancelled.
+menu() {
+    close_overlay
+    ~/.local/dbin/class-overlay choose "$@" 2>/dev/null || true
+}
+
+choose_class() {
+    local choice n lists
+    mapfile -t lists < <(find "$CLASSES" -maxdepth 1 -name '*.txt' -printf '%f\n' 2>/dev/null | sed 's/\.txt$//' | sort)
+    choice=$(menu "Klasse" "${lists[@]}" "$NUMBERS")
+    if [ "$choice" = "$NUMBERS" ]; then
+        n=$(menu "Wie viele in der Klasse?" $(seq 4 35))
+        [ -n "$n" ] || exit 0
+        { echo "1–$n"; seq "$n"; } >"$CLASS"
+    elif [ -n "$choice" ] && [ -f "$CLASSES/$choice.txt" ]; then
+        { echo "$choice"; grep -v -e '^[[:space:]]*$' -e '^[[:space:]]*#' "$CLASSES/$choice.txt"; } >"$CLASS"
+    else
+        exit 0
+    fi
+    rm -f "$REMAINING"
+}
+
+ensure_class() {
+    [ "$(wc -l <"$CLASS" 2>/dev/null || echo 0)" -gt 1 ] || choose_class
+    title=$(head -1 "$CLASS")
+    mapfile -t names < <(tail -n +2 "$CLASS")
+}
+
+pick() {
+    ensure_class
+    overlay pick
+}
+
+# JSON for the pick screen: the next student, nobody twice in a round.
+pick_next() {
+    ensure_class
+    [ -s "$REMAINING" ] || printf '%s\n' "${names[@]}" | shuf >"$REMAINING"
+    local name left
+    name=$(head -1 "$REMAINING")
+    sed -i 1d "$REMAINING"
+    left=$(wc -l <"$REMAINING")
+    jq -n --arg title "$title" --arg name "$name" --argjson left "$left" \
+        '{$title, $name, $left, names: $ARGS.positional}' --args "${names[@]}"
+}
+
+groups() {
+    ensure_class
+    local choice=$1
+    [ -n "$choice" ] || choice=$(menu "Gruppen" \
+        "2 pro Gruppe" "3 pro Gruppe" "4 pro Gruppe" "5 pro Gruppe" "6 pro Gruppe" \
+        "2 Gruppen" "3 Gruppen" "4 Gruppen" "5 Gruppen" "6 Gruppen" "7 Gruppen" "8 Gruppen")
+    [[ "${choice%% *}" =~ ^[0-9]+$ ]] || exit 0
+    overlay groups "$choice"
+}
+
+# JSON for the groups screen: the class dealt into groups by CHOICE ("4 pro Gruppe", "5 Gruppen").
+groups_deal() {
+    ensure_class
+    local choice=$1 size count
+    size=${choice%% *}
+    [[ "$size" =~ ^[0-9]+$ ]] || exit 1
+    case "$choice" in
+        *"pro Gruppe") count=$((${#names[@]} / size)) ;;
+        *)            count=$size ;;
+    esac
+    [ "$count" -ge 1 ] || count=1
+    [ "$count" -le "${#names[@]}" ] || count=${#names[@]}
+
+    # Deal the shuffled names round robin, so group sizes differ by at most one.
+    local cards=() i=0 nl=$'\n'
+    while read -r name; do
+        cards[i % count]+="${cards[i % count]:+$nl}$name"
+        i=$((i + 1))
+    done < <(printf '%s\n' "${names[@]}" | shuf)
+    jq -n --arg title "$title" --arg choice "$choice" \
+        '{$title, $choice, groups: $ARGS.positional}' --args "${cards[@]}"
+}
+
+task() {
+    overlay task
+}
+
+# A soft two-tone gong, made once.
+make_gong() {
+    [ -f "$GONG" ] && return
+    mkdir -p "$(dirname "$GONG")"
+    local tmp
+    tmp=$(mktemp -d)
+    sox -n -r 44100 -c 1 "$tmp/high.wav" synth 2.5 sine 659.25 sine 1318.5 sine 1977.8 \
+        remix - fade l 0.005 2.5 2.4 gain -n -12
+    sox -n -r 44100 -c 1 "$tmp/low.wav" synth 3 sine 523.25 sine 1046.5 sine 1569.8 \
+        remix - fade l 0.005 3 2.9 gain -n -12 pad 0.7
+    sox -m "$tmp/high.wav" "$tmp/low.wav" "$GONG" gain -n -3
+    rm -r "$tmp"
+}
+
+signal() {
+    make_gong
+    setsid -f paplay "$GONG" >/dev/null 2>&1
+    overlay signal
+}
+
+board_output() {
+    jq -r '.output[0] // empty' "$RUN/smartboard-bar.jsonc" 2>/dev/null
+}
+
+# Usage: new_board STYLE — creates an empty 16:9 board (the size of the board), prints its path.
+new_board() {
+    local file
+    mkdir -p "$BOARDS"
+    file="$BOARDS/Tafel-$(date +%F-%H%M%S).xopp"
+    printf '<?xml version="1.0" standalone="no"?>\n<xournal creator="class-tools" fileversion="4">\n<title>Tafel</title>\n<page width="1120" height="630"><background type="solid" color="#ffffffff" style="%s"/><layer/></page>\n</xournal>\n' \
+        "$1" | gzip >"$file"
+    echo "$file"
+}
+
+# Maximized on the smartboard, clear of the bars.
+open_board() {
+    local output
+    output=$(board_output)
+    hyprctl -q dispatch "hl.dsp.exec_cmd(\"[maximize${output:+; monitor $output}] xournalpp '$1'\")"
+}
+
+# Prints "visible", "hidden" or nothing if Xournal++ is not running.
+board_state() {
+    jq -rn --argjson clients "$(hyprctl clients -j)" --argjson monitors "$(hyprctl monitors -j)" '
+        first($clients[] | select(.class | test("xournalpp"))) as $window
+        | if $window == null then empty
+          elif [$monitors[].activeWorkspace.id] | index($window.workspace.id) then "visible"
+          else "hidden" end'
+}
+
+# Starts the board with a dotted page and waits for its window.
+start_board() {
+    open_board "$(new_board dotted)"
+    for _ in $(seq 50); do
+        [ -n "$(board_state)" ] && return
+        sleep 0.2
+    done
+}
+
+show_board() {
+    local workspace
+    workspace=$(hyprctl monitors -j | jq -r --arg output "$(board_output)" \
+        '(map(select(.name == $output)) + map(select(.focused)))[0].activeWorkspace.id')
+    hyprctl -q dispatch "hl.dsp.window.move({ window = \"$XOURNAL\", workspace = $workspace, follow = true })"
+    hyprctl -q dispatch "hl.dsp.window.fullscreen({ window = \"$XOURNAL\", action = \"set\", mode = \"maximized\" })"
+    hyprctl -q dispatch "hl.dsp.focus({ window = \"$XOURNAL\" })"
+}
+
+hide_board() {
+    hyprctl -q dispatch "hl.dsp.window.move({ window = \"$XOURNAL\", workspace = \"special:tafel\", follow = false })"
+}
+
+# The board is one Xournal++ window, the document open in it (a dotted page to start
+# with, or a PDF loaded there). The button shows and hides it.
+board() {
+    case "$(board_state)" in
+        visible) hide_board ;;
+        hidden)  show_board ;;
+        *)       start_board ;;
+    esac
+}
+
+# Screenshot of the smartboard without the bars, appended as a new page to the document
+# of the board by the Tafelbild plugin of Xournal++, then the board is shown to annotate it.
+snap() {
+    local geometry
+    geometry=$(hyprctl monitors -j | jq -r --arg output "$(board_output)" '
+        (map(select(.name == $output)) + map(select(.focused)))[0]
+        | (.width / .scale | floor) as $w | (.height / .scale | floor) as $h
+        | if .transform % 2 == 1 then [$h, $w] else [$w, $h] end as [$w, $h]
+        | "\(.x + .reserved[0]),\(.y + .reserved[1]) \($w - .reserved[0] - .reserved[2])x\($h - .reserved[1] - .reserved[3])"')
+    grim -g "$geometry" "$SNAP.tmp"
+    mv "$SNAP.tmp" "$SNAP"
+
+    if [ -z "$(board_state)" ]; then
+        start_board
+        sleep 1  # let it load the document and its plugins
+    fi
+    hyprctl -q dispatch "hl.dsp.send_shortcut({ window = \"$XOURNAL\", mods = \"CTRL ALT SHIFT\", key = \"B\" })"
+    show_board
+}
+
+dice() {
+    local sides=${1:-$(cat "$DICE" 2>/dev/null || echo 6)}
+    [[ "$sides" =~ ^[0-9]+$ ]] && [ "$sides" -gt 1 ] || sides=6
+    overlay dice --sides "$sides" --remember "$DICE"
+}
+
+case "$1" in
+    pick)        pick ;;
+    pick-next)   pick_next ;;
+    groups)      groups "$2" ;;
+    groups-deal) groups_deal "$2" ;;
+    dice)        dice "$2" ;;
+    blank)       overlay blank ;;
+    task)        task ;;
+    signal)      signal ;;
+    board)       board ;;
+    snap)        snap ;;
+    noise)       overlay noise ;;
+    timer)       overlay timer ;;
+    class)
+        choose_class
+        case "$2" in
+            pick | groups) "$2" ;;
+        esac
+        ;;
+    reset)
+        rm -f "$CLASS" "$REMAINING" "$DICE" "$NOISE_MODE" "$TASK"
+        close_overlay
+        kill_overlay "$RUN/class-task-pin.pid"
+        ;;
+    *)
+        echo "Usage: class-tools pick | groups [CHOICE] | dice [SIDES] | blank | task | signal | board | snap | noise | timer | class [TOOL] | reset | pick-next | groups-deal CHOICE" >&2
+        exit 1
+        ;;
+esac

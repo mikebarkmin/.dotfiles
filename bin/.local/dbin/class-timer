@@ -1,0 +1,101 @@
+#!/bin/bash
+# Usage: class-timer set <minutes> | add <minutes> | pause | reset | status
+# Countdown for exercise phases, shown on the smartboard bar. Tapping it there opens
+# the timer screen of class-overlay, which drives this script and reads its status.
+#
+# status: JSON for waybar, the text a progress bar coloured by the time left:
+#   plenty (green) · half (yellow) · low (orange, last quarter) · done (red) · paused,
+#   plus left/total seconds and paused for the timer screen.
+set -e
+
+STATE="${XDG_RUNTIME_DIR:-/tmp}/class-timer"  # end=, total=, paused= (seconds left)
+SOUND=/usr/share/sounds/freedesktop/stereo/complete.oga
+CELLS=8
+
+refresh_waybar() {
+    pkill --older 1 -SIGRTMIN+10 waybar 2>/dev/null || true  # skip just-started bars
+}
+
+end=0 total=0 paused=""
+# shellcheck disable=SC1090
+[ -f "$STATE" ] && source "$STATE"
+now=$(date +%s)
+
+save() {
+    printf 'end=%s\ntotal=%s\npaused=%s\n' "$end" "$total" "$paused" >"$STATE"
+    rm -f "$STATE.rang"
+    refresh_waybar
+}
+
+seconds_left() {
+    if [ -n "$paused" ]; then
+        echo "$paused"
+    else
+        echo $((end > now ? end - now : 0))
+    fi
+}
+
+case "$1" in
+    set)
+        total=$((${2:-5} * 60))
+        end=$((now + total)) paused=""
+        save
+        ;;
+    add)
+        if [ ! -f "$STATE" ] || [ "$(seconds_left)" -eq 0 ]; then
+            total=0 end=$now paused=""
+        fi
+        total=$((total + ${2:-5} * 60))
+        if [ -n "$paused" ]; then
+            paused=$((paused + ${2:-5} * 60))
+        else
+            end=$((end + ${2:-5} * 60))
+        fi
+        save
+        ;;
+    pause)
+        [ -f "$STATE" ] || exit 0
+        if [ -n "$paused" ]; then
+            end=$((now + paused)) paused=""
+        elif [ "$(seconds_left)" -gt 0 ]; then
+            paused=$(seconds_left)
+        fi
+        save
+        ;;
+    reset)
+        rm -f "$STATE" "$STATE.rang"
+        refresh_waybar
+        ;;
+    status)
+        if [ ! -f "$STATE" ]; then
+            echo '{"text": "󰔛", "class": "idle", "left": 0, "total": 0, "paused": false}'
+            exit 0
+        fi
+        left=$(seconds_left)
+        filled=$(((left * CELLS + total - 1) / (total > 0 ? total : 1)))
+        bar=$(printf '%*s' "$filled" '' | sed 's/ /█/g')$(printf '%*s' $((CELLS - filled)) '' | sed 's/ /·/g')
+        icon=󰔛
+        if [ -n "$paused" ]; then
+            icon=󰏤 class=paused
+        elif [ "$left" -eq 0 ]; then
+            class=done
+            if [ ! -f "$STATE.rang" ]; then
+                touch "$STATE.rang"
+                setsid paplay "$SOUND" >/dev/null 2>&1 &
+            fi
+        elif [ $((left * 4)) -le "$total" ]; then
+            class=low
+        elif [ $((left * 2)) -le "$total" ]; then
+            class=half
+        else
+            class=plenty
+        fi
+        printf '{"text": "%s  %02d:%02d %s", "class": "%s", "left": %d, "total": %d, "paused": %s}\n' \
+            "$icon" $((left / 60)) $((left % 60)) "$bar" "$class" "$left" "$total" \
+            "$([ -n "$paused" ] && echo true || echo false)"
+        ;;
+    *)
+        echo "Usage: class-timer set <minutes> | add <minutes> | pause | reset | status" >&2
+        exit 1
+        ;;
+esac

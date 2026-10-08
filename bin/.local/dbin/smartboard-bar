@@ -1,0 +1,51 @@
+#!/bin/bash
+# Usage: smartboard-bar toggle | start [output] [shrink] | stop
+# Runs a second waybar instance with the presenter tools at the bottom.
+# Without an output it goes to the smartboard if connected, else the focused monitor.
+# [shrink] divides all sizes by that factor to cancel out a raised monitor scale.
+set -e
+
+RUN="${XDG_RUNTIME_DIR:-/tmp}"
+PIDFILE="$RUN/smartboard-bar.pid"
+CONFIG="$RUN/smartboard-bar.jsonc"
+SMARTBOARD_DESC="IWB PC Monitor"
+HEIGHT=44
+
+running() {
+    [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null
+}
+
+default_output() {
+    hyprctl monitors -j | jq -r --arg desc "$SMARTBOARD_DESC" \
+        '(map(select(.description | contains($desc))) + map(select(.focused)))[0].name'
+}
+
+start() {
+    local output="${1:-$(default_output)}"
+    local shrink="${2:-1}"
+    local style=~/.config/waybar/smartboard.css
+    if [ "$shrink" != "1" ]; then
+        style=$(~/.local/dbin/waybar-shrink-css "$style" "$shrink" "$RUN/smartboard-bar-style")
+    fi
+    cat >"$CONFIG" <<JSON
+{
+  "include": ["~/.config/waybar/smartboard.jsonc"],
+  "output": ["$output"],
+  "height": $(jq -n "$HEIGHT / $shrink | round")
+}
+JSON
+    setsid waybar -c "$CONFIG" -s "$style" >/dev/null 2>&1 &
+    echo $! >"$PIDFILE"
+}
+
+stop() {
+    running && kill "$(cat "$PIDFILE")"
+    rm -f "$PIDFILE"
+}
+
+case "$1" in
+    toggle) if running; then stop; else start; fi ;;
+    start)  stop; start "$2" "$3" ;;
+    stop)   stop ;;
+    *)      echo "Usage: smartboard-bar toggle | start [output] [shrink] | stop" >&2; exit 1 ;;
+esac

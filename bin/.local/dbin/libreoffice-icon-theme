@@ -1,0 +1,38 @@
+#!/bin/bash
+# Usage: libreoffice-icon-theme
+# Sets LibreOffice's icon style to match the active theme's mode.
+# LibreOffice reads it only at startup and writes its own (old) value back on
+# exit, so while it runs we wait in the background and apply once it closed.
+set -uo pipefail
+
+THEMES_DIR="$HOME/.config/hypr/themes"
+ACTIVE_FILE="$HOME/.config/hypr/.active-theme"
+REGISTRY="$HOME/.config/libreoffice/4/user/registrymodifications.xcu"
+LOCK="${XDG_RUNTIME_DIR:-/tmp}/libreoffice-icon-theme.lock"
+
+apply() {
+    [ -f "$REGISTRY" ] || return 0
+    local mode icons item
+    mode=$(cat "$THEMES_DIR/$(cat "$ACTIVE_FILE" 2>/dev/null)/mode" 2>/dev/null || echo dark)
+    if [ "$mode" = "light" ]; then icons=colibre_svg; else icons=colibre_dark_svg; fi
+
+    item="<item oor:path=\"/org.openoffice.Office.Common/Misc\"><prop oor:name=\"SymbolStyle\" oor:op=\"fuse\"><value>$icons</value></prop></item>"
+    if grep -q 'oor:name="SymbolStyle"' "$REGISTRY"; then
+        sed -i "s|<item oor:path=\"/org.openoffice.Office.Common/Misc\"><prop oor:name=\"SymbolStyle\"[^>]*><value>[^<]*</value></prop></item>|$item|" "$REGISTRY"
+    else
+        sed -i "s|</oor:items>|$item\n</oor:items>|" "$REGISTRY"
+    fi
+}
+
+apply
+
+if pgrep -x soffice.bin >/dev/null; then
+    # One watcher is enough; it reads the active theme when LibreOffice exits.
+    (
+        flock -n 9 || exit 0
+        while pgrep -x soffice.bin >/dev/null; do sleep 1; done
+        sleep 1
+        apply
+    ) 9>"$LOCK" </dev/null >/dev/null 2>&1 &
+    disown
+fi

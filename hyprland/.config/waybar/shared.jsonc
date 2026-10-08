@@ -18,6 +18,7 @@
     "custom/prusa",
     "power-profiles-daemon", // distro icon
     "custom/winapps",
+    "custom/classroom",
     "idle_inhibitor", // idle inhibitor
     "custom/dns",
     "tray",
@@ -137,6 +138,13 @@
       "balanced": " ",
       "power-saver": " "
     }
+  },
+  "custom/classroom": {
+    "exec": "~/.local/dbin/classroom-mode status",
+    "return-type": "json",
+    "interval": "once",
+    "signal": 9,
+    "on-click": "~/.local/dbin/classroom-mode toggle"
   },
   "idle_inhibitor": {
     "format": "{icon}",

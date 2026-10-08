@@ -96,9 +96,22 @@ local function configure_external()
     hl.monitor({ output = EXTERNAL_2, mode = "1920x1080@60", position = "1920x0", scale = 1 })
 end
 
+-- Default rule for the IWB: 4K@60 is flaky over the USB-C hub, so even the
+-- very first modeset on hotplug (before the hook runs) should use 30 Hz.
+local function touchscreen_default_rule()
+    hl.monitor({ output = TOUCHSCREEN, mode = "3840x2160@30", position = "auto-right", scale = 2, disabled = false })
+end
+
 local function configure_laptop()
     log("Configuring laptop-only setup")
     hl.monitor({ output = LAPTOP, mode = "1920x1200@60", position = "0x0", scale = 1, disabled = false })
+    -- Other modes leave `disabled`/`mirror` rules behind. Reset them so a monitor
+    -- plugged in later comes up enabled: hl.get_monitors() only lists enabled
+    -- monitors, so the hook would never notice a disabled one and switch modes.
+    hl.monitor({ output = EXTERNAL_1, mode = "preferred", position = "auto", scale = 1, disabled = false })
+    hl.monitor({ output = EXTERNAL_2, mode = "preferred", position = "auto", scale = 1, disabled = false })
+    hl.monitor({ output = BEAMER,     mode = "preferred", position = "auto", scale = 1, disabled = false })
+    touchscreen_default_rule()
     bind_touch_input("current")
 end
 
@@ -174,6 +187,4 @@ hl.on("monitor.added",   function(_) apply("added") end)
 hl.on("monitor.removed", function(_) apply("removed") end)
 hl.on("config.reloaded", function(_) apply("reloaded") end)
 
--- Static rule so the very first modeset on hotplug (before the hook above runs)
--- already uses 30 Hz; 4K@60 is flaky over the USB-C hub.
-hl.monitor({ output = TOUCHSCREEN, mode = "3840x2160@30", position = "auto-right", scale = 2 })
+touchscreen_default_rule()

@@ -60,4 +60,4 @@ if [ -z "$choose_state" ]; then
 fi
 switch_state "$choose_state"
 sleep 1
-killall waybar && hyprctl dispatch exec waybar 
+~/.local/dbin/classroom-mode restart-waybar

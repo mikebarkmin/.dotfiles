@@ -1,0 +1,19 @@
+#!/bin/bash
+# Usage: waybar-shrink-css <style.css> <factor> <outdir>
+# Writes a copy of a waybar stylesheet with every px size divided by <factor>,
+# to cancel out a higher monitor scale. Prints the path of the new stylesheet.
+set -e
+
+src="$1"
+factor="$2"
+outdir="$3"
+
+mkdir -p "$outdir"
+# Link what the stylesheet imports so relative @imports keep working
+# and follow the active theme.
+for css in "$(dirname "$src")"/*.css; do
+    ln -sfn "$(realpath -s "$css")" "$outdir/$(basename "$css")"
+done
+rm -f "$outdir/$(basename "$src")"
+perl -pe 's/(\d+(?:\.\d+)?)px/sprintf("%.2fpx", $1 \/ '"$factor"')/ge' "$src" >"$outdir/$(basename "$src")"
+echo "$outdir/$(basename "$src")"

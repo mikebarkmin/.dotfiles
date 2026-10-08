@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 # Open a new kitty in the focused window's current directory, if known.
 
+args=()
+font_size=$(~/.local/dbin/classroom-mode kitty-font-size || true)
+[[ -n $font_size ]] && args+=(-o font_size="$font_size")
+
 cwd=$(~/.local/dbin/focused-cwd)
 if [[ -n $cwd ]]; then
-    exec kitty --directory "$cwd"
+    exec kitty "${args[@]}" --directory "$cwd"
 else
-    exec kitty
+    exec kitty "${args[@]}"
 fi
