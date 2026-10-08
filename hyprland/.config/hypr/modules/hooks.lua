@@ -12,31 +12,39 @@ hl.on("config.reloaded", function()
 end)
 
 -- Per-monitor cursor colour: Hyprland only has one global cursor theme, so
--- swap it whenever focus moves to another output (which follows the mouse).
+-- choose the theme from the output under the pointer, independently of focus.
+-- Use lime on the smartboard and the right-hand USB-C hub monitor; amber
+-- stays on the laptop and left-hand monitor. Match descriptions since the
+-- hub's DP output names can change when reconnecting.
 local CURSOR_SIZE       = 32
 local CURSOR_DEFAULT    = "Bibata-Modern-Amber"
-local CURSOR_SMARTBOARD = "Bibata-Modern-Lime"
+local CURSOR_SECONDARY  = "Bibata-Modern-Lime"
 local SMARTBOARD_DESC   = "IWB PC Monitor"
+local EXTERNAL_RIGHT_DESC = "BNQ BenQ RL2460H KCF01940SL0"
 
 local current_cursor = nil
 
 local function apply_monitor_cursor()
-    for _, m in ipairs(hl.get_monitors()) do
-        if m.focused then
-            local theme = CURSOR_DEFAULT
-            if m.description and m.description:find(SMARTBOARD_DESC, 1, true) then
-                theme = CURSOR_SMARTBOARD
-            end
-            if theme ~= current_cursor then
-                current_cursor = theme
-                hl.exec_cmd("hyprctl setcursor " .. theme .. " " .. CURSOR_SIZE)
-            end
-            return
-        end
+    local m = hl.get_monitor_at_cursor()
+    if not m then return end
+
+    local theme = CURSOR_DEFAULT
+    if m.description and (
+        m.description:find(SMARTBOARD_DESC, 1, true)
+        or m.description:find(EXTERNAL_RIGHT_DESC, 1, true)
+    ) then
+        theme = CURSOR_SECONDARY
+    end
+    if theme ~= current_cursor then
+        current_cursor = theme
+        hl.exec_cmd("hyprctl setcursor " .. theme .. " " .. CURSOR_SIZE)
     end
 end
 
 hl.on("monitor.focused", apply_monitor_cursor)
+-- Slow crossings need not trigger a usable focus event. This check runs
+-- inside Hyprland; setcursor is only spawned when the theme actually changes.
+hl.timer(apply_monitor_cursor, { timeout = 50, type = "repeat" })
 hl.on("config.reloaded", function()
     current_cursor = nil
     apply_monitor_cursor()
