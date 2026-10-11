@@ -2,6 +2,7 @@
 """Usage: class-overlay blank
        class-overlay pick
        class-overlay groups CHOICE
+       class-overlay attendance [--return-tool pick|groups] [--choice CHOICE]
        class-overlay task [--pinned]
        class-overlay signal
        class-overlay choose TITLE OPTION...
@@ -15,6 +16,8 @@ made to be used by touch alone.
 pick:   A random student (class-tools pick-next), picked again in place.
 groups: The class dealt into groups by CHOICE (class-tools groups-deal), shuffled
         again in place.
+attendance: Tap names to cross out absent students, shared by pick and groups.
+        Changes apply immediately and last until classroom mode ends.
 task:   The task for the class ("Arbeitsauftrag"), put together by tapping or taken
         from the prepared tasks in TASKS_FILE (blocks separated by empty lines).
         Shown big, or with --pinned as a small card in the top right corner.
@@ -90,6 +93,7 @@ button { background: @surface0; color: @text; border: none; border-radius: 16px;
 button:active { background: @mauve; color: @base; }
 button.action { background: @surface1; font-size: 24px; padding: 14px 28px; }
 button.selected { background: @mauve; color: @base; }
+button.absent { background: @base; color: @overlay0; }
 button.done { background: @mauve; color: @base; }
 .time { color: @text; }
 .time.plenty { color: @green; }
@@ -185,20 +189,31 @@ def columns(n):
     return math.ceil(math.sqrt(n * 1.6))
 
 
-def flowbox(n):
+def flowbox(n, *, wrap=False):
     return Gtk.FlowBox(
         selection_mode=Gtk.SelectionMode.NONE,
         homogeneous=True,
         column_spacing=20,
         row_spacing=20,
         max_children_per_line=columns(n),
-        min_children_per_line=columns(n),
+        min_children_per_line=1 if wrap else columns(n),
         halign=Gtk.Align.CENTER,
     )
 
 
+def scrollable(child):
+    """Let tall lists scroll while the title and action buttons stay visible."""
+    scroll = Gtk.ScrolledWindow(
+        hscrollbar_policy=Gtk.PolicyType.NEVER,
+        vscrollbar_policy=Gtk.PolicyType.AUTOMATIC,
+        propagate_natural_height=True,
+    )
+    scroll.set_child(child)
+    return scroll
+
+
 def cards_grid(cards, label):
-    grid = flowbox(len(cards))
+    grid = flowbox(len(cards), wrap=True)
     for i, names in enumerate(cards, 1):
         card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8, css_classes=["card"])
         if label:
@@ -579,8 +594,11 @@ class PickPanel:
         self.spinner = Spinner(width)
         box.append(self.spinner.label)
 
-        buttons = Gtk.Box(spacing=16, halign=Gtk.Align.CENTER, margin_top=24)
-        buttons.append(action_button("󰒟  Nächste:r", self.next))
+        buttons = flowbox(3, wrap=True)
+        buttons.set_homogeneous(False)
+        self.next_button = action_button("󰒟  Nächste:r", self.next)
+        buttons.append(self.next_button)
+        buttons.append(action_button("󰀎  Anwesenheit", lambda: run_tool(app, "attendance", "pick")))
         buttons.append(action_button("󰀎  Klasse wechseln", lambda: run_tool(app, "class", "pick")))
         box.append(buttons)
         box.append(Gtk.Label(label="Daneben tippen zum Schließen", css_classes=["hint"]))
@@ -588,6 +606,13 @@ class PickPanel:
 
     def next(self):
         pick = tool_json("pick-next")
+        self.next_button.set_sensitive(bool(pick["names"]))
+        if not pick["names"]:
+            self.title.set_label(f"{pick['title']} · 0 anwesend")
+            self.spinner.spin_id += 1
+            self.spinner.label.remove_css_class("final")
+            self.spinner.label.set_markup(big_markup("Niemand anwesend", self.spinner.width))
+            return
         self.title.set_label(f"{pick['title']} · noch {pick['left']} in dieser Runde")
         self.spinner.spin(pick["names"], pick["name"])
 
@@ -597,12 +622,14 @@ class GroupsPanel:
         self.choice = choice
         self.title = Gtk.Label(css_classes=["title"])
         box.append(self.title)
-        self.grid = Gtk.Box(halign=Gtk.Align.CENTER)
-        box.append(self.grid)
+        self.grid = Gtk.Box(halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER)
+        box.append(scrollable(self.grid))
 
-        buttons = Gtk.Box(spacing=16, halign=Gtk.Align.CENTER, margin_top=24)
+        buttons = flowbox(4, wrap=True)
+        buttons.set_homogeneous(False)
         buttons.append(action_button("󰒟  Neu mischen", self.shuffle))
         buttons.append(action_button("󰡉  Andere Größe", lambda: run_tool(app, "groups")))
+        buttons.append(action_button("󰀎  Anwesenheit", lambda: run_tool(app, "attendance", "groups", self.choice)))
         buttons.append(action_button("󰀎  Klasse wechseln", lambda: run_tool(app, "class", "groups")))
         box.append(buttons)
         box.append(Gtk.Label(label="Daneben tippen zum Schließen", css_classes=["hint"]))
@@ -613,7 +640,71 @@ class GroupsPanel:
         self.title.set_label(f"{deal['title']} · {deal['choice']}")
         if child := self.grid.get_first_child():
             self.grid.remove(child)
-        self.grid.append(cards_grid(deal["groups"], "Gruppe"))
+        if deal["groups"]:
+            self.grid.append(cards_grid(deal["groups"], "Gruppe"))
+        else:
+            self.grid.append(Gtk.Label(label="Niemand anwesend", css_classes=["card-names"]))
+
+
+class AttendancePanel:
+    def __init__(self, app, box, args):
+        self.app = app
+        self.args = args
+        status = tool_json("attendance-status")
+        self.names = status["names"]
+        self.absent = set(status["absent"])
+        box.append(Gtk.Label(label=f"Anwesenheit · {status['title']}", css_classes=["title"]))
+        self.summary = Gtk.Label(css_classes=["hint"])
+        box.append(self.summary)
+
+        grid = flowbox(len(self.names), wrap=True)
+        self.buttons = []
+        for name in self.names:
+            button = Gtk.Button(label=name)
+            button.connect("clicked", lambda _b, n=name: self.toggle(n))
+            grid.append(button)
+            self.buttons.append((name, button))
+        box.append(scrollable(grid))
+
+        buttons = flowbox(3, wrap=True)
+        buttons.set_homogeneous(False)
+        buttons.append(action_button("Alle anwesend", lambda: self.set_absent(set())))
+        buttons.append(action_button("󰀎  Klasse wechseln", lambda: run_tool(app, "class", args.return_tool or "attendance")))
+        done = Gtk.Button(label="Fertig", css_classes=["done"])
+        done.connect("clicked", lambda _b: self.done())
+        buttons.append(done)
+        box.append(buttons)
+        self.update()
+
+    def update(self):
+        present = sum(name not in self.absent for name in self.names)
+        self.summary.set_label(f"{present} von {len(self.names)} anwesend · Namen antippen: ab-/anmelden")
+        for name, button in self.buttons:
+            escaped = GLib.markup_escape_text(name)
+            if name in self.absent:
+                button.get_child().set_markup(f"<s>{escaped}</s>")
+                button.add_css_class("absent")
+            else:
+                button.get_child().set_markup(escaped)
+                button.remove_css_class("absent")
+
+    def toggle(self, name):
+        absent = self.absent ^ {name}
+        self.set_absent(absent)
+
+    def set_absent(self, absent):
+        subprocess.run([CLASS_TOOLS, "attendance-set", *(name for name in self.names if name in absent)],
+                       check=True, capture_output=True, text=True)
+        self.absent = absent
+        self.update()
+
+    def done(self):
+        if self.args.return_tool == "groups":
+            run_tool(self.app, "groups", self.args.choice)
+        elif self.args.return_tool == "pick":
+            run_tool(self.app, "pick")
+        else:
+            self.app.quit()
 
 
 def timer_status():
@@ -980,7 +1071,7 @@ def rounded_rect(cr, x, y, width, height, radius):
 def interactive(widget):
     """Whether a tap on the widget should not close the overlay."""
     while widget:
-        if isinstance(widget, (Gtk.Button, Gtk.DrawingArea)):
+        if isinstance(widget, (Gtk.Button, Gtk.DrawingArea, Gtk.ScrolledWindow)):
             return True
         widget = widget.get_parent()
     return False
@@ -1005,6 +1096,12 @@ def build(app, args):
     width = monitor.get_geometry().width
 
     box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=24, valign=Gtk.Align.CENTER, halign=Gtk.Align.CENTER)
+    if args.command in ("groups", "choose", "attendance"):
+        box.set_halign(Gtk.Align.FILL)
+        box.set_margin_top(24)
+        box.set_margin_bottom(24)
+        box.set_margin_start(32)
+        box.set_margin_end(32)
     if args.command == "blank":
         # Covers the bars too, the board should show nothing at all.
         LayerShell.set_exclusive_zone(win, -1)
@@ -1017,6 +1114,8 @@ def build(app, args):
         PickPanel(app, box, width)
     elif args.command == "groups":
         GroupsPanel(app, box, args.choice)
+    elif args.command == "attendance":
+        AttendancePanel(app, box, args)
     elif args.command == "dice":
         DicePanel(box, width, args.sides, args.remember)
     elif args.command == "timer":
@@ -1025,12 +1124,13 @@ def build(app, args):
         NoisePanel(app, box, width)
     elif args.command == "choose":
         box.append(Gtk.Label(label=args.title, css_classes=["title"]))
-        grid = flowbox(len(args.options))
+        grid = flowbox(len(args.options), wrap=True)
+        grid.set_valign(Gtk.Align.CENTER)
         for option in args.options:
             button = Gtk.Button(label=option)
             button.connect("clicked", lambda _b, o=option: choose(app, o))
             grid.append(button)
-        box.append(grid)
+        box.append(scrollable(grid))
         box.append(Gtk.Label(label="Daneben tippen zum Abbrechen", css_classes=["hint"]))
     win.set_child(box)
 
@@ -1059,6 +1159,9 @@ def main():
     task.add_argument("--pinned", action="store_true")
     groups = sub.add_parser("groups")
     groups.add_argument("choice")
+    attendance = sub.add_parser("attendance")
+    attendance.add_argument("--return-tool", choices=("pick", "groups"))
+    attendance.add_argument("--choice", default="")
     choose_parser = sub.add_parser("choose")
     choose_parser.add_argument("title")
     choose_parser.add_argument("options", nargs="+")

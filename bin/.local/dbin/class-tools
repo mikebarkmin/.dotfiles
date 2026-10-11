@@ -1,7 +1,7 @@
 #!/bin/bash
 # Usage: class-tools pick | groups [CHOICE] | dice [SIDES] | blank | task | signal | board | snap
-#                    | noise | timer | class [TOOL] | reset
-#                    | pick-next | groups-deal CHOICE
+#                    | noise | timer | class [TOOL] | attendance [TOOL] [CHOICE] | reset
+#                    | pick-next | groups-deal CHOICE | class-status | attendance-status | attendance-set [NAME...]
 # Classroom tools on the smartboard bar, made for touch alone: results and choices
 # are shown full screen by class-overlay, with buttons for the follow-up actions.
 #
@@ -14,7 +14,8 @@
 # snap:   screenshot of the board as a new page in the open Xournal++ document, to annotate
 # board:  the board, one Xournal++ window on the smartboard: shows and hides it, starts it
 #         with a new dotted page saved to BOARDS; load a PDF there to work on it instead
-# class:  choose the class list for pick and groups (asked on first use), then run TOOL
+# class:  choose the class list, check attendance, then run TOOL (pick or groups)
+# attendance: mark who is present for pick and groups, without changing the class list
 # timer:  settings of the class timer in the bar, see class-timer
 # noise:  settings of the noise meter in the bar (work mode, threshold), see class-noise
 #
@@ -31,6 +32,8 @@ RUN="${XDG_RUNTIME_DIR:-/tmp}"
 CLASSES="${XDG_DATA_HOME:-$HOME/.local/share}/classroom"
 CLASS="$RUN/class-tools-class"      # names of the chosen class, first line is its title
 REMAINING="$RUN/class-tools-pick"   # names not picked yet in this round
+PICKED="$RUN/class-tools-picked"    # names already picked, kept across attendance changes
+ATTENDANCE="$RUN/class-tools-attendance.json" # absent names per class, for this teaching session
 DICE="$RUN/class-tools-dice"        # last number of sides
 NOISE_MODE="$RUN/class-noise-mode"
 TASK="$RUN/class-task.json"
@@ -65,44 +68,141 @@ menu() {
 
 choose_class() {
     local choice n lists
-    mapfile -t lists < <(find "$CLASSES" -maxdepth 1 -name '*.txt' -printf '%f\n' 2>/dev/null | sed 's/\.txt$//' | sort)
+    mapfile -t lists < <(find "$CLASSES" -maxdepth 1 -name '*.txt' ! -name 'aufgaben.txt' -printf '%f\n' 2>/dev/null | sed 's/\.txt$//' | sort)
     choice=$(menu "Klasse" "${lists[@]}" "$NUMBERS")
     if [ "$choice" = "$NUMBERS" ]; then
         n=$(menu "Wie viele in der Klasse?" $(seq 4 35))
         [ -n "$n" ] || exit 0
         { echo "1–$n"; seq "$n"; } >"$CLASS"
     elif [ -n "$choice" ] && [ -f "$CLASSES/$choice.txt" ]; then
-        { echo "$choice"; grep -v -e '^[[:space:]]*$' -e '^[[:space:]]*#' "$CLASSES/$choice.txt"; } >"$CLASS"
+        { echo "$choice"; sed 's/\r$//' "$CLASSES/$choice.txt" | grep -v -e '^[[:space:]]*$' -e '^[[:space:]]*#' || true; } >"$CLASS"
     else
         exit 0
     fi
-    rm -f "$REMAINING"
+    if ! class_chosen; then
+        rm -f "$CLASS"
+        echo "The class list contains no students." >&2
+        exit 1
+    fi
+    rm -f "$REMAINING" "$PICKED"
+    refresh_class
+}
+
+class_chosen() {
+    [ -f "$CLASS" ] && [ "$(wc -l <"$CLASS")" -gt 1 ]
 }
 
 ensure_class() {
-    [ "$(wc -l <"$CLASS" 2>/dev/null || echo 0)" -gt 1 ] || choose_class
+    class_chosen || choose_class
     title=$(head -1 "$CLASS")
     mapfile -t names < <(tail -n +2 "$CLASS")
 }
 
-pick() {
+attendance_data() {
+    jq -c 'if type == "object" then . else {} end' "$ATTENDANCE" 2>/dev/null || echo '{}'
+}
+
+refresh_class() {
+    [ -f "$RUN/smartboard-bar.pid" ] || return 0
+    pkill --older 1 --pidfile "$RUN/smartboard-bar.pid" -SIGRTMIN+11 waybar 2>/dev/null || true
+}
+
+lines_json() {
+    jq -Rsc 'split("\n") | map(select(length > 0))' "$1" 2>/dev/null || echo '[]'
+}
+
+ensure_present() {
     ensure_class
+    mapfile -t names < <(jq -rn --arg title "$title" --argjson attendance "$(attendance_data)" \
+        '($attendance[$title] // []) as $absent
+         | $ARGS.positional[] | select(. as $name | $absent | index($name) | not)' --args "${names[@]}")
+}
+
+attendance() {
+    ensure_class
+    local args=()
+    [ -z "$1" ] || args+=(--return-tool "$1")
+    [ -z "$2" ] || args+=(--choice "$2")
+    overlay attendance "${args[@]}"
+}
+
+attendance_status() {
+    ensure_class
+    jq -n --arg title "$title" --argjson attendance "$(attendance_data)" \
+        '{$title, names: $ARGS.positional, absent: ($attendance[$title] // [])}' --args "${names[@]}"
+}
+
+attendance_set() {
+    ensure_class
+    local roster absent
+    roster=$(printf '%s\n' "${names[@]}" | jq -Rsc 'split("\n")[:-1]')
+    absent=$(jq -cn --argjson roster "$roster" \
+        'if all($ARGS.positional[]; . as $name | $roster | index($name) != null)
+         then $ARGS.positional | unique else error("Unknown student") end' --args "$@")
+    jq -n --arg title "$title" --argjson attendance "$(attendance_data)" --argjson absent "$absent" \
+        '$attendance | .[$title] = $absent' >"$ATTENDANCE.tmp"
+    mv "$ATTENDANCE.tmp" "$ATTENDANCE"
+    refresh_class
+}
+
+class_status() {
+    if ! class_chosen; then
+        jq -cn '{text: "󰀎  —", class: "inactive", tooltip: "Klasse wählen und Anwesenheit einstellen"}'
+        return
+    fi
+    ensure_present
+    local total
+    total=$(($(wc -l <"$CLASS") - 1))
+    jq -cn --arg title "$title" --argjson present "${#names[@]}" --argjson total "$total" \
+        '{text: "󰀎  \($present)", class: "active",
+          tooltip: "\($title)\n\($present) von \($total) anwesend\nAntippen: Anwesenheit und Klasse wechseln"}'
+}
+
+pick() {
+    if ! class_chosen; then
+        choose_class
+        attendance pick
+        return
+    fi
     overlay pick
 }
 
 # JSON for the pick screen: the next student, nobody twice in a round.
 pick_next() {
-    ensure_class
-    [ -s "$REMAINING" ] || printf '%s\n' "${names[@]}" | shuf >"$REMAINING"
-    local name left
+    ensure_present
+    if [ "${#names[@]}" -eq 0 ]; then
+        jq -n --arg title "$title" '{$title, name: null, left: 0, names: []}'
+        return
+    fi
+
+    # Migrate a running round, then keep its history when attendance changes.
+    if [ ! -f "$PICKED" ] && [ -f "$REMAINING" ]; then
+        jq -rn --argjson remaining "$(lines_json "$REMAINING")" \
+            '$ARGS.positional[] | select(. as $name | $remaining | index($name) | not)' \
+            --args "${names[@]}" >"$PICKED"
+    fi
+    local pool=() name left
+    mapfile -t pool < <(jq -rn --argjson picked "$(lines_json "$PICKED")" \
+        '$ARGS.positional[] | select(. as $name | $picked | index($name) | not)' --args "${names[@]}")
+    if [ "${#pool[@]}" -eq 0 ]; then
+        : >"$PICKED"
+        pool=("${names[@]}")
+    fi
+    printf '%s\n' "${pool[@]}" | shuf >"$REMAINING"
     name=$(head -1 "$REMAINING")
     sed -i 1d "$REMAINING"
+    printf '%s\n' "$name" >>"$PICKED"
     left=$(wc -l <"$REMAINING")
     jq -n --arg title "$title" --arg name "$name" --argjson left "$left" \
         '{$title, $name, $left, names: $ARGS.positional}' --args "${names[@]}"
 }
 
 groups() {
+    if ! class_chosen; then
+        choose_class
+        attendance groups "$1"
+        return
+    fi
     ensure_class
     local choice=$1
     [ -n "$choice" ] || choice=$(menu "Gruppen" \
@@ -114,10 +214,14 @@ groups() {
 
 # JSON for the groups screen: the class dealt into groups by CHOICE ("4 pro Gruppe", "5 Gruppen").
 groups_deal() {
-    ensure_class
+    ensure_present
     local choice=$1 size count
     size=${choice%% *}
-    [[ "$size" =~ ^[0-9]+$ ]] || exit 1
+    [[ "$size" =~ ^[0-9]+$ ]] && [ "$size" -gt 0 ] || exit 1
+    if [ "${#names[@]}" -eq 0 ]; then
+        jq -n --arg title "$title" --arg choice "$choice" '{$title, $choice, groups: []}'
+        return
+    fi
     case "$choice" in
         *"pro Gruppe") count=$((${#names[@]} / size)) ;;
         *)            count=$size ;;
@@ -252,6 +356,10 @@ case "$1" in
     pick-next)   pick_next ;;
     groups)      groups "$2" ;;
     groups-deal) groups_deal "$2" ;;
+    attendance) attendance "$2" "$3" ;;
+    attendance-status) attendance_status ;;
+    attendance-set) shift; attendance_set "$@" ;;
+    class-status) class_status ;;
     dice)        dice "$2" ;;
     blank)       overlay blank ;;
     task)        task ;;
@@ -263,16 +371,18 @@ case "$1" in
     class)
         choose_class
         case "$2" in
-            pick | groups) "$2" ;;
+            pick | groups) attendance "$2" ;;
+            attendance | "") attendance ;;
         esac
         ;;
     reset)
-        rm -f "$CLASS" "$REMAINING" "$DICE" "$NOISE_MODE" "$TASK"
+        rm -f "$CLASS" "$REMAINING" "$PICKED" "$ATTENDANCE" "$DICE" "$NOISE_MODE" "$TASK"
         close_overlay
         kill_overlay "$RUN/class-task-pin.pid"
+        refresh_class
         ;;
     *)
-        echo "Usage: class-tools pick | groups [CHOICE] | dice [SIDES] | blank | task | signal | board | snap | noise | timer | class [TOOL] | reset | pick-next | groups-deal CHOICE" >&2
+        echo "Usage: class-tools pick | groups [CHOICE] | dice [SIDES] | blank | task | signal | board | snap | noise | timer | class [TOOL] | attendance [TOOL] [CHOICE] | reset | pick-next | groups-deal CHOICE | class-status | attendance-status | attendance-set [NAME...]" >&2
         exit 1
         ;;
 esac

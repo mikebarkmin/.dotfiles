@@ -6,7 +6,7 @@
   <property name="pressureMultiplier" value="1"/>
   <property name="zoomGesturesEnabled" value="true"/>
   <property name="selectedToolbar" value="Minimal Top Copy"/>
-  <property name="lastSavePath" value="/home/mike/Nextcloud/Schule/schule-material/mathematik/08-terme/06-ausklammern"/>
+  <property name="lastSavePath" value="/home/mike/Sources/schule-material/mathematik/q1-gk-modellieren-mit-funktionen/02-einfuehrung-steckbriefaufgaben"/>
   <property name="lastOpenPath" value="/home/mike/Nextcloud/Schule/schule-material/mathematik/q1-gk-optimierungsprobleme/05-training-zielfunktion"/>
   <property name="lastImagePath" value="/home/mike/Nextcloud/Latex/Privat/Lebenslauf"/>
   <property name="edgePanSpeed" value="20"/>
@@ -26,7 +26,7 @@
   <property name="menubarVisible" value="true"/>
   <property name="filepathShownInTitlebar" value="false"/>
   <property name="pageNumberShownInTitlebar" value="false"/>
-  <property name="numColumns" value="2"/>
+  <property name="numColumns" value="1"/>
   <property name="numRows" value="1"/>
   <property name="viewFixedRows" value="false"/>
   <property name="showPairedPages" value="false"/>
@@ -253,7 +253,7 @@
     <attribute name="count" type="int" value="9"/>
   </data>
   <data name="tools">
-    <attribute name="current" type="string" value="hand"/>
+    <attribute name="current" type="string" value="pen"/>
     <data name="drawArrow"/>
     <data name="drawCoordinateSystem"/>
     <data name="drawDoubleArrow"/>
@@ -266,7 +266,7 @@
     </data>
     <data name="hand"/>
     <data name="highlighter">
-      <attribute name="color" type="hex" value="ff8000"/>
+      <attribute name="color" type="hex" value="00ff00"/>
       <attribute name="drawingType" type="string" value="default"/>
       <attribute name="fill" type="int" value="0"/>
       <attribute name="fillAlpha" type="int" value="128"/>
@@ -282,7 +282,7 @@
       <attribute name="size" type="string" value="MEDIUM"/>
     </data>
     <data name="pen">
-      <attribute name="color" type="hex" value="000000"/>
+      <attribute name="color" type="hex" value="3333cc"/>
       <attribute name="drawingType" type="string" value="default"/>
       <attribute name="fill" type="int" value="0"/>
       <attribute name="fillAlpha" type="int" value="255"/>

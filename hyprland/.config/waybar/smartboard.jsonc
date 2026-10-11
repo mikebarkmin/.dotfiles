@@ -14,6 +14,7 @@
     "custom/snap"
   ],
   "modules-left": [
+    "custom/class",
     "custom/timer",
     "custom/noise",
     "custom/task",
@@ -27,6 +28,13 @@
     "custom/light-dark",
     "custom/classroom-end"
   ],
+  "custom/class": {
+    "exec": "~/.local/dbin/class-tools class-status",
+    "return-type": "json",
+    "interval": 5,
+    "signal": 11,
+    "on-click": "~/.local/dbin/class-tools attendance"
+  },
   "custom/timer": {
     "exec": "~/.local/dbin/class-timer status",
     "return-type": "json",
