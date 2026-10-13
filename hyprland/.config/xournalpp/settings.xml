@@ -6,7 +6,7 @@
   <property name="pressureMultiplier" value="1"/>
   <property name="zoomGesturesEnabled" value="true"/>
   <property name="selectedToolbar" value="Minimal Top Copy"/>
-  <property name="lastSavePath" value="/home/mike/Sources/schule-material/mathematik/q1-gk-modellieren-mit-funktionen/02-einfuehrung-steckbriefaufgaben"/>
+  <property name="lastSavePath" value="/home/mike/Sources/schule-material/mathematik/07-rationale-zahlen/06-multiplizieren"/>
   <property name="lastOpenPath" value="/home/mike/Nextcloud/Schule/schule-material/mathematik/q1-gk-optimierungsprobleme/05-training-zielfunktion"/>
   <property name="lastImagePath" value="/home/mike/Nextcloud/Latex/Privat/Lebenslauf"/>
   <property name="edgePanSpeed" value="20"/>
@@ -282,7 +282,7 @@
       <attribute name="size" type="string" value="MEDIUM"/>
     </data>
     <data name="pen">
-      <attribute name="color" type="hex" value="3333cc"/>
+      <attribute name="color" type="hex" value="ff0000"/>
       <attribute name="drawingType" type="string" value="default"/>
       <attribute name="fill" type="int" value="0"/>
       <attribute name="fillAlpha" type="int" value="255"/>

@@ -6,10 +6,16 @@ local capabilities = vim.tbl_deep_extend(
 
 local typst_job
 local typst_terminal
+local typst_pdf
 
 vim.keymap.set('n', '<leader>ao', function()
   -- Reuse the watcher instead of starting another one for the same buffer.
   if typst_job and vim.fn.jobwait({ typst_job }, 0)[1] == -1 then
+    local _, err = vim.ui.open(typst_pdf)
+    if err then
+      vim.notify('Could not open Typst preview: ' .. err, vim.log.levels.ERROR)
+    end
+
     local windows = vim.fn.win_findbuf(typst_terminal)
     if windows[1] then
       vim.api.nvim_set_current_win(windows[1])
@@ -29,18 +35,20 @@ vim.keymap.set('n', '<leader>ao', function()
   vim.cmd.update()
   vim.cmd('botright 12new')
   typst_terminal = vim.api.nvim_get_current_buf()
-  typst_job = vim.fn.jobstart({ 'typst', 'watch', file, '--open' }, { term = true })
+  typst_pdf = vim.fn.fnamemodify(file, ':r') .. '.pdf'
+  typst_job = vim.fn.jobstart({ 'typst', 'watch', file, typst_pdf, '--open' }, { term = true })
 
   if typst_job <= 0 then
     vim.cmd.close()
     vim.notify('Could not start typst watch', vim.log.levels.ERROR)
     typst_job = nil
     typst_terminal = nil
+    typst_pdf = nil
     return
   end
 
   vim.cmd.startinsert()
-end, { buffer = true, desc = 'Launch or focus Typst preview' })
+end, { buffer = true, desc = 'Launch or reopen Typst preview' })
 
 vim.lsp.start {
   name = 'tinymist',
