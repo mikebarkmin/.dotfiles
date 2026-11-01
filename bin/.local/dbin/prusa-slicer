@@ -1,3 +1,2 @@
 #!/usr/bin/env bash
-
-exec flatpak run com.prusa3d.PrusaSlicer "$@"
+exec flatpak run --branch=beta --command=/app/bin/slic3r-app-launcher com.prusa3d.PrusaSlicer --single-instance-on-url "$@"

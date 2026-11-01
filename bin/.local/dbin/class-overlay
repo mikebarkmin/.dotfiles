@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """Usage: class-overlay blank
        class-overlay pick
-       class-overlay groups CHOICE
+       class-overlay groups CHOICE | --last FILE
        class-overlay attendance [--return-tool pick|groups] [--choice CHOICE]
        class-overlay task [--pinned]
        class-overlay signal
@@ -15,7 +15,8 @@ made to be used by touch alone.
 
 pick:   A random student (class-tools pick-next), picked again in place.
 groups: The class dealt into groups by CHOICE (class-tools groups-deal), shuffled
-        again in place.
+        again in place. With --last the deal saved in FILE (class-tools groups-last),
+        shuffling again uses its choice.
 attendance: Tap names to cross out absent students, shared by pick and groups.
         Changes apply immediately and last until classroom mode ends.
 task:   The task for the class ("Arbeitsauftrag"), put together by tapping or taken
@@ -618,7 +619,11 @@ class PickPanel:
 
 
 class GroupsPanel:
-    def __init__(self, app, box, choice):
+    def __init__(self, app, box, choice, last=None):
+        if last:
+            with open(last) as f:
+                deal = json.load(f)
+            choice = deal["choice"]
         self.choice = choice
         self.title = Gtk.Label(css_classes=["title"])
         box.append(self.title)
@@ -633,11 +638,16 @@ class GroupsPanel:
         buttons.append(action_button("󰀎  Klasse wechseln", lambda: run_tool(app, "class", "groups")))
         box.append(buttons)
         box.append(Gtk.Label(label="Daneben tippen zum Schließen", css_classes=["hint"]))
-        self.shuffle()
+        if last:
+            self.show(deal, f" · {deal.get('time', '')}")
+        else:
+            self.shuffle()
 
     def shuffle(self):
-        deal = tool_json("groups-deal", self.choice)
-        self.title.set_label(f"{deal['title']} · {deal['choice']}")
+        self.show(tool_json("groups-deal", self.choice))
+
+    def show(self, deal, suffix=""):
+        self.title.set_label(f"{deal['title']} · {deal['choice']}{suffix}")
         if child := self.grid.get_first_child():
             self.grid.remove(child)
         if deal["groups"]:
@@ -1113,7 +1123,7 @@ def build(app, args):
     elif args.command == "pick":
         PickPanel(app, box, width)
     elif args.command == "groups":
-        GroupsPanel(app, box, args.choice)
+        GroupsPanel(app, box, args.choice, args.last)
     elif args.command == "attendance":
         AttendancePanel(app, box, args)
     elif args.command == "dice":
@@ -1158,7 +1168,8 @@ def main():
     task = sub.add_parser("task")
     task.add_argument("--pinned", action="store_true")
     groups = sub.add_parser("groups")
-    groups.add_argument("choice")
+    groups.add_argument("choice", nargs="?")
+    groups.add_argument("--last", metavar="FILE")
     attendance = sub.add_parser("attendance")
     attendance.add_argument("--return-tool", choices=("pick", "groups"))
     attendance.add_argument("--choice", default="")

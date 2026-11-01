@@ -129,9 +129,12 @@ local function configure_touchscreen()
     hl.monitor({ output = TOUCHSCREEN, mode = "3840x2160@30", position = "auto-right", scale = 2 })
     hl.monitor({ output = EXTERNAL_1,  disabled = true })
     hl.monitor({ output = EXTERNAL_2,  disabled = true })
-    hl.monitor({ output = BEAMER,      disabled = true })
 
     local iwb = find_monitor(TOUCHSCREEN)
+    -- The IWB can also be plugged in via HDMI, where it *is* the beamer port.
+    if not (iwb and iwb.name == BEAMER) then
+        hl.monitor({ output = BEAMER, disabled = true })
+    end
     if iwb then
         log("Binding touch/tablet input to " .. iwb.name)
         bind_touch_input(iwb.name)
@@ -143,8 +146,9 @@ local function get_config_name()
     local touchscreen = is_connected(TOUCHSCREEN)
     local ext1        = is_connected(EXTERNAL_1)
     local ext2        = is_connected(EXTERNAL_2)
-    if beamer then             return "beamer"
-    elseif touchscreen then    return "touchscreen"
+    -- Check the IWB first: over HDMI it shows up as HDMI-A-1, i.e. as the beamer.
+    if touchscreen then        return "touchscreen"
+    elseif beamer then         return "beamer"
     elseif ext1 and ext2 then  return "external"
     else                       return "laptop"
     end

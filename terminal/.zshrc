@@ -138,6 +138,8 @@ export FZF_DEFAULT_OPTS=" \
 # opencode
 export PATH=/home/mike/.opencode/bin:$PATH
 
+alias pi='env -u HF_TOKEN pi'
+
 
 # Added by Antigravity CLI installer
 export PATH="/home/mike/.local/bin:$PATH"

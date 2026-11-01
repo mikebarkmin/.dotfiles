@@ -34,7 +34,6 @@ hl.config({
     -- https://wiki.hyprland.org/Configuring/Variables/#decoration
     decoration = {
         rounding = 0,
-        rounding_power = 0,
         active_opacity = 1.0,
         inactive_opacity = 1.0,
         shadow = {

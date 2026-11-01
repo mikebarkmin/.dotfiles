@@ -1,12 +1,13 @@
 #!/bin/bash
 # Usage: class-tools pick | groups [CHOICE] | dice [SIDES] | blank | task | signal | board | snap
-#                    | noise | timer | class [TOOL] | attendance [TOOL] [CHOICE] | reset
+#                    | noise | timer | class [TOOL] | attendance [TOOL] [CHOICE] | reset | groups-last
 #                    | pick-next | groups-deal CHOICE | class-status | attendance-status | attendance-set [NAME...]
 # Classroom tools on the smartboard bar, made for touch alone: results and choices
 # are shown full screen by class-overlay, with buttons for the follow-up actions.
 #
 # pick:   random student, nobody twice until everyone had a turn
-# groups: random groups of a chosen size or count
+# groups: random groups of a chosen size or count; every deal is logged to GROUPS_LOG
+# groups-last: the last groups dealt again, also after classroom mode ended
 # dice:   1–SIDES, by default the last number of sides (6 at first)
 # blank:  black screen until tapped
 # task:   the task for the class ("Arbeitsauftrag"), big or pinned to a corner
@@ -26,6 +27,8 @@
 #   ~/.local/share/classroom/<class>.txt
 # Prepared tasks, separated by empty lines, the first line is the button label:
 #   ~/.local/share/classroom/aufgaben.txt
+# Every deal of groups, newest last (a .log, so it is not taken for a class list):
+#   ~/.local/share/classroom/gruppen.log
 set -e
 
 RUN="${XDG_RUNTIME_DIR:-/tmp}"
@@ -42,6 +45,9 @@ BOARDS="$(xdg-user-dir DOCUMENTS 2>/dev/null || echo "$HOME")/Tafelbilder"
 SNAP="$RUN/class-snap.png"          # read (and removed) by the Tafelbild plugin of Xournal++
 XOURNAL="class:.*xournalpp.*"
 NUMBERS="Nummern 1…N"
+LAST_GROUPS="Letzte Gruppen"
+GROUPS_LOG="$CLASSES/gruppen.log"
+GROUPS_LAST="$CLASSES/gruppen-letzte.json" # kept by reset, for groups-last
 
 # Usage: kill_overlay PIDFILE — only if the pid still belongs to class-overlay.
 kill_overlay() {
@@ -198,6 +204,10 @@ pick_next() {
 }
 
 groups() {
+    if [ "$1" = "$LAST_GROUPS" ]; then
+        groups_last
+        return
+    fi
     if ! class_chosen; then
         choose_class
         attendance groups "$1"
@@ -207,7 +217,12 @@ groups() {
     local choice=$1
     [ -n "$choice" ] || choice=$(menu "Gruppen" \
         "2 pro Gruppe" "3 pro Gruppe" "4 pro Gruppe" "5 pro Gruppe" "6 pro Gruppe" \
-        "2 Gruppen" "3 Gruppen" "4 Gruppen" "5 Gruppen" "6 Gruppen" "7 Gruppen" "8 Gruppen")
+        "2 Gruppen" "3 Gruppen" "4 Gruppen" "5 Gruppen" "6 Gruppen" "7 Gruppen" "8 Gruppen" \
+        "$LAST_GROUPS")
+    if [ "$choice" = "$LAST_GROUPS" ]; then
+        groups_last
+        return
+    fi
     [[ "${choice%% *}" =~ ^[0-9]+$ ]] || exit 0
     overlay groups "$choice"
 }
@@ -235,8 +250,29 @@ groups_deal() {
         cards[i % count]+="${cards[i % count]:+$nl}$name"
         i=$((i + 1))
     done < <(printf '%s\n' "${names[@]}" | shuf)
-    jq -n --arg title "$title" --arg choice "$choice" \
-        '{$title, $choice, groups: $ARGS.positional}' --args "${cards[@]}"
+    local deal
+    deal=$(jq -n --arg title "$title" --arg choice "$choice" --arg time "$(date '+%F %H:%M')" \
+        '{$title, $choice, $time, groups: $ARGS.positional}' --args "${cards[@]}")
+    log_groups "$deal"
+    echo "$deal"
+}
+
+# Keeps a deal of groups_deal, readable in GROUPS_LOG and as JSON for groups-last.
+log_groups() {
+    mkdir -p "$CLASSES"
+    printf '%s\n' "$1" >"$GROUPS_LAST.tmp"
+    mv "$GROUPS_LAST.tmp" "$GROUPS_LAST"
+    jq -r '"\(.time)  \(.title) · \(.choice)",
+           (.groups | to_entries[] | "  Gruppe \(.key + 1): \(.value | split("\n") | join(", "))"),
+           ""' <<<"$1" >>"$GROUPS_LOG"
+}
+
+groups_last() {
+    if [ ! -f "$GROUPS_LAST" ]; then
+        echo "No groups dealt yet." >&2
+        exit 1
+    fi
+    overlay groups --last "$GROUPS_LAST"
 }
 
 task() {
@@ -356,6 +392,7 @@ case "$1" in
     pick-next)   pick_next ;;
     groups)      groups "$2" ;;
     groups-deal) groups_deal "$2" ;;
+    groups-last) groups_last ;;
     attendance) attendance "$2" "$3" ;;
     attendance-status) attendance_status ;;
     attendance-set) shift; attendance_set "$@" ;;
@@ -382,7 +419,7 @@ case "$1" in
         refresh_class
         ;;
     *)
-        echo "Usage: class-tools pick | groups [CHOICE] | dice [SIDES] | blank | task | signal | board | snap | noise | timer | class [TOOL] | attendance [TOOL] [CHOICE] | reset | pick-next | groups-deal CHOICE | class-status | attendance-status | attendance-set [NAME...]" >&2
+        echo "Usage: class-tools pick | groups [CHOICE] | dice [SIDES] | blank | task | signal | board | snap | noise | timer | class [TOOL] | attendance [TOOL] [CHOICE] | reset | groups-last | pick-next | groups-deal CHOICE | class-status | attendance-status | attendance-set [NAME...]" >&2
         exit 1
         ;;
 esac
