@@ -5,13 +5,33 @@
 #
 # restart-waybar: restart all bars in the right layout (used by the theme switcher).
 # reapply-scale:  restore the smartboard scale after `hyprctl reload` reset it.
-set -e
+#
+# Log (actions, errors, bar output and crashes): ~/.local/state/classroom/classroom-mode.log
+set -eE
 
 RUN="${XDG_RUNTIME_DIR:-/tmp}"
 STATE="$RUN/classroom-mode"
 FONT_SIZE=16      # kitty, smartboard only; kitty-cwd also uses this for new windows
 SCALE_FACTOR=1.25 # applied to the smartboard only
 SMARTBOARD_DESC="${SMARTBOARD_DESC:-IWB PC Monitor}"
+LOG="${XDG_STATE_HOME:-$HOME/.local/state}/classroom/classroom-mode.log"
+LOG_MAX_BYTES=1000000
+
+log() {
+    printf '%s [classroom-mode] %s\n' "$(date '+%F %T')" "$*" >>"$LOG"
+}
+
+# Called for every action except the frequent status queries: keeps the log small,
+# sends stderr of all commands there and records any command that fails.
+start_logging() {
+    mkdir -p "${LOG%/*}"
+    if [ "$(stat -c %s "$LOG" 2>/dev/null || echo 0)" -gt "$LOG_MAX_BYTES" ]; then
+        mv -f "$LOG" "$LOG.1"
+    fi
+    exec 2>>"$LOG"
+    trap 'log "ERROR: \"$BASH_COMMAND\" failed with exit code $? (line $LINENO)"' ERR
+    log "$1"
+}
 
 active() {
     [ -f "$STATE" ]
@@ -50,13 +70,13 @@ stop_all_waybar() {
 # Stylesheets are regenerated each time, so this also picks up theme changes.
 start_waybar() {
     if ! active; then
-        setsid waybar >/dev/null 2>&1 &
+        setsid ~/.local/dbin/bar-run main >/dev/null 2>&1 &
         return
     fi
 
     load_state
     if [ -z "$monitor" ]; then
-        setsid waybar >/dev/null 2>&1 &
+        setsid ~/.local/dbin/bar-run main >/dev/null 2>&1 &
         ~/.local/dbin/smartboard-bar start
         return
     fi
@@ -65,8 +85,8 @@ start_waybar() {
     style=$(~/.local/dbin/waybar-shrink-css ~/.config/waybar/style.css "$SCALE_FACTOR" "$RUN/classroom-waybar-style")
     printf '{ "include": ["~/.config/waybar/config.jsonc"], "output": ["!%s", "*"] }\n' "$monitor" >"$RUN/classroom-waybar-rest.jsonc"
     printf '{ "include": ["~/.config/waybar/config.jsonc"], "output": ["%s"] }\n' "$monitor" >"$RUN/classroom-waybar-board.jsonc"
-    setsid waybar -c "$RUN/classroom-waybar-rest.jsonc" -s ~/.config/waybar/style.css >/dev/null 2>&1 &
-    setsid waybar -c "$RUN/classroom-waybar-board.jsonc" -s "$style" >/dev/null 2>&1 &
+    setsid ~/.local/dbin/bar-run rest -c "$RUN/classroom-waybar-rest.jsonc" -s ~/.config/waybar/style.css >/dev/null 2>&1 &
+    setsid ~/.local/dbin/bar-run board -c "$RUN/classroom-waybar-board.jsonc" -s "$style" >/dev/null 2>&1 &
     ~/.local/dbin/smartboard-bar start "$monitor" "$SCALE_FACTOR"
 }
 
@@ -108,6 +128,7 @@ on() {
         kitty_font_size=$FONT_SIZE
     fi
 
+    log "on: smartboard ${name:-not connected}${name:+ ($mode, scale $scale)}"
     printf 'inhibit_pid=%s\ndnd_before=%s\nmonitor=%q\nmonitor_mode=%q\nmonitor_pos=%q\nmonitor_scale=%q\nkitty_font_size=%q\n' \
         "$inhibit_pid" "$dnd_before" "$name" "$mode" "$pos" "$scale" "$kitty_font_size" >"$STATE"
 
@@ -123,6 +144,7 @@ off() {
     active || return 0
     load_state
     rm -f "$STATE"
+    log "off"
 
     kill "$inhibit_pid" 2>/dev/null || true
     [ "$dnd_before" = "true" ] || swaync-client -df >/dev/null 2>&1 || true
@@ -147,6 +169,10 @@ status() {
         echo '{"text": "󰑴 ", "class": "inactive", "tooltip": "Classroom mode off"}'
     fi
 }
+
+case "$1" in
+    toggle | on | off | restart-waybar | reapply-scale) start_logging "$1" ;;
+esac
 
 case "$1" in
     toggle)         if active; then off; else on; fi ;;

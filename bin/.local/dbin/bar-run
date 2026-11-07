@@ -1,0 +1,39 @@
+#!/bin/bash
+# Usage: bar-run NAME [waybar args...]
+# Runs waybar and writes its output and how it ended (stopped, crashed, ...) to the
+# classroom log, each line tagged with NAME. TERM/INT/HUP are passed on to waybar,
+# so killing this wrapper stops the bar.
+# The name must not contain "waybar": `pkill -SIGRTMIN+9 waybar` would match it and kill it.
+
+LOG="${XDG_STATE_HOME:-$HOME/.local/state}/classroom/classroom-mode.log"
+mkdir -p "${LOG%/*}"
+name=${1:?usage: bar-run NAME [waybar args...]}
+shift
+
+log() { printf '%s [%s] %s\n' "$(date '+%F %T')" "$name" "$*" >>"$LOG"; }
+
+waybar "$@" > >(while IFS= read -r line; do log "$line"; done) 2>&1 &
+child=$!
+started=$SECONDS
+log "started pid $child: waybar $*"
+
+trap 'kill -TERM "$child" 2>/dev/null' TERM INT HUP
+# wait returns early when a trapped signal arrives; keep waiting until waybar is gone.
+while :; do
+    wait "$child"
+    rc=$?
+    kill -0 "$child" 2>/dev/null || break
+done
+
+runtime="after $((SECONDS - started))s"
+if [ "$rc" -eq 0 ]; then
+    log "exited normally $runtime"
+elif [ "$rc" -gt 128 ]; then
+    sig=$(kill -l $((rc - 128)) 2>/dev/null || echo $((rc - 128)))
+    case "$sig" in
+        TERM | INT | HUP | KILL) log "stopped by SIG$sig $runtime" ;;
+        *) log "CRASHED with SIG$sig $runtime (coredumpctl info $child)" ;;
+    esac
+else
+    log "FAILED with exit code $rc $runtime"
+fi

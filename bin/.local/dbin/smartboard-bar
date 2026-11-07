@@ -34,7 +34,7 @@ start() {
   "height": $(jq -n "$HEIGHT / $shrink | round")
 }
 JSON
-    setsid waybar -c "$CONFIG" -s "$style" >/dev/null 2>&1 &
+    setsid ~/.local/dbin/bar-run smartboard-bar -c "$CONFIG" -s "$style" >/dev/null 2>&1 &
     echo $! >"$PIDFILE"
 }
 
